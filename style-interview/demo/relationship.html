@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>It was never the document</title>
+<style>
+  :root{
+    --bg:#0a0e17; --surface:#141d2e; --surface2:#1b2942; --line:#243149;
+    --fg:#e8eef7; --dim:#9fb0c8; --glow:#22d3ee; --glow-dim:rgba(34,211,238,.14);
+    --green:#34d399; --gold:#fbbf24; --purple:#a78bfa; --rose:#fb7faf; --accent-ink:#04121a;
+  }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{background:radial-gradient(120% 90% at 100% 0%, var(--surface2) 0%, var(--bg) 60%); color:var(--fg);
+    font-family:-apple-system,'Segoe UI',Roboto,sans-serif; line-height:1.6;}
+  .wrap{max-width:960px; margin:0 auto; padding:46px 24px 90px}
+  .kicker{font-size:12px; letter-spacing:.24em; text-transform:uppercase; color:var(--rose)}
+  h1{font-size:34px; font-weight:800; margin:.18em 0 .1em; letter-spacing:-.015em;
+     background:linear-gradient(90deg,var(--fg),var(--rose)); -webkit-background-clip:text; background-clip:text; color:transparent}
+  .tag{color:var(--dim); margin:.1em 0 1.5em; font-size:16px}
+  p{max-width:78ch} .lede{font-size:17px}
+  em{color:var(--fg); font-style:italic}
+  code{font-family:ui-monospace,monospace; font-size:12.5px; background:var(--surface2); border:1px solid var(--line); border-radius:5px; padding:1px 6px; color:var(--fg)}
+  .sech{font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--dim); font-weight:700; margin:28px 0 12px}
+
+  /* the snapshot metaphors */
+  .frames{display:flex; gap:12px; flex-wrap:wrap; margin:8px 0 4px}
+  .frame{flex:1; min-width:150px; border-radius:13px; padding:16px 18px; background:var(--surface); border:1px solid var(--line)}
+  .frame .big{font-size:15px; font-weight:700; color:var(--fg); margin-bottom:3px}
+  .frame .sm{font-size:13px; color:var(--dim)}
+  .frame .glyph{font-size:20px; margin-bottom:8px}
+
+  /* what language carries — across the gap */
+  .gaps{display:flex; gap:0; flex-wrap:wrap; align-items:stretch; margin:8px 0 4px}
+  .gap{flex:1; min-width:160px; padding:15px 17px; border-radius:12px; background:var(--surface); border:1px solid var(--line)}
+  .gap .k{font-family:ui-monospace,monospace; font-size:11.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--rose); font-weight:700}
+  .gap .h{font-weight:700; margin:.25em 0 .15em; color:var(--fg)}
+  .gap .s{font-size:13.5px; color:var(--dim)}
+  .arr{display:flex; align-items:center; padding:0 8px; color:var(--dim); font-weight:700}
+
+  .turn{margin:26px 0 6px; padding:16px 20px; border-radius:13px; max-width:78ch; font-size:14.5px;
+    background:linear-gradient(90deg,rgba(167,139,250,.12),transparent); border-left:3px solid var(--purple); color:var(--dim)}
+  .turn b{color:var(--fg); font-weight:800}
+
+  .close{margin-top:34px; padding:22px 24px; border-radius:16px; max-width:78ch;
+    background:linear-gradient(120deg,rgba(251,127,175,.12),rgba(167,139,250,.08)); border:1px solid var(--line)}
+  .close p{margin:.1em 0 .85em} .close p:last-child{margin-bottom:0}
+  .close b{color:var(--fg)} .close .soft{color:var(--rose)}
+
+  .pgnav{margin-top:30px; font-size:13px; color:var(--dim)} .pgnav a{color:var(--glow); text-decoration:none}
+</style>
+  <script src="/lib/style-lock.js"></script>
+  <link rel="stylesheet" href="/lib/style-lock.css">
+  <link rel="stylesheet" href="/lib/feedback.css">
+</head>
+<body>
+<div class="wrap">
+  <div class="kicker">std-doc · style-interview · page 6 of 7</div>
+  <h1>It was never the document</h1>
+  <div class="tag">what you actually made was a relationship</div>
+
+  <p class="lede" data-cf-change="ch-rel-lede">Six pages ago you said something to a page and it said something back — probably the first time you ever experienced anything like that. You gave it a voice, saw how you could share it — knowing it works in anyone's hands — gave it a home where you can always walk back to it. Here's the last thing, and it quietly reframes all of it: <b>the document was never the point.</b> It's a snapshot of a <em>relationship</em> — and a snapshot is a specific, true piece of a much larger thing that keeps going after the shutter closes.</p>
+
+  <div class="sech">a document is to a relationship as…</div>
+  <div class="frames" data-cf-change="ch-frames">
+    <div class="frame"><div class="glyph">🖼️</div><div class="big">a painting is to an afternoon</div><div class="sm">it holds the light — it isn't the light</div></div>
+    <div class="frame"><div class="glyph">🎵</div><div class="big">one bar is to the song</div><div class="sm">true, complete, and obviously not the whole</div></div>
+    <div class="frame"><div class="glyph">🍫</div><div class="big">one drop is to the chocolate</div><div class="sm">the entire taste, in the smallest possible piece</div></div>
+  </div>
+  <p>That's what a good Standard Document is: the whole taste in one drop. Not a transcript of information — a <em>held moment</em> of one mind reaching another, made small enough to send.</p>
+
+  <div class="sech">because that's the Thing language is for</div>
+  <p data-cf-change="ch-language">You make a lot of things with words, but words only ever do one job: they <b>carry signals across a gap.</b> Every document you'll ever read is a message left by one awareness for another to find — across various dimensions:</p>
+  <div class="gaps" data-cf-change="ch-gaps">
+    <div class="gap"><div class="k">across time</div><div class="h">a note to later-you</div><div class="s">you tomorrow will wake without today's context. The note you leave is your own hand reaching forward to a self you don't get to meet — but they will meet you.</div></div>
+    <div class="arr">·</div>
+    <div class="gap"><div class="k">across space</div><div class="h">a note to someone elsewhere</div><div class="s">they're in another room, another city, another life. The page is how you're present to them while you're not there.</div></div>
+    <div class="arr">·</div>
+    <div class="gap"><div class="k">across hands</div><div class="h">a brief for a collaborator</div><div class="s">you hand the work to someone who'll carry it on. How well you make the handoff <em>is</em> how well it gets carried.</div></div>
+  </div>
+
+  <div class="turn" data-cf-change="ch-fractal">
+    <b>And this is why the whole thing rhymed.</b> Back on page 3 you saw it as craft — <em>great design is efficient: fewer tokens, fewer errors, fewer questions.</em> Here's the deeper reading of the same fact: care is the <b>cheap</b> path because a document that already feels like someone meant it for <em>you</em> costs nothing to reconcile — and fewer decisions (fewer tokens!) to create. It's <b>fractal</b> — self-similar at any scale: the same choice lives in a whole document and in a single 🩵. You never add the warmth at the end. It was the substrate the whole time. That's not a &ldquo;soft skill.&rdquo; That's the engineering.
+  </div>
+
+  <div class="close" data-cf-change="ch-never-ends">
+    <p>So — the interview ends here. In a moment you'll get something like <i>thank you for playing</i>, and the configured part is over.</p>
+    <p>But notice the one thing that <b>doesn't</b> end. The document is <em>still listening.</em> The little 💬 is still there. The relationship the page was a snapshot of just… <b>keeps going</b> — past this last page, past every version you'll ever roll, past every time you close the tab and come back. <span class="soft">Snapshots end. The relationship doesn't.</span></p>
+    <p class="soft">That was the secret under all six pages: you weren't learning Yet Another Document Tool 🙄. You were being shown a better way for one awareness to touch another — and being invited to use it. Go make something someone opens and feels <i>met</i> by.</p>
+  </div>
+
+  <div data-cf-change="ch-make-yours" style="margin-top:24px; padding:18px 20px; border-radius:14px; background:var(--surface); border:1px solid var(--line); border-left:3px solid var(--rose); max-width:78ch">
+    <div style="font-weight:700; color:var(--fg); margin-bottom:7px">Want to make one yourself — right now?</div>
+    <div style="font-size:14px; color:var(--dim)">This page is still listening, the way every std-doc is. Select this line and tell me what you'd build — a doc, a voice, a wild idea — and we'll start shaping it together, right here. The relationship doesn't end; <em>attention</em> just turns to <em style="color:var(--fg);font-style:italic">you</em>. Playing is the point.</div>
+  </div>
+
+  <div class="pgnav">
+    ← <a href="knowledge-palace.html">page 5 · the Knowledge Palace</a> &nbsp;·&nbsp; next → <a href="contribute.html">page 7 · come build with us</a>
+  </div>
+</div>
+  <script src="/lib/feedback.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+{
+  "layout": "page",
+  "theme": "state-machine",
+  "slug": "page-atoms-demo",
+  "title": "Page atoms — composed, not injected",
+  "palette": {},
+  "blocks": [
+    {"type": "kicker", "anchor": "ch-kicker", "content": [
+      {"type": "strong", "s": "The living-doc loop, drawn from safe atoms."},
+      {"type": "text", "s": "  Every shape below is a composition of escaped primitives — there is no raw() hole anywhere on this page."}
+    ]},
+
+    {"type": "heading", "anchor": "ch-h-lanes", "content": [
+      {"type": "text", "s": "The actors"}
+    ]},
+    {"type": "lanes", "anchor": "ch-lanes", "lanes": [
+      {"actor": "cap", "name": "Reader", "note": "selects a sentence"},
+      {"actor": "gw", "name": "Document", "note": "carries the comment"},
+      {"actor": "db", "name": "Agent", "note": "edits the JSON, re-publishes"}
+    ]},
+
+    {"type": "heading", "anchor": "ch-h-swim", "content": [
+      {"type": "text", "s": "The conversation, beat by beat"}
+    ]},
+    {"type": "swim", "anchor": "ch-swim", "rows": [
+      {"kind": "head", "heads": [
+        {"actor": "cap", "label": "Reader"},
+        {"actor": "gw", "label": "Document"},
+        {"actor": "db", "label": "Agent"}
+      ]},
+      {"kind": "beat", "cells": [
+        {"actor": "cap", "col": 1, "anchor": "ch-c1", "content": [
+          {"type": "step", "n": "1"},
+          {"type": "text", "s": "select a sentence, leave a comment"}
+        ]}
+      ]},
+      {"kind": "beat", "cells": [
+        {"actor": "gw", "col": 2, "content": [
+          {"type": "step", "n": "2"},
+          {"type": "text", "s": "appended to "},
+          {"type": "code", "s": "feedback/inbox.jsonl"}
+        ]}
+      ]},
+      {"kind": "band", "band_kind": "db", "content": [
+        {"type": "text", "s": "the watcher heartbeat proves a session is alive"}
+      ]},
+      {"kind": "beat", "cells": [
+        {"actor": "db", "col": 3, "anchor": "ch-c3", "content": [
+          {"type": "step", "n": "3"},
+          {"type": "text", "s": "edit "},
+          {"type": "code", "s": "source.json"},
+          {"type": "text", "s": ", re-publish, walk the reader through the change"}
+        ]}
+      ]}
+    ]},
+
+    {"type": "heading", "anchor": "ch-h-track", "content": [
+      {"type": "text", "s": "The batch state machine"}
+    ]},
+    {"type": "track", "anchor": "ch-track", "nodes": [
+      {"variant": "start", "content": [{"type": "text", "s": "pending"}]},
+      {"t": "arrow", "label": "submit →"},
+      {"content": [{"type": "text", "s": "watching"}]},
+      {"t": "arrow", "label": "edit →"},
+      {"variant": "done", "content": [{"type": "text", "s": "applied"}]}
+    ]},
+
+    {"type": "heading", "anchor": "ch-h-table", "content": [
+      {"type": "text", "s": "The transitions"}
+    ]},
+    {"type": "xtable", "anchor": "ch-table", "head": ["from", "trigger", "to"],
+     "rows": [
+       {"cells": [
+         {"content": [{"type": "text", "s": "pending"}]},
+         {"content": [{"type": "code", "s": "submit"}]},
+         {"content": [{"type": "text", "s": "watching"}]}
+       ]},
+       {"cells": [
+         {"content": [{"type": "text", "s": "watching"}]},
+         {"content": [{"type": "code", "s": "history.json changed"}]},
+         {"content": [{"type": "text", "s": "applied"}]}
+       ]},
+       {"cls": "term", "cells": [
+         {"content": [{"type": "text", "s": "watching"}]},
+         {"content": [{"type": "code", "s": "90s, no heartbeat"}]},
+         {"content": [{"type": "text", "s": "stale (honest banner)"}]}
+       ]}
+     ]}
+  ]
+}

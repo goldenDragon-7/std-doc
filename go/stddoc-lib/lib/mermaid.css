@@ -1,0 +1,48 @@
+/* std-doc mermaid kit — diagram-card + fullscreen pan-zoom.
+ *
+ * Served at /lib/mermaid.css (both the std-doc server and the in-lion Library).
+ * Conditionally injected by inject.py when a page contains class="mermaid".
+ *
+ * Colours are hard-coded to the dark mermaid theme (themeVariables.background
+ * #0d1526 etc. in mermaid.js) with var() fallbacks, so the card agrees with the
+ * diagram regardless of the host page's palette. See protocol/mermaid-gotchas.md
+ * Bug 3 / Feature 4 — this file IS that feature, promoted into the engine.
+ */
+
+/* the card the diagram lives in (header + scrollable body) */
+.diagram-card{position:relative;border:1px solid var(--border,#1e293b);border-radius:8px;
+  background:var(--surface,#0d1526);margin:1.2rem 0;overflow:hidden;}
+.dc-top{display:flex;align-items:center;gap:.6rem;padding:.45rem .7rem;
+  border-bottom:1px solid var(--border,#1e293b);background:var(--surface2,#111827);}
+.dc-label{flex:1;font-size:.62rem;text-transform:uppercase;letter-spacing:.1em;
+  color:var(--text-dim,#94a3b8);font-family:var(--mono,ui-monospace,monospace);}
+
+/* per-card fullscreen button */
+.fz-btn{background:#111827;border:1px solid #334155;color:var(--text-dim,#94a3b8);cursor:pointer;
+  padding:.22rem .55rem;border-radius:4px;font-size:.62rem;font-family:var(--mono,ui-monospace,monospace);
+  transition:.15s;flex-shrink:0;}
+.fz-btn:hover{color:var(--text,#e2e8f0);border-color:var(--glow,#22d3ee);background:var(--glow-dim,rgba(34,211,238,.12));}
+
+/* scrollable diagram wrapper — natural SVG size, scroll to explore */
+.mermaid-wrap{overflow:auto;border-radius:6px;max-height:420px;
+  scrollbar-color:#334155 #0d1526;scrollbar-width:thin;}
+.mermaid-wrap::-webkit-scrollbar{width:6px;height:6px;}
+.mermaid-wrap::-webkit-scrollbar-track{background:#0d1526;}
+.mermaid-wrap::-webkit-scrollbar-thumb{background:#334155;border-radius:3px;}
+/* let mermaid SVG render at its natural width — don't shrink it */
+.mermaid svg{max-width:none !important;display:block;}
+
+/* ── fullscreen overlay (mermaid.js bootstraps this node if absent) ───────── */
+#fz-overlay{display:none;position:fixed;inset:0;background:rgba(5,8,20,.96);
+  z-index:9999;flex-direction:column;}
+#fz-overlay.active{display:flex;}
+#fz-toolbar{display:flex;align-items:center;gap:.8rem;padding:.6rem 1rem;
+  border-bottom:1px solid var(--border,#1e293b);flex-shrink:0;}
+#fz-title{font-size:.62rem;text-transform:uppercase;letter-spacing:.12em;
+  color:var(--text-dim,#94a3b8);flex:1;}
+#fz-hint{font-size:.6rem;color:var(--text-faint,#64748b);}
+.fz-ctrl{background:#111827;border:1px solid #334155;color:var(--text-dim,#94a3b8);cursor:pointer;
+  padding:.25rem .55rem;border-radius:4px;font-size:.7rem;font-family:var(--mono,ui-monospace,monospace);transition:.15s;}
+.fz-ctrl:hover{color:var(--text,#e2e8f0);border-color:var(--glow,#22d3ee);}
+#fz-body{flex:1;overflow:hidden;position:relative;}
+#fz-body svg{width:100% !important;height:100% !important;display:block;}

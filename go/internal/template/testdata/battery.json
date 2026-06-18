@@ -1,0 +1,148 @@
+[
+{
+"type": "hero",
+"block": {
+"text": "Make it pluggable.",
+"sub": "the ask"
+},
+"expected": "<div class='hero'><div class='hero-ask'>Make it pluggable.</div><div class='hero-sub'>the ask</div></div>"
+},
+{
+"type": "hero",
+"block": {
+"text": "no sub here"
+},
+"expected": "<div class='hero'><div class='hero-ask'>no sub here</div></div>"
+},
+{
+"type": "hero",
+"block": {
+"text": "with <b>&</b> chars",
+"sub": "a & b < c > d \" e ' f"
+},
+"expected": "<div class='hero'><div class='hero-ask'>with &lt;b&gt;&amp;&lt;/b&gt; chars</div><div class='hero-sub'>a &amp; b &lt; c &gt; d &quot; e &#x27; f</div></div>"
+},
+{
+"type": "hero",
+"block": {},
+"expected": "<div class='hero'><div class='hero-ask'></div></div>"
+},
+{
+"type": "hero",
+"block": {
+"text": "x",
+"sub": ""
+},
+"expected": "<div class='hero'><div class='hero-ask'>x</div></div>"
+},
+{
+"type": "decisionmatrix",
+"block": {
+"columns": [
+"A",
+"B"
+],
+"rows": [
+{
+"label": "Latency",
+"cells": [
+{
+"text": "fast",
+"verdict": "have"
+},
+{
+"text": "slow",
+"verdict": "miss"
+}
+]
+},
+{
+"label": "no-cells"
+},
+{
+"label": "weird & <v>",
+"cells": [
+{
+"text": "?",
+"verdict": "bogus"
+}
+]
+}
+]
+},
+"expected": "<div class='dm-wrap'><table class='dm'><thead><tr><th class='corner'></th><th>A</th><th>B</th></tr></thead><tbody><tr><td class='lbl'>Latency</td><td class='cell c-have'>fast</td><td class='cell c-miss'>slow</td></tr><tr><td class='lbl'>no-cells</td></tr><tr><td class='lbl'>weird &amp; &lt;v&gt;</td><td class='cell c-part'>?</td></tr></tbody></table></div>"
+},
+{
+"type": "decisionmatrix",
+"block": {},
+"expected": "<div class='dm-wrap'><table class='dm'><thead><tr><th class='corner'></th></tr></thead><tbody></tbody></table></div>"
+},
+{
+"type": "decisionmatrix",
+"block": {
+"columns": [],
+"rows": []
+},
+"expected": "<div class='dm-wrap'><table class='dm'><thead><tr><th class='corner'></th></tr></thead><tbody></tbody></table></div>"
+},
+{
+"type": "descent",
+"block": {
+"layers": [
+{
+"title": "Top",
+"why": "the ask",
+"tag": "net-new"
+},
+{
+"title": "Mid",
+"tag": "reuse"
+},
+{
+"title": "Bottom",
+"tag": "partial",
+"here": true
+}
+]
+},
+"expected": "<div class='descent'><div class='layer'><div class='lname'>Top<span class='dtag t-new'>net-new</span></div><div class='ldesc'>the ask</div></div><div class='conscript'><span class='arr'>&#8593;</span>cannot Top without Mid</div><div class='layer'><div class='lname'>Mid<span class='dtag t-reuse'>reuse</span></div></div><div class='conscript'><span class='arr'>&#8593;</span>cannot Mid without Bottom</div><div class='layer here'><div class='lname'>Bottom<span class='dtag t-part'>partial</span></div></div></div>"
+},
+{
+"type": "descent",
+"block": {
+"layers": [
+{
+"title": "one",
+"tag": "reuse"
+},
+{
+"title": "two"
+}
+]
+},
+"expected": "<div class='descent'><div class='layer'><div class='lname'>one<span class='dtag t-reuse'>reuse</span></div></div><div class='conscript'><span class='arr'>&#8593;</span>cannot one without two</div><div class='layer here'><div class='lname'>two</div></div></div>"
+},
+{
+"type": "descent",
+"block": {
+"layers": [
+{
+"title": "solo & <x>"
+}
+]
+},
+"expected": "<div class='descent'><div class='layer here'><div class='lname'>solo &amp; &lt;x&gt;</div></div></div>"
+},
+{
+"type": "descent",
+"block": {
+"layers": [
+{
+"title": "bad-tag",
+"tag": "nope"
+}
+]
+},
+"expected": "<div class='descent'><div class='layer here'><div class='lname'>bad-tag</div></div></div>"
+}
+]

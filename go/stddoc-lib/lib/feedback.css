@@ -1,0 +1,887 @@
+/* std-doc feedback widget — Copyright (c) 2026 goldenDragon7 — MIT (see LICENSE).
+   Built on make-pages-interactive by Paras Chopra (MIT):
+   https://github.com/paraschopra/make-pages-interactive — his notice is in NOTICE. */
+/* Claude Feedback — drop-in styles. All class names prefixed with cf- to avoid
+   collisions with host-page CSS. */
+
+#claude-feedback-root,
+#claude-feedback-root * {
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+}
+
+/* Theme isolation. The widget's rules read the host's BARE vars (--surface/--fg/
+   --line/--dim/…) with light-page fallbacks, so on a dark host they resolved
+   inconsistently (black-square buttons, dark-on-dark text). We pin them at the
+   root to a self-contained DARK palette — a matching set for the comment popup
+   and feedback panel: dark surfaces, light text, light (cyan) highlights — so the
+   floating chrome reads as one coherent dark set regardless of the host voice.
+   The namespaced --cf-* accent vars are untouched. */
+#claude-feedback-root {
+  --bg: #141a26; --surface: #1b2333; --surface2: #26324a;
+  --fg: #eef2f8; --text: #eef2f8; --text-2: #cbd5e1; --text-faint: #8593a8;
+  --dim: #9aa7bd; --line: #33405a; --border: #33405a;
+  --glow: #38bdf8; --red: #f87171; --accent-ink: #0a0e17;
+}
+/* Text fields default to a white browser chrome — darken them to match. */
+#claude-feedback-root textarea,
+#claude-feedback-root input[type="text"],
+#claude-feedback-root input:not([type]) {
+  background: var(--surface2); color: var(--text); border-color: var(--line);
+}
+#claude-feedback-root textarea::placeholder,
+#claude-feedback-root input::placeholder { color: var(--dim); }
+
+/* ---------------- Launcher button (bottom-right) ---------------- */
+.cf-launcher {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 2147483640;
+}
+
+.cf-btn-primary {
+  background: var(--glow, #b14000);
+  color: var(--accent-ink, white);
+  border: none;
+  border-radius: 999px;
+  padding: 12px 18px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.18);
+  transition: transform 0.08s ease, box-shadow 0.15s ease;
+}
+.cf-btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 26px rgba(0, 0, 0, 0.22); }
+.cf-btn-primary:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+.cf-btn-primary.cf-btn-small,
+.cf-btn.cf-btn-small {
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+.cf-btn {
+  background: var(--surface, #fff);
+  color: var(--fg, #1a1a1a);
+  border: 1px solid var(--line, #d0d0d0);
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.1s ease, border-color 0.1s ease;
+}
+.cf-btn:hover { background: var(--surface2, #f5f5f5); border-color: var(--glow, #b14000); }
+.cf-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.cf-icon-btn {
+  background: transparent;
+  border: none;
+  font-size: 22px;
+  line-height: 1;
+  color: var(--dim, #666);
+  cursor: pointer;
+  padding: 0 6px;
+}
+.cf-icon-btn:hover { color: var(--fg, #1a1a1a); }
+
+#cf-badge {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.25);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 1px 7px;
+  margin-left: 4px;
+  min-width: 16px;
+  text-align: center;
+}
+#cf-badge:empty { display: none; }
+
+/* Keyboard-hint pill shown on buttons */
+.cf-kbd-hint {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  font-family: ui-monospace, Menlo, monospace;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.22);
+  color: inherit;
+  margin-left: 4px;
+  letter-spacing: 0.5px;
+  vertical-align: 1px;
+  opacity: 0.95;
+}
+/* On light buttons (cf-btn / cf-tab) the hint pill needs different colors */
+.cf-btn .cf-kbd-hint,
+.cf-tab .cf-kbd-hint {
+  background: var(--surface2, #f3eedf);
+  color: var(--dim, #888);
+}
+.cf-header-hint {
+  font-size: 10px;
+  font-family: ui-monospace, Menlo, monospace;
+  color: var(--dim, #aaa);
+  letter-spacing: 0.5px;
+  flex: 1;
+  text-align: right;
+  margin-right: 8px;
+}
+
+/* ---------------- Side panel ---------------- */
+.cf-panel {
+  position: fixed;
+  right: 18px;
+  bottom: 78px;
+  width: 380px;
+  /* Fixed height so the panel doesn't resize when you switch tabs */
+  height: min(540px, calc(100vh - 110px));
+  background: var(--surface, #1b2333);
+  border: 1px solid var(--line, #33405a);
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.22);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 2147483641;
+  opacity: 0;
+  transform: translateY(8px);
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.cf-panel.cf-open {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.cf-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line, #eee);
+  background: var(--surface, #fdfcf8);
+}
+
+.cf-panel-header strong { font-size: 15px; }
+
+.cf-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--line, #eee);
+  background: var(--surface, #fdfcf8);
+}
+.cf-tab {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 10px 12px;
+  font-size: 13px;
+  color: var(--dim, #666);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+}
+.cf-tab:hover { color: var(--fg, #1a1a1a); }
+.cf-tab.cf-tab-active { color: var(--glow, #b14000); border-bottom-color: var(--glow, #b14000); font-weight: 600; }
+
+/* Tab panes are flex columns so the list scrolls in the middle while
+   panel-actions stay pinned to the bottom of the panel. */
+.cf-tab-pane {
+  display: none;
+  padding: 12px 14px;
+  flex: 1;
+  min-height: 0;       /* allow child flex:1 to shrink */
+  flex-direction: column;
+}
+.cf-tab-pane.cf-tab-pane-active { display: flex; }
+
+.cf-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+}
+
+.cf-list:empty::after {
+  content: "Nothing yet. Highlight any text on the page to comment, or click '+ general question' below.";
+  display: block;
+  color: var(--dim, #888);
+  font-size: 13px;
+  line-height: 1.4;
+  padding: 16px 6px;
+  font-style: italic;
+}
+
+#cf-history-list:empty::after {
+  content: "No previous batches yet. After Claude processes a batch of feedback, the changes will appear here.";
+}
+
+.cf-comment-item {
+  border: 1px solid var(--line, #eee);
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: var(--surface2, #fafafa);
+  font-size: 13.5px;
+  line-height: 1.4;
+}
+
+/* Processing banner — shown in Pending tab while a submitted batch is being processed */
+.cf-processing-banner {
+  border: 1px solid #f0c890;
+  background: rgba(245,158,11,.12);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+.cf-processing-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.cf-processing-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.cf-processing-meta {
+  color: var(--dim, #888);
+  font-size: 11.5px;
+  margin-left: 6px;
+}
+.cf-processing-status {
+  margin-top: 8px;
+  padding: 8px 10px;
+  background: rgba(217, 119, 6, 0.08);
+  border-left: 3px solid #d97706;
+  border-radius: 4px;
+  font-size: 12.5px;
+  color: #fbbf24;
+}
+.cf-processing-details {
+  margin-top: 8px;
+  font-size: 12px;
+}
+.cf-processing-details summary {
+  cursor: pointer;
+  color: var(--dim, #888);
+  outline: none;
+}
+.cf-processing-details summary:hover { color: var(--fg, #1a1a1a); }
+
+@keyframes cf-spin { to { transform: rotate(360deg); } }
+.cf-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #f0c890;
+  border-top-color: var(--glow, #b14000);
+  border-radius: 50%;
+  animation: cf-spin 0.9s linear infinite;
+  flex-shrink: 0;
+}
+
+/* Stale variant — "no agent picked this up" */
+.cf-processing-banner.cf-processing-stale {
+  border-color: #d97706;
+  background: rgba(217,119,6,.16);
+}
+.cf-processing-banner.cf-processing-stale .cf-processing-status {
+  background: rgba(217, 119, 6, 0.08);
+  border-left-color: #d97706;
+  color: #5a3a00;
+}
+/* High-contrast text on the light-amber stale background — the inherited
+   #888 meta / default heading were too faint to read here. */
+.cf-processing-banner.cf-processing-stale strong { color: #7a3d00; }
+.cf-processing-banner.cf-processing-stale .cf-processing-meta { color: #6b4410; }
+.cf-processing-banner.cf-processing-stale .cf-processing-details summary { color: #6b4410; }
+.cf-processing-banner.cf-processing-stale code {
+  background: rgba(217, 119, 6, 0.12);
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 11.5px;
+}
+.cf-stale-icon {
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #d97706;
+  color: white;
+  font-weight: 700;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.cf-comment-quote {
+  font-size: 12px;
+  color: var(--dim, #888);
+  border-left: 3px solid var(--line, #d8d2c2);
+  padding: 2px 8px;
+  margin-bottom: 6px;
+  max-height: 4.2em;
+  overflow: hidden;
+  font-style: italic;
+}
+.cf-comment-quote.cf-comment-general { font-style: normal; color: var(--glow, #b14000); font-weight: 600; font-size: 11px; letter-spacing: 0.4px; text-transform: uppercase; border-left-color: var(--glow, #b14000); }
+.cf-comment-body { color: var(--fg, #1a1a1a); white-space: pre-wrap; }
+.cf-comment-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 6px;
+  color: var(--dim, #999);
+  font-size: 11px;
+}
+.cf-comment-delete {
+  background: transparent;
+  border: none;
+  color: var(--red, #b00020);
+  cursor: pointer;
+  font-size: 11px;
+}
+.cf-comment-delete:hover { text-decoration: underline; }
+
+.cf-panel-actions {
+  display: flex;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line, #eee);
+  margin-top: 8px;
+  flex-shrink: 0;       /* never compress; always visible */
+}
+.cf-panel-actions:not(:first-of-type) {
+  /* second actions row (e.g. submit button) sits flush with the first row */
+  border-top: 0;
+  padding-top: 0;
+  margin-top: 6px;
+}
+.cf-panel-actions .cf-btn,
+.cf-panel-actions .cf-btn-primary { flex: 1; }
+
+.cf-hint {
+  margin: 8px 0 0;
+  font-size: 11.5px;
+  color: var(--dim, #888);
+  line-height: 1.4;
+  flex-shrink: 0;
+}
+
+/* ---------------- Inline selection popup ---------------- */
+.cf-selection-popup {
+  position: absolute;
+  z-index: 2147483642;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.1s ease;
+}
+.cf-selection-popup.cf-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ---------------- Comment editor ---------------- */
+.cf-editor {
+  position: fixed;
+  z-index: 2147483643;
+  width: 320px;
+  background: var(--surface, #1b2333);
+  border: 1px solid var(--line, #33405a);
+  border-radius: 10px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+  padding: 12px;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(4px);
+  transition: opacity 0.12s ease, transform 0.12s ease;
+}
+.cf-editor.cf-visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+.cf-editor-quote {
+  font-size: 12px;
+  color: var(--dim, #666);
+  border-left: 3px solid var(--line, #d8d2c2);
+  padding: 2px 8px;
+  margin-bottom: 8px;
+  max-height: 4.5em;
+  overflow: hidden;
+  font-style: italic;
+}
+.cf-editor-quote.cf-comment-general { font-style: normal; color: var(--glow, #b14000); font-weight: 600; font-size: 11px; letter-spacing: 0.4px; text-transform: uppercase; }
+.cf-editor textarea {
+  width: 100%;
+  font-family: inherit;
+  font-size: 14px;
+  border: 1px solid var(--line, #d0d0d0);
+  border-radius: 6px;
+  padding: 8px 10px;
+  resize: vertical;
+}
+.cf-editor textarea:focus { outline: none; border-color: var(--glow, #b14000); }
+.cf-editor-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+/* ---------------- Element-selection mode ---------------- */
+body.cf-elem-mode {
+  cursor: crosshair;
+}
+
+/* Hover outline: subtle dashed, hints "you can click me" */
+.cf-elem-hover {
+  outline: 2px dashed var(--glow, #b14000) !important;
+  outline-offset: 2px;
+  background: rgba(177, 64, 0, 0.04);
+  cursor: pointer !important;
+}
+
+/* Solid outline once selected, with a small label */
+.cf-elem-selected {
+  outline: 3px solid var(--glow, #b14000) !important;
+  outline-offset: 2px;
+  background: rgba(177, 64, 0, 0.08);
+  position: relative;
+}
+.cf-elem-selected::before {
+  content: "selected";
+  position: absolute;
+  top: -10px;
+  left: -2px;
+  background: var(--glow, #b14000);
+  color: var(--accent-ink, white);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 8px;
+  border-radius: 999px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  z-index: 1;
+}
+
+/* When the toggle button is active */
+#cf-elem-toggle.cf-active {
+  background: var(--glow, #b14000);
+  color: var(--accent-ink, white);
+  border-color: var(--glow, #b14000);
+}
+
+/* Element-popup button arrangement (two buttons side-by-side) */
+#cf-elem-popup {
+  display: inline-flex;
+  gap: 6px;
+}
+
+/* ---------------- Change highlights ---------------- */
+[data-cf-change] {
+  position: relative;
+  outline: 0 solid transparent;
+  border-radius: 3px;
+  transition: outline 0.25s ease, background 0.25s ease;
+}
+[data-cf-change].cf-change-active {
+  outline: 3px solid var(--glow, #b14000);
+  background: rgba(177, 64, 0, 0.06);
+  animation: cf-pulse 1.5s ease-in-out 2;
+}
+@keyframes cf-pulse {
+  0%, 100% { outline-color: var(--glow, #b14000); }
+  50%      { outline-color: #ffb070; }
+}
+
+/* History list items — compact: title + asked, no description */
+.cf-history-batch {
+  border: 1px solid var(--line, #eee);
+  border-radius: 6px;
+  padding: 6px 10px 8px;
+  background: var(--surface2, #26324a);
+}
+.cf-history-batch-header {
+  font-size: 10.5px;
+  color: var(--dim, #aaa);
+  letter-spacing: 0.3px;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+.cf-history-change {
+  font-size: 13px;
+  line-height: 1.4;
+  padding: 5px 0;
+  border-top: 1px dashed var(--line, #eee);
+  cursor: pointer;
+}
+.cf-history-change:first-of-type { border-top: none; }
+.cf-history-change:hover .cf-history-change-title { color: var(--glow, #b14000); }
+.cf-history-change-title { font-weight: 600; color: var(--fg, #1a1a1a); }
+.cf-history-change-quote {
+  font-size: 11.5px;
+  color: var(--dim, #888);
+  font-style: italic;
+  border-left: 2px solid var(--line, #d8d2c2);
+  padding: 1px 6px;
+  margin-top: 3px;
+}
+
+/* ---------------- Tour bar ---------------- */
+.cf-tour-bar {
+  position: fixed;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%) translateY(10px);
+  background: rgba(20, 20, 20, 0.92);
+  color: white;
+  padding: 10px 14px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+  z-index: 2147483644;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.cf-tour-bar.cf-visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+.cf-tour-bar .cf-btn,
+.cf-tour-bar .cf-btn-small {
+  background: rgba(255, 255, 255, 0.12);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+.cf-tour-bar .cf-btn:hover { background: rgba(255, 255, 255, 0.2); border-color: rgba(255, 255, 255, 0.4); }
+.cf-tour-label { font-size: 13px; min-width: 80px; text-align: center; }
+
+/* "Changes ready, reload to see" — persistent top-center banner.
+   Shown when new changes arrived while the user was likely on another tab.
+   Title is also prefixed with 🔔 (see feedback.js). Press R to reload. */
+.cf-reload-banner {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-12px);
+  background: #1a1a1a;
+  color: white;
+  padding: 8px 10px 8px 14px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.28);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 2147483646;
+}
+.cf-reload-banner.cf-visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+.cf-reload-banner .cf-reload-bell {
+  font-size: 17px;
+  display: inline-block;
+  transform-origin: 50% 10%;
+  animation: cf-bell-shake 1.4s ease-in-out infinite;
+}
+.cf-reload-banner .cf-reload-msg {
+  letter-spacing: 0.1px;
+}
+.cf-reload-banner .cf-btn-primary {
+  background: var(--glow, #b14000);
+  padding: 6px 12px;
+  font-size: 13px;
+  box-shadow: none;
+}
+.cf-reload-banner .cf-btn-primary:hover {
+  transform: none;
+  box-shadow: 0 4px 14px rgba(177, 64, 0, 0.4);
+}
+@keyframes cf-bell-shake {
+  0%, 60%, 100% { transform: rotate(0); }
+  68%  { transform: rotate(-14deg); }
+  76%  { transform: rotate(10deg); }
+  84%  { transform: rotate(-6deg); }
+  92%  { transform: rotate(3deg); }
+}
+
+/* Notice / toast */
+.cf-toast {
+  position: fixed;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-8px);
+  background: #1a1a1a;
+  color: white;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.22);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  z-index: 2147483645;
+}
+.cf-toast.cf-visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ---------------- Structured controls (radio / checkbox / select) ----------------
+   Author-marked question blocks ([data-cf-control]) the reader answers with a
+   real control. Styled to sit inside Dialect-A docs; palette vars fall back to
+   the std-doc hues so the block looks right even if the doc didn't define :root.
+   These are the only library styles that render INSIDE the document (not the
+   floating widget), so every rule is scoped under .cf-q. */
+.cf-q {
+  border: 1px solid var(--border, #1e293b);
+  border-left: 3px solid var(--glow, #22d3ee);
+  background: var(--surface, #111827);
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin: 18px 0;
+}
+.cf-q[data-cf-prompt]::before {
+  content: attr(data-cf-prompt);
+  display: block;
+  font-weight: 600;
+  color: var(--text, #f1f5f9);
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+.cf-q label {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 5px 0;
+  color: var(--text-2, #cbd5e1);
+  font-size: 13.5px;
+  cursor: pointer;
+}
+.cf-q label:hover { color: var(--text, #f1f5f9); }
+.cf-q input[type="radio"],
+.cf-q input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--glow, #22d3ee);
+  cursor: pointer;
+  margin: 0;
+  flex: 0 0 auto;
+}
+.cf-q select {
+  width: 100%;
+  padding: 7px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border, #1e293b);
+  background: var(--surface2, #1a2236);
+  color: var(--text, #f1f5f9);
+  font-family: inherit;
+  font-size: 13.5px;
+  cursor: pointer;
+}
+.cf-q-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  align-items: center;
+}
+.cf-q-note {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border, #1e293b);
+  background: var(--bg, #0a0e17);
+  color: var(--text, #f1f5f9);
+  font-family: inherit;
+  font-size: 12.5px;
+}
+.cf-q-note::placeholder { color: var(--text-faint, #64748b); }
+.cf-q-text {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 4px 0 2px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border, #1e293b);
+  background: var(--bg, #0a0e17);
+  color: var(--text, #f1f5f9);
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.5;
+  resize: vertical;
+}
+.cf-q-text::placeholder { color: var(--text-faint, #64748b); }
+.cf-q-submit {
+  flex: 0 0 auto;
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 1px solid var(--glow, #22d3ee);
+  background: transparent;
+  color: var(--glow, #22d3ee);
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.cf-q-submit:hover {
+  background: var(--glow, #22d3ee);
+  color: var(--bg, #0a0e17);
+}
+/* the structured answer as it appears in the pending panel (LIGHT surface) */
+.cf-comment-control div:first-child { font-size: 11.5px; color: var(--dim, #888); }
+.cf-comment-control div:last-child { color: var(--glow, #b14000); font-weight: 600; }
+
+/* ---------------- Presence (heartbeat from watch.py) ----------------
+   A live agent → calm green dot on the feedback button + an animated "on it"
+   pulse in the processing banner, replacing the spinner. Cold/absent → nothing
+   shown (and the stale warning is free to fire, truthfully). */
+@keyframes cf-pulse-ring {
+  0%   { box-shadow: 0 0 0 0 rgba(16,185,129,.55); }
+  70%  { box-shadow: 0 0 0 7px rgba(16,185,129,0); }
+  100% { box-shadow: 0 0 0 0 rgba(16,185,129,0); }
+}
+.cf-pulse {
+  width: 12px; height: 12px; border-radius: 50%;
+  background: #10b981; flex: 0 0 auto;
+  animation: cf-pulse-ring 1.4s ease-out infinite;
+}
+/* a small live dot on the feedback launcher when an agent is watching */
+#cf-toggle.cf-present { position: relative; }
+#cf-toggle.cf-present::after {
+  content: ""; position: absolute; top: -3px; right: -3px;
+  width: 9px; height: 9px; border-radius: 50%;
+  background: #10b981; border: 2px solid #0a0e17;
+  animation: cf-pulse-ring 1.6s ease-out infinite;
+}
+
+/* ---------------- Threaded history (you → reply conversation) ----------------
+   Each answered comment renders as a pair of bubbles: the reader's note, then
+   the agent's reply. Clear, scannable, and click-to-jump (cross-page aware). */
+   NOTE: the feedback panel is a LIGHT surface (#1a1a1a text, var(--glow, #b14000) accent,
+   warm borders) — these bubbles MUST use dark text on light fills. Do not reach
+   for the dark-page palette here (that was the contrast bug). */
+.cf-thread {
+  margin: 0 0 14px; padding-bottom: 12px;
+  border-bottom: 1px solid #e9e4d8;
+}
+.cf-bubble {
+  border-radius: 10px; padding: 9px 12px; margin: 6px 0;
+  font-size: 13px; line-height: 1.5;
+  color: var(--fg, #1a1a1a);               /* explicit dark text — readable on the light panel */
+}
+.cf-bubble-who {
+  font-size: 9.5px; text-transform: uppercase; letter-spacing: .1em;
+  margin-bottom: 3px; font-weight: 700;
+}
+.cf-bubble-text { color: var(--fg, #1a1a1a); }
+.cf-you {
+  background: rgba(255,255,255,.05);   /* subtle dark raised */
+  border: 1px solid var(--line, #33405a);
+  margin-left: 22px;            /* the reader's note, nudged right */
+}
+.cf-you .cf-bubble-who { color: var(--dim, #9aa7bd); }
+.cf-reply {
+  background: rgba(56,189,248,.10);   /* accent tint (dark) */
+  border: 1px solid var(--line, #33405a);
+  margin-right: 22px;           /* the reply, nudged left, accented */
+  cursor: pointer; transition: border-color .15s ease, background .15s ease;
+}
+.cf-reply:hover { border-color: var(--glow, #b14000); background: rgba(56,189,248,.18); }
+.cf-reply .cf-bubble-who { color: var(--glow, #b14000); }
+.cf-reply-title { font-weight: 600; color: var(--fg, #1a1a1a); }
+.cf-bubble-desc { margin-top: 5px; font-size: 12px; color: var(--text-2, #cbd5e1); }
+.cf-bubble-page {
+  margin-top: 6px; font-size: 11px; font-weight: 600; color: var(--glow, #b14000);
+}
+.cf-history-empty {
+  padding: 22px 14px; text-align: center; font-size: 12.5px;
+  color: var(--dim, #888); line-height: 1.6;
+}
+
+/* ---------------- First-class whisper widget (inline panel) ----------------
+   Persistent compose box that lives INLINE in the document flow — a normal
+   card at the end of the content column, talk to the author without selecting
+   any text. Not an overlay; it does not cover the document. */
+/* Palette hooks: a host doc may set --cf-whisper-* (or alias them to its own
+   theme vars) to make the box native to its palette. Defaults below keep the
+   light look for palette-less docs — change nothing for them. */
+.cf-whisper {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 28px 0;
+  background: var(--cf-whisper-bg, var(--surface, #fff));
+  border: 1px solid var(--cf-whisper-border, var(--line, #e2e2e2));
+  border-radius: 12px;
+  padding: 16px;
+}
+.cf-whisper-head {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--cf-whisper-accent, var(--glow, #b14000));
+  margin-bottom: 8px;
+  letter-spacing: 0.1px;
+}
+.cf-whisper-text {
+  width: 100%;
+  resize: vertical;
+  min-height: 44px;
+  border: 1px solid var(--cf-whisper-field-border, var(--line, #d0d0d0));
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 13.5px;
+  font-family: inherit;
+  /* Use the host's real text token (--text), not --fg (which the voices don't
+     define → it fell back to dark #1a1a1a → black-on-dark when typing on a dark
+     voice). --text is light on dark voices and dark on light ones, so the typed
+     text always contrasts with the field. */
+  color: var(--cf-whisper-text, var(--text, #1a1a1a));
+  background: var(--cf-whisper-field-bg, var(--surface2, #fafafa));
+}
+.cf-whisper-text:focus {
+  outline: none;
+  border-color: var(--cf-whisper-accent, var(--glow, #b14000));
+  background: var(--cf-whisper-field-bg-focus, var(--surface, #fff));
+}
+.cf-whisper-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+/* Send button adopts the whisper accent so it reads native to a themed host
+   doc; defaults to the engine's burnt-orange for palette-less docs. */
+.cf-whisper .cf-btn-primary {
+  background: var(--cf-whisper-accent, var(--glow, #b14000));
+  color: var(--cf-whisper-accent-ink, var(--accent-ink, #fff));
+}
+
+/* processing banner ("Claude is on it") — was a light amber box; harmonize it
+   so it's readable on a dark host page too. */
+.cf-processing-banner { background: var(--cf-surface2); border-color: var(--cf-line); color: var(--cf-fg); }
+.cf-processing-banner strong, .cf-processing-body, .cf-processing-row { color: var(--cf-fg); }
+.cf-processing-meta { color: var(--cf-dim); }
+.cf-processing-status { background: var(--cf-accent-soft); border-left-color: var(--cf-accent); color: var(--cf-fg); }
+.cf-processing-details summary { color: var(--cf-dim); }
+.cf-processing-details summary:hover { color: var(--cf-fg); }
+.cf-processing-banner code { background: var(--cf-accent-soft); color: var(--cf-fg); }
+.cf-processing-banner.cf-processing-stale { background: var(--cf-surface2); border-color: var(--cf-accent); }
+.cf-stale-icon { background: var(--cf-accent); color: var(--cf-accent-ink); }
+.cf-spinner { border-color: var(--cf-line); border-top-color: var(--cf-accent); }

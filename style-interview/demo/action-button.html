@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>A document that does things</title>
+<style>
+  :root{
+    --bg:#0a0e17; --surface:#141d2e; --surface2:#1b2942; --line:#243149;
+    --fg:#e8eef7; --dim:#9fb0c8; --glow:#22d3ee; --glow-dim:rgba(34,211,238,.14);
+    --green:#34d399; --gold:#fbbf24; --purple:#a78bfa; --red:#f87171;
+    --accent-ink:#04121a;
+  }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{background:radial-gradient(120% 90% at 0% 0%, var(--surface2) 0%, var(--bg) 60%); color:var(--fg);
+    font-family:-apple-system,'Segoe UI',Roboto,sans-serif; line-height:1.6;}
+  .wrap{max-width:960px; margin:0 auto; padding:46px 24px 80px}
+  .kicker{font-size:12px; letter-spacing:.24em; text-transform:uppercase; color:var(--glow)}
+  h1{font-size:33px; font-weight:800; margin:.18em 0 .1em; letter-spacing:-.015em;
+     background:linear-gradient(90deg,var(--fg),var(--glow)); -webkit-background-clip:text; background-clip:text; color:transparent}
+  .tag{color:var(--dim); margin:.1em 0 1.5em; font-size:16px}
+  p{max-width:78ch} .lede{font-size:17px}
+  kbd{font-family:ui-monospace,monospace; font-size:12px; background:var(--surface2); border:1px solid var(--line); border-bottom-width:2px; border-radius:5px; padding:1px 6px; color:var(--fg)}
+
+  .demo{margin:28px 0; padding:22px; border-radius:16px; background:var(--surface); border:1px solid var(--line)}
+  .demo .demo-h{font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:var(--dim); margin-bottom:14px}
+  .pipe{display:flex; flex-wrap:wrap; gap:0; align-items:center; margin-bottom:18px}
+  .stage{padding:10px 14px; border-radius:11px; background:var(--surface2); border:1px solid var(--line); min-width:96px; opacity:.4; transition:.35s}
+  .stage .sh{font-weight:700; font-size:13.5px} .stage .ss{font-size:12px; color:var(--dim)}
+  .stage.lit{opacity:1; background:linear-gradient(90deg,var(--glow-dim),transparent); border-color:var(--glow); box-shadow:inset 0 0 0 1px rgba(34,211,238,.25)}
+  .stage.lit .sh{color:var(--glow)}
+  .stage.done{opacity:1; border-color:var(--green); background:rgba(52,211,153,.08)}
+  .stage.done .sh{color:var(--green)}
+  .stage.teeth.lit{background:linear-gradient(90deg,rgba(248,113,113,.16),transparent); border-color:var(--red)}
+  .stage.teeth.lit .sh{color:var(--red)}
+  .parr{padding:0 8px; color:var(--dim); font-weight:700}
+  .actrow{display:flex; gap:12px; align-items:center; flex-wrap:wrap}
+  .act{appearance:none; border:none; cursor:pointer; font:inherit; font-weight:800; font-size:15px;
+    padding:11px 22px; border-radius:11px; background:var(--glow); color:var(--accent-ink);
+    box-shadow:0 6px 22px rgba(34,211,238,.28); transition:transform .08s, box-shadow .15s}
+  .act:hover{transform:translateY(-1px)} .act:disabled{opacity:.5; cursor:not-allowed; transform:none; box-shadow:none}
+  .act.ghost{background:transparent; color:var(--glow); border:1px solid var(--line); box-shadow:none}
+  .statusline{font-size:13.5px; min-height:1.3em; font-weight:700; letter-spacing:.02em}
+  .statusline .dot{display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:7px; vertical-align:middle}
+  .statusline .detail{font-weight:400; color:var(--dim); letter-spacing:0}
+  .statusline.idle{color:var(--dim)} .statusline.idle .dot{background:var(--dim)}
+  .statusline.running{color:var(--gold)} .statusline.running .dot{background:var(--gold); animation:cf-pulse 1s ease-in-out infinite}
+  .statusline.success{color:var(--green)} .statusline.success .dot{background:var(--green)}
+  @keyframes cf-pulse{50%{opacity:.35}}
+
+  .kinds{display:flex; flex-wrap:wrap; gap:10px; margin:22px 0 6px}
+  .kind{flex:1; min-width:150px; padding:13px 15px; border-radius:12px; background:var(--surface2); border:1px solid var(--line)}
+  .kind .ke{font-size:18px} .kind .kh{font-weight:700; margin:.25em 0 .15em} .kind .ks{font-size:13px; color:var(--dim)}
+
+  .why{margin-top:28px; padding:16px 20px; border-radius:13px; max-width:78ch; font-size:14.5px;
+    background:linear-gradient(90deg,var(--glow-dim),transparent); border-left:3px solid var(--glow); color:var(--dim)}
+  .why b{font-weight:800; color:var(--fg)}
+  .pgnav{margin-top:32px; font-size:13px; color:var(--dim)} .pgnav a{color:var(--glow); text-decoration:none}
+</style>
+  <script src="/lib/style-lock.js"></script>
+  <link rel="stylesheet" href="/lib/style-lock.css">
+  <link rel="stylesheet" href="/lib/feedback.css">
+</head>
+<body>
+<div class="wrap">
+  <div class="kicker">std-doc · style-interview · page 2 of 7</div>
+  <h1>A document that <em>does</em> things</h1>
+  <div class="tag">not your grandma's document — this one has buttons that act</div>
+
+  <p class="lede">Page 1 was about <em>saying</em> something to a page. This one is the flip side: a page can <em>do</em> something. A living document can carry real controls — buttons that run a command, mint a version, copy a block, kick off a build. The text isn't the whole document anymore; the document is a small, safe set of controls — press one and it acts.</p>
+
+  <div class="demo" data-cf-change="ch-action-demo">
+    <div class="demo-h">▶ press it — watch the page work</div>
+    <div class="pipe" id="pipe">
+      <div class="stage" data-k="build"><div class="sh">build</div><div class="ss">compile</div></div>
+      <div class="parr">→</div>
+      <div class="stage" data-k="test"><div class="sh">test</div><div class="ss">107 checks</div></div>
+      <div class="parr">→</div>
+      <div class="stage teeth" data-k="gate"><div class="sh">gate ⛔</div><div class="ss">no leaks</div></div>
+      <div class="parr">→</div>
+      <div class="stage" data-k="sign"><div class="sh">sign</div><div class="ss">one binary</div></div>
+      <div class="parr">→</div>
+      <div class="stage" data-k="ship"><div class="sh">ship 🚀</div><div class="ss">to everyone</div></div>
+    </div>
+    <div class="actrow" data-cf-change="ch-status-states">
+      <button class="act" id="run">▶ Run the release</button>
+      <button class="act ghost" id="reset" disabled>reset</button>
+      <span class="statusline idle" id="status"><span class="dot"></span>IDLE — nothing has run yet</span>
+    </div>
+  </div>
+
+  <p>That button didn't navigate anywhere or pop an alert. It <b>did work, in place</b>, and reported back. That's the shape of an action button: a control that performs something and shows you the result without leaving the page. In a real living doc the action can reach further — and it's always one of a few honest kinds:</p>
+
+  <div class="kinds">
+    <div class="kind"><div class="ke">📋</div><div class="kh">copy</div><div class="ks">lift a command or block to your clipboard, ready to paste</div></div>
+    <div class="kind"><div class="ke">🔢</div><div class="kh">mint</div><div class="ks">stamp a new version — number + timestamp — on the spot</div></div>
+    <div class="kind"><div class="ke">📨</div><div class="kh">ask</div><div class="ks">post a structured choice (radio/select) the awareness reads directly</div></div>
+    <div class="kind"><div class="ke">⚙️</div><div class="kh">run</div><div class="ks">trigger a real job — a build, a publish — and stream the result back</div></div>
+  </div>
+
+  <div class="why" data-cf-change="ch-doc-not-app"><b>One line that keeps this honest — it stays a document, not an app.</b> The temptation is to keep bolting on buttons until your doc becomes a <em>control panel</em>: tabs, dashboards, a general-purpose UI for everything. That's a different tool. A living document's actions are <b>bounded by its subject</b> — a doc <em>about</em> a release can run that release; a doc <em>teaching</em> a command can copy that command; a doc <em>posing</em> a decision can take your answer. The button only does the one thing the page is already about. So the doc doesn't become a place you do <em>any</em> work — it becomes a page that can do <em>its own</em>. And because the action lives right where the idea is — no copying steps out to a terminal, no losing your place — you get real efficiency: <b>fewer steps, fewer errors, fewer questions</b>, without ever stopping being a document.</div>
+
+  <div class="pgnav">
+    ← <a href="hello.html">page 1 · say something</a> &nbsp;·&nbsp; next → <a href="style-ab.html">page 3 · pick your voice (and name me)</a>
+  </div>
+</div>
+
+<script>
+  var stages = ["build","test","gate","sign","ship"];
+  var labels = {build:"building…", test:"running 107 checks…", gate:"security gate — checking for leaks…", sign:"signing the binary…", ship:"shipping to everyone 🚀"};
+  var pipe = document.getElementById('pipe'), run = document.getElementById('run'),
+      reset = document.getElementById('reset'), statEl = document.getElementById('status');
+  function stageEl(k){ return pipe.querySelector('.stage[data-k="'+k+'"]'); }
+  function clear(){ stages.forEach(function(k){ var e=stageEl(k); e.classList.remove('lit','done'); }); }
+  var timers = [];
+  run.addEventListener('click', function(){
+    clear(); run.disabled = true; reset.disabled = true;
+    statEl.className = 'statusline running'; statEl.innerHTML = '<span class="dot"></span>WORKING… <span class="detail">starting…</span>';
+    timers.forEach(clearTimeout); timers = [];
+    stages.forEach(function(k, i){
+      timers.push(setTimeout(function(){
+        stages.forEach(function(p, j){ if(j<i) stageEl(p).classList.add('done'); });
+        var e = stageEl(k); e.classList.remove('done'); e.classList.add('lit');
+        statEl.className = 'statusline running'; statEl.innerHTML = '<span class="dot"></span>WORKING… <span class="detail">' + labels[k] + '</span>';
+        if(i === stages.length-1){
+          timers.push(setTimeout(function(){
+            stages.forEach(function(p){ stageEl(p).classList.remove('lit'); stageEl(p).classList.add('done'); });
+            statEl.className = 'statusline success'; statEl.innerHTML = '<span class="dot"></span>COMPLETED — shipped to everyone, without you leaving the page ✓';
+            run.disabled = false; reset.disabled = false;
+          }, 650));
+        }
+      }, 700 * (i+1)));
+    });
+  });
+  reset.addEventListener('click', function(){
+    timers.forEach(clearTimeout); timers = []; clear();
+    statEl.className = 'statusline idle'; statEl.innerHTML = '<span class="dot"></span>IDLE — nothing has run yet';
+    reset.disabled = true; run.disabled = false;
+  });
+</script>
+  <script src="/lib/feedback.js" defer></script>
+</body>
+</html>

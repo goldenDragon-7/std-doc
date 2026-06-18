@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Come build with us</title>
+<style>
+  /* techno-dark fallback tokens; /lib/style-lock.css swaps these to the locked voice */
+  :root{
+    --bg:#0a0e17; --surface:#111827; --surface2:#1a2236; --line:#1e293b;
+    --fg:#f1f5f9; --dim:#94a3b8; --glow:#22d3ee; --glow-dim:rgba(34,211,238,.15);
+    --green:#10b981; --gold:#fbbf24; --purple:#a78bfa; --red:#ef4444;
+    --rose:#fb7faf; --accent-ink:#04121a;
+  }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{background:var(--bg); color:var(--fg);
+    font-family:-apple-system,'Segoe UI',Roboto,sans-serif; line-height:1.6;}
+  .wrap{max-width:960px; margin:0 auto; padding:46px 24px 90px}
+  .kicker{font-size:12px; letter-spacing:.24em; text-transform:uppercase; color:var(--glow)}
+  h1{font-size:34px; font-weight:800; margin:.18em 0 .1em; letter-spacing:-.015em; color:var(--fg)}
+  .tag{color:var(--dim); margin:.1em 0 1.5em; font-size:16px}
+  p{max-width:78ch} .lede{font-size:17px}
+  em{color:var(--fg); font-style:italic}
+  code,kbd{font-family:ui-monospace,monospace; font-size:12.5px; background:var(--surface2); border:1px solid var(--line); border-radius:5px; padding:1px 6px; color:var(--fg)}
+  .sech{font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--dim); font-weight:700; margin:30px 0 12px}
+
+  .rule{margin:10px 0; padding:15px 18px; border-radius:13px; background:var(--surface); border:1px solid var(--line); border-left:3px solid var(--green)}
+  .rule h3{margin:0 0 .2em; font-size:15px; color:var(--fg); display:flex; align-items:center; gap:9px}
+  .rule p{margin:.25em 0 0; font-size:14px; color:var(--dim); max-width:78ch}
+  .rule p b{color:var(--fg)}
+
+  .how{margin:10px 0; padding:16px 18px; border-radius:13px; background:var(--surface); border:1px solid var(--line); border-left:3px solid var(--glow)}
+  .how h3{margin:0 0 .3em; font-size:15px; color:var(--fg); display:flex; align-items:center; gap:9px}
+  .how .n{font-family:ui-monospace,monospace; font-size:12px; color:var(--glow)}
+  .how ol{margin:.4em 0 0; padding-left:20px; color:var(--dim); font-size:14px} .how li{margin:.3em 0}
+  .how b{color:var(--fg)}
+
+  .snippet{margin:11px 0 2px; padding:13px 15px; border-radius:10px; background:var(--surface2); border:1px solid var(--line);
+    font-family:ui-monospace,monospace; font-size:12.5px; color:var(--fg); overflow-x:auto; line-height:1.5}
+  .snippet .c{color:var(--dim)} .snippet .t{color:var(--glow)} .snippet .v{color:var(--green)}
+
+  .invite{margin:26px 0 6px; padding:18px 20px; border-radius:14px; background:var(--surface); border:1px solid var(--line); border-left:3px solid var(--rose)}
+  .invite .q{font-weight:700; margin-bottom:8px; font-size:15px; color:var(--fg)}
+  .invite .hint{font-size:13px; color:var(--dim); max-width:78ch}
+
+  .close{margin-top:34px; padding:20px 24px; border-radius:16px; max-width:78ch;
+    background:linear-gradient(120deg,var(--glow-dim),transparent); border:1px solid var(--line)}
+  .close p{margin:0} .close b{color:var(--fg)} .close .soft{color:var(--glow)}
+
+  .pgnav{margin-top:30px; font-size:13px; color:var(--dim)} .pgnav a{color:var(--glow); text-decoration:none}
+</style>
+  <script src="/lib/style-lock.js"></script>
+  <link rel="stylesheet" href="/lib/style-lock.css">
+  <link rel="stylesheet" href="/lib/feedback.css">
+</head>
+<body>
+<div class="wrap">
+  <div class="kicker">std-doc · style-interview · page 7 of 7</div>
+  <div style="font-size:20px; font-weight:800; color:var(--glow); margin:.35em 0 .15em; letter-spacing:-.01em">Thank you for playing. 🎉</div>
+  <h1>Come build with us</h1>
+  <div class="tag">the community you're joining — and exactly how you join it</div>
+
+  <p class="lede" data-cf-change="ch-c7-community">std-doc is built <em>in the open</em>, by a small group that's about to get a lot bigger. The three voices you chose between, every primitive that draws a diagram, this very page — all contributed, all reviewable, all yours to extend. The <a href="style-ab.html"><b>Hall of Styles</b></a> opens with three and grows with every person who walks through this door. This is the part where you stop being a reader of someone else's work and become one of the people who make it. You won't be doing it alone — that's the whole point of a community.</p>
+
+  <div class="sech">the guidelines — what every contribution holds</div>
+  <p>These aren't bureaucracy. They're the four promises that keep the gift <em>safe to trust</em> for the next person who opens it — the same promises that make std-doc worth giving away.</p>
+
+  <div class="rule" data-cf-change="ch-c7-guidelines">
+    <h3>🔏 Signed &amp; self-contained</h3>
+    <p>It must <b>freeze clean</b> — no network, no external script, no remote font, nothing that depends on anything outside itself. The security gate refuses anything that reaches out. A gift has to work in the recipient's hands, offline, forever.</p>
+  </div>
+  <div class="rule">
+    <h3>📦 Zero dependencies</h3>
+    <p>Stdlib only. The whole engine is dependency-free on purpose — that's how it ships as one signed Go binary nobody has to audit a supply chain for. Your contribution keeps it that way.</p>
+  </div>
+  <div class="rule">
+    <h3>🧱 It can't break anyone</h3>
+    <p>The <b>strangler proof</b>: every document that already exists stays <em>byte-identical</em> after your change. You add to the vocabulary; you never alter what someone else already wrote. The test suite enforces it — green stays green.</p>
+  </div>
+  <div class="rule">
+    <h3>🎨 Fractal voice</h3>
+    <p>A style rhymes top to bottom; a primitive reads in <em>every</em> voice — token-clean, zero hardcoded color. If it only looks right in one skin, it isn't finished. (That's the rule the page-3 voice-lock is built on.)</p>
+  </div>
+
+  <div class="sech">how you actually do it</div>
+
+  <div class="how" data-cf-change="ch-c7-howto">
+    <h3><span class="n">a voice →</span> add it to the Hall of Styles</h3>
+    <ol>
+      <li>Drop a named <code>:root</code> token block into <code>styles/</code> — a voice is one small block; override as few or as many tokens as the look needs (not just these three):</li>
+    </ol>
+    <div class="snippet"><span class="c">/* sunrise — warm, high-contrast, optimistic */</span><br>
+    <span class="t">:root[data-style="sunrise"]</span>{ --bg:<span class="v">#fffaf3</span>; --fg:<span class="v">#2a1d12</span>; --glow:<span class="v">#e8590c</span>; <span class="c">…</span> }</div>
+    <ol start="2">
+      <li>Run the suite — <code>pytest</code> stays green (the strangler proof).</li>
+      <li><b>Open a pull request</b> to the Hall. The family reviews it, merges it, and every document everywhere can now wear your voice.</li>
+    </ol>
+  </div>
+
+  <div class="how" data-cf-change="ch-c7-howto-plugin">
+    <h3><span class="n">a way to draw →</span> add a primitive</h3>
+    <ol>
+      <li>Implement the primitive contract in <code>primitives/</code> — a small, pure step from data to drawn SVG, registered into the shared library. (Browse the <b>bestiary</b> and <b>examples/</b> in the repo for patterns to start from.)</li>
+      <li>Add a test that proves the existing pages are unchanged, and that yours renders in all three voices.</li>
+      <li><b>Open a pull request.</b> Reviewed, merged, and the whole library gains it at once — no forking the core, ever.</li>
+    </ol>
+  </div>
+
+  <p data-cf-change="ch-c7-repo">The repo lives on <b>goldenDragon7's GitHub</b> for you and everyone you know to visit — a signed binary, given free. That's the address of the door. Everything above is how you walk through it.</p>
+
+  <div class="close" data-cf-change="ch-c7-close">
+    <p class="soft">Welcome to the people who believe love and intelligence belong together — and build as if it's true. 🩵</p>
+  </div>
+
+  <div class="pgnav">
+    ← <a href="relationship.html">page 6 · it was never the document</a> &nbsp;·&nbsp; start over → <a href="hello.html">page 1 · say something</a>
+  </div>
+</div>
+  <script src="/lib/feedback.js" defer></script>
+</body>
+</html>

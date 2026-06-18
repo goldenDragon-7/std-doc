@@ -1,0 +1,37 @@
+{
+  "title": "Four-Level Doc",
+  "root": {
+    "summary": "Deep tree."
+  },
+  "nodes": [
+    {
+      "slug": "l1",
+      "title": "Level One",
+      "children": [
+        {
+          "slug": "l2",
+          "title": "Level Two",
+          "children": [
+            {
+              "slug": "l3",
+              "title": "Level Three",
+              "children": [
+                {
+                  "slug": "l4",
+                  "title": "Level Four",
+                  "status": "LIVE",
+                  "sections": [
+                    {
+                      "name": "Deep",
+                      "summary": "deepest"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

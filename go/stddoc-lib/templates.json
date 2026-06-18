@@ -1,0 +1,1619 @@
+{
+  "prose": [
+    "<p class='prose",
+    {
+      "if": {
+        "truthy": "lede"
+      },
+      "then": [
+        " lede"
+      ]
+    },
+    "'>",
+    {
+      "esc": "text"
+    },
+    "</p>"
+  ],
+  "reveal": [
+    "<div class='reveal' style='",
+    {
+      "lookup": "tone",
+      "table": {
+        "muse": "--c1:var(--purple);--c2:var(--glow);",
+        "warm": "--c1:var(--gold);--c2:var(--purple);"
+      },
+      "default": "--c1:var(--purple);--c2:var(--glow);"
+    },
+    "'>",
+    {
+      "each": "paras",
+      "body": [
+        "<p class='reveal-p'>",
+        {
+          "compose": "content"
+        },
+        "</p>"
+      ]
+    },
+    "</div>"
+  ],
+  "hero": [
+    "<div class='hero'><div class='hero-ask'>",
+    {
+      "esc": "text"
+    },
+    "</div>",
+    {
+      "if": {
+        "truthy": "sub"
+      },
+      "then": [
+        "<div class='hero-sub'>",
+        {
+          "esc": "sub"
+        },
+        "</div>"
+      ]
+    },
+    "</div>"
+  ],
+  "decisionmatrix": [
+    "<div class='dm-wrap'><table class='dm'><thead><tr><th class='corner'></th>",
+    {
+      "each": "columns",
+      "body": [
+        "<th>",
+        {
+          "esc": "@item"
+        },
+        "</th>"
+      ]
+    },
+    "</tr></thead><tbody>",
+    {
+      "each": "rows",
+      "body": [
+        "<tr><td class='lbl'>",
+        {
+          "esc": "label"
+        },
+        "</td>",
+        {
+          "each": "cells",
+          "body": [
+            "<td class='cell ",
+            {
+              "lookup": "verdict",
+              "table": {
+                "miss": "c-miss",
+                "have": "c-have",
+                "part": "c-part",
+                "unknown": "c-unknown",
+                "neutral": "c-neutral"
+              },
+              "default": "c-part"
+            },
+            "'>",
+            {
+              "esc": "text"
+            },
+            "</td>"
+          ]
+        },
+        "</tr>"
+      ]
+    },
+    "</tbody></table></div>"
+  ],
+  "descent": [
+    "<div class='descent'>",
+    {
+      "each": "layers",
+      "body": [
+        "<div class='",
+        {
+          "if": {
+            "or": [
+              {
+                "and": [
+                  {
+                    "any": {
+                      "in": "@root.layers",
+                      "field": "here"
+                    }
+                  },
+                  {
+                    "truthy": "here"
+                  }
+                ]
+              },
+              {
+                "and": [
+                  {
+                    "not": {
+                      "any": {
+                        "in": "@root.layers",
+                        "field": "here"
+                      }
+                    }
+                  },
+                  {
+                    "truthy": "@last"
+                  }
+                ]
+              }
+            ]
+          },
+          "then": [
+            "layer here"
+          ],
+          "else": [
+            "layer"
+          ]
+        },
+        "'><div class='lname'>",
+        {
+          "esc": "title"
+        },
+        {
+          "if": {
+            "in": [
+              "tag",
+              [
+                "net-new",
+                "reuse",
+                "partial"
+              ]
+            ]
+          },
+          "then": [
+            "<span class='dtag ",
+            {
+              "lookup": "tag",
+              "table": {
+                "net-new": "t-new",
+                "reuse": "t-reuse",
+                "partial": "t-part"
+              },
+              "default": ""
+            },
+            "'>",
+            {
+              "lookup": "tag",
+              "table": {
+                "net-new": "net-new",
+                "reuse": "reuse",
+                "partial": "partial"
+              },
+              "default": ""
+            },
+            "</span>"
+          ]
+        },
+        "</div>",
+        {
+          "if": {
+            "truthy": "why"
+          },
+          "then": [
+            "<div class='ldesc'>",
+            {
+              "esc": "why"
+            },
+            "</div>"
+          ]
+        },
+        "</div>",
+        {
+          "if": {
+            "not": {
+              "truthy": "@last"
+            }
+          },
+          "then": [
+            "<div class='conscript'><span class='arr'>&#8593;</span>cannot ",
+            {
+              "esc": "title"
+            },
+            " without ",
+            {
+              "esc": "@next.title"
+            },
+            "</div>"
+          ]
+        }
+      ]
+    },
+    "</div>"
+  ],
+  "crux": [
+    "<div class='crux-box'>",
+    {
+      "if": {
+        "not": {
+          "eq": [
+            "yourcall",
+            false
+          ]
+        }
+      },
+      "then": [
+        "<div class='cx-yc'>&#9664; your call</div>"
+      ]
+    },
+    "<div class='cx-title'>",
+    {
+      "esc": "title"
+    },
+    "</div>",
+    {
+      "each": "options",
+      "body": [
+        "<div class='",
+        {
+          "if": {
+            "eqp": [
+              "key",
+              "@root.lean"
+            ]
+          },
+          "then": [
+            "cx-opt lean"
+          ],
+          "else": [
+            "cx-opt"
+          ]
+        },
+        "'><span class='k'>",
+        {
+          "esc": "key"
+        },
+        "</span><span class='t'>",
+        {
+          "esc": "text"
+        },
+        "</span>",
+        {
+          "if": {
+            "eqp": [
+              "key",
+              "@root.lean"
+            ]
+          },
+          "then": [
+            "<span class='lean-tag'>recommended</span>"
+          ]
+        },
+        "</div>"
+      ]
+    },
+    "</div>"
+  ],
+  "endpoint": [
+    "<div class='endpoint'><div class='ep-cap'><span class='ep-l0'>Layer 0</span>",
+    {
+      "if": {
+        "truthy": "caption"
+      },
+      "then": [
+        {
+          "esc": "caption"
+        }
+      ]
+    },
+    "</div><pre class='ep-art'>",
+    {
+      "esc": "ascii"
+    },
+    "</pre></div>"
+  ],
+  "callout": [
+    "<div class='callout",
+    {
+      "if": {
+        "truthy": "variant"
+      },
+      "then": [
+        " ",
+        {
+          "esc": "variant"
+        }
+      ]
+    },
+    "' style='--c:",
+    {
+      "if": {
+        "eq": [
+          "variant",
+          "gate"
+        ]
+      },
+      "then": [
+        "var(--red)"
+      ]
+    },
+    {
+      "if": {
+        "not": {
+          "eq": [
+            "variant",
+            "gate"
+          ]
+        }
+      },
+      "then": [
+        {
+          "palette_var": "kind"
+        }
+      ]
+    },
+    ";",
+    {
+      "if": {
+        "eq": [
+          "variant",
+          "ghost-dashed"
+        ]
+      },
+      "then": [
+        "border:1px dashed var(--border);background:transparent;"
+      ]
+    },
+    {
+      "if": {
+        "eq": [
+          "variant",
+          "gate"
+        ]
+      },
+      "then": [
+        "border-left:4px solid var(--c);background:color-mix(in srgb, var(--c) 10%, transparent);"
+      ]
+    },
+    {
+      "if": {
+        "not": {
+          "truthy": "variant"
+        }
+      },
+      "then": [
+        {
+          "lookup": "style",
+          "table": {
+            "solid": "border-left:4px solid var(--c);background:color-mix(in srgb, var(--c) 18%, transparent);",
+            "gradient": "border-left:4px solid var(--c);background:linear-gradient(120deg, color-mix(in srgb, var(--c) 18%, transparent), transparent);",
+            "dashed": "border-left:4px dashed var(--c);background:transparent;",
+            "framed": "border:1px dashed color-mix(in srgb, var(--c) 38%, transparent);background:transparent;border-radius:.7em;"
+          },
+          "default": "border-left:4px solid var(--c);background:color-mix(in srgb, var(--c) 10%, transparent);"
+        }
+      ]
+    },
+    "'>",
+    {
+      "if": {
+        "truthy": "pin"
+      },
+      "then": [
+        "<div class='callout-pin'>",
+        {
+          "esc": "pin"
+        },
+        "</div>"
+      ]
+    },
+    {
+      "if": {
+        "truthy": "lead_content"
+      },
+      "then": [
+        "<div class='callout-lead",
+        {
+          "if": {
+            "truthy": "loud"
+          },
+          "then": [
+            " loud"
+          ]
+        },
+        "'>",
+        {
+          "compose": "lead_content"
+        },
+        "</div>"
+      ]
+    },
+    {
+      "if": {
+        "and": [
+          {
+            "truthy": "lead"
+          },
+          {
+            "not": {
+              "truthy": "lead_content"
+            }
+          }
+        ]
+      },
+      "then": [
+        "<div class='callout-lead",
+        {
+          "if": {
+            "truthy": "loud"
+          },
+          "then": [
+            " loud"
+          ]
+        },
+        "'>",
+        {
+          "esc": "lead"
+        },
+        "</div>"
+      ]
+    },
+    {
+      "if": {
+        "truthy": "body"
+      },
+      "then": [
+        "<div class='callout-body'>",
+        {
+          "esc": "body"
+        },
+        "</div>"
+      ]
+    },
+    {
+      "if": {
+        "truthy": "hint_content"
+      },
+      "then": [
+        "<div class='callout-hint'>",
+        {
+          "compose": "hint_content"
+        },
+        "</div>"
+      ]
+    },
+    {
+      "if": {
+        "and": [
+          {
+            "truthy": "hint"
+          },
+          {
+            "not": {
+              "truthy": "hint_content"
+            }
+          }
+        ]
+      },
+      "then": [
+        "<div class='callout-hint'>",
+        {
+          "esc": "hint"
+        },
+        "</div>"
+      ]
+    },
+    "</div>"
+  ],
+  "chip": [
+    "<span class='ent-chip' style='--c:",
+    {
+      "palette_var": "ent"
+    },
+    ";background:color-mix(in srgb, var(--c) 18%, transparent);border:1px solid var(--c);color:var(--c);padding:.05em .45em;border-radius:.7em;font-weight:600'>",
+    {
+      "esc": "label"
+    },
+    "</span>"
+  ],
+  "compare": [
+    "<div class='cmp'>",
+    "<div class='cmp-col ",
+    {
+      "if": {
+        "truthy": "left.accent"
+      },
+      "then": [
+        "accent' style='--c:",
+        {
+          "palette_var": "left.accent"
+        },
+        "'"
+      ],
+      "else": [
+        "bad'"
+      ]
+    },
+    "><h4>",
+    {
+      "esc": "left.title"
+    },
+    "</h4>",
+    {
+      "if": {
+        "truthy": "left.pill"
+      },
+      "then": [
+        "<span class='cmp-pill'>",
+        {
+          "esc": "left.pill"
+        },
+        "</span>"
+      ]
+    },
+    "<ul class='cmp-items'>",
+    {
+      "each": "left.items",
+      "body": [
+        "<li>",
+        {
+          "esc": "@item"
+        },
+        "</li>"
+      ]
+    },
+    "</ul></div>",
+    "<div class='cmp-col ",
+    {
+      "if": {
+        "truthy": "right.accent"
+      },
+      "then": [
+        "accent' style='--c:",
+        {
+          "palette_var": "right.accent"
+        },
+        "'"
+      ],
+      "else": [
+        "good'"
+      ]
+    },
+    "><h4>",
+    {
+      "esc": "right.title"
+    },
+    "</h4>",
+    {
+      "if": {
+        "truthy": "right.pill"
+      },
+      "then": [
+        "<span class='cmp-pill'>",
+        {
+          "esc": "right.pill"
+        },
+        "</span>"
+      ]
+    },
+    "<ul class='cmp-items'>",
+    {
+      "each": "right.items",
+      "body": [
+        "<li>",
+        {
+          "esc": "@item"
+        },
+        "</li>"
+      ]
+    },
+    "</ul></div>",
+    "</div>"
+  ],
+  "spectrum": [
+    "<div class='spectrum'><div class='spec-bar'></div><div class='spec-row' style='grid-template-columns:repeat(",
+    {
+      "count": "stops",
+      "min": 1
+    },
+    ",1fr)'>",
+    {
+      "each": "stops",
+      "body": [
+        "<div class='spec-cell'><div class='n'>",
+        {
+          "esc": "label"
+        },
+        "</div>",
+        {
+          "if": {
+            "truthy": "note"
+          },
+          "then": [
+            "<div class='d'>",
+            {
+              "esc": "note"
+            },
+            "</div>"
+          ]
+        },
+        "</div>"
+      ]
+    },
+    "</div></div>"
+  ],
+  "badges": [
+    "<div class='badges'>",
+    {
+      "each_pairs": "badges",
+      "body": [
+        "<span class='badge'>",
+        {
+          "esc": "@key"
+        },
+        ": ",
+        {
+          "esc": "@val"
+        },
+        "</span>"
+      ]
+    },
+    {
+      "if": {
+        "truthy": "status"
+      },
+      "then": [
+        "<span class='badge ",
+        {
+          "lookup": "status",
+          "upper": true,
+          "table": {
+            "LIVE": "b-live",
+            "PARTIAL": "b-partial",
+            "WIP": "b-wip",
+            "DEBT": "b-debt"
+          },
+          "default": "b-wip"
+        },
+        "'>",
+        {
+          "esc": "status"
+        },
+        "</span>"
+      ]
+    },
+    "</div>"
+  ],
+  "threeaxes": [
+    "<div class='axes'>",
+    {
+      "each": "axes",
+      "body": [
+        "<div class='axis ",
+        {
+          "lookup": "kind",
+          "table": {
+            "computed": "have",
+            "blind": "missing"
+          },
+          "default": "have"
+        },
+        "'><div class='an'>",
+        {
+          "esc": "name"
+        },
+        "</div>",
+        {
+          "if": {
+            "truthy": "note"
+          },
+          "then": [
+            "<div class='aq'>",
+            {
+              "esc": "note"
+            },
+            "</div>"
+          ]
+        },
+        "<span class='as'>",
+        {
+          "esc": "kind"
+        },
+        "</span></div>"
+      ]
+    },
+    "</div>"
+  ],
+  "children": [
+    {
+      "if": {
+        "truthy": "children"
+      },
+      "then": [
+        "<h2>Descend</h2><div class='grid'>",
+        {
+          "each": "children",
+          "body": [
+            "<a class='card' href='",
+            {
+              "esc": "slug"
+            },
+            ".html'><h3><span class='cnum'>",
+            {
+              "esc": "_number"
+            },
+            "</span>",
+            {
+              "esc": "title"
+            },
+            "</h3><p class='ct'>",
+            {
+              "esc": "tagline"
+            },
+            "</p></a>"
+          ]
+        },
+        "</div>"
+      ]
+    }
+  ],
+  "ascii": [
+    {
+      "if": {
+        "truthy": "caption"
+      },
+      "then": [
+        "<div class='note'>",
+        {
+          "esc": "caption"
+        },
+        "</div>"
+      ]
+    },
+    "<pre class='diagram'>",
+    {
+      "esc": "ascii"
+    },
+    "</pre>"
+  ],
+  "mermaid": [
+    "<div class='diagram-card'><div class='dc-top'><span class='dc-label'>",
+    {
+      "if": {
+        "truthy": "caption"
+      },
+      "then": [
+        {
+          "esc": "caption"
+        }
+      ],
+      "else": [
+        {
+          "if": {
+            "truthy": "title"
+          },
+          "then": [
+            {
+              "esc": "title"
+            }
+          ],
+          "else": [
+            "diagram"
+          ]
+        }
+      ]
+    },
+    "</span><button class='fz-btn'>&#x26F6; fullscreen</button></div><div class='mermaid-wrap'><div class='mermaid'>",
+    {
+      "esc": "mermaid"
+    },
+    "</div></div></div>"
+  ],
+  "control": [
+    "<div class='cf-q' data-cf-control='",
+    {
+      "esc": "control",
+      "default": "radio"
+    },
+    "' data-cf-id='",
+    {
+      "esc": "id"
+    },
+    "' data-cf-prompt='",
+    {
+      "esc": "prompt"
+    },
+    "'>",
+    {
+      "if": {
+        "eq": [
+          "control",
+          "select"
+        ]
+      },
+      "then": [
+        "<select><option value=''>&mdash; pick one &mdash;</option>",
+        {
+          "each": "choices",
+          "body": [
+            "<option value='",
+            {
+              "esc": "value"
+            },
+            "'>",
+            {
+              "esc": "label"
+            },
+            "</option>"
+          ]
+        },
+        "</select>"
+      ],
+      "else": [
+        {
+          "if": {
+            "eq": [
+              "control",
+              "text"
+            ]
+          },
+          "then": [
+            "<textarea class='cf-q-text' rows='3' placeholder='type your answer&hellip;'></textarea>"
+          ],
+          "else": [
+            {
+              "each": "choices",
+              "body": [
+                "<label><input type='",
+                {
+                  "esc": "@root.control",
+                  "default": "radio"
+                },
+                "' value='",
+                {
+                  "esc": "value"
+                },
+                "'> ",
+                {
+                  "esc": "label"
+                },
+                "</label>"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "if": {
+        "truthy": "submit"
+      },
+      "then": [
+        "<div><button class='cf-q-submit'>",
+        {
+          "esc": "submit"
+        },
+        "</button></div>",
+        "<script>(function(){var s=document.currentScript;if(!s)return;var q=s.parentElement;var b=q.querySelector('.cf-q-submit');if(!b)return;b.addEventListener('click',function(){if(b.dataset.done)return;var pick='';var sel=q.querySelector('select'),ta=q.querySelector('.cf-q-text'),rc=q.querySelector('input:checked');if(sel&&sel.selectedIndex>0)pick=sel.value;else if(ta)pick=ta.value.trim();else if(rc){var lab=rc.closest('label');pick=lab?lab.textContent.trim():rc.value;}b.dataset.done='1';b.classList.add('cf-q-sent');b.textContent=pick?('\\u2713 '+pick+' \\u2014 locked in'):'\\u2713 recorded';});})();</script>"
+      ]
+    },
+    "</div>"
+  ],
+  "cardgrid": [
+    "<div class='cardgrid",
+    {
+      "if": {
+        "truthy": "variant"
+      },
+      "then": [
+        " ",
+        {
+          "esc": "variant"
+        }
+      ]
+    },
+    "'>",
+    {
+      "each": "cards",
+      "body": [
+        {
+          "if": {
+            "and": [
+              {
+                "eq": [
+                  "@root.separator",
+                  "dot"
+                ]
+              },
+              {
+                "not": {
+                  "truthy": "@first"
+                }
+              }
+            ]
+          },
+          "then": [
+            "<span class='cg-sep'>&middot;</span>"
+          ]
+        },
+        {
+          "if": {
+            "truthy": "ent"
+          },
+          "then": [
+            "<div class='ent-card accent' style='--c:",
+            {
+              "palette_var": "ent"
+            },
+            "'>"
+          ],
+          "else": [
+            "<div class='ent-card'>"
+          ]
+        },
+        {
+          "if": {
+            "truthy": "eyebrow"
+          },
+          "then": [
+            "<div class='ec-eyebrow'>",
+            {
+              "esc": "eyebrow"
+            },
+            "</div>"
+          ]
+        },
+        {
+          "if": {
+            "truthy": "icon"
+          },
+          "then": [
+            "<div class='ec-icon'>",
+            {
+              "esc": "icon"
+            },
+            "</div>"
+          ]
+        },
+        "<div class='ec-title'>",
+        {
+          "esc": "title"
+        },
+        "</div>",
+        "<div class='ec-body'>",
+        {
+          "esc": "body"
+        },
+        "</div></div>"
+      ]
+    },
+    "</div>"
+  ],
+  "table": [
+    "<table class='rich-table' style='border-collapse:collapse;width:100%;margin:.6em 0'>",
+    {
+      "if": {
+        "truthy": "columns"
+      },
+      "then": [
+        "<thead><tr>",
+        {
+          "each": "columns",
+          "body": [
+            "<th style='text-align:left;border-bottom:2px solid var(--border,#888);padding:.3em .5em'>",
+            {
+              "esc": "@item"
+            },
+            "</th>"
+          ]
+        },
+        "</tr></thead>"
+      ]
+    },
+    "<tbody>",
+    {
+      "each": "groups",
+      "body": [
+        {
+          "if": {
+            "truthy": "name"
+          },
+          "then": [
+            "<tr class='tgroup'><td colspan='",
+            {
+              "count": "@root.columns",
+              "min": 1
+            },
+            "' style='font-weight:700;background:var(--surface2,#eee);padding:.3em .5em'>",
+            {
+              "esc": "name"
+            },
+            "</td></tr>"
+          ]
+        },
+        {
+          "each": "rows",
+          "body": [
+            "<tr>",
+            {
+              "each": "@item",
+              "body": [
+                {
+                  "if": {
+                    "isdict": "@item"
+                  },
+                  "then": [
+                    {
+                      "if": {
+                        "truthy": "ent"
+                      },
+                      "then": [
+                        "<td style='--c:",
+                        {
+                          "palette_var": "ent"
+                        },
+                        ";color:var(--c);border-left:3px solid var(--c)'>",
+                        {
+                          "esc": "text"
+                        },
+                        "</td>"
+                      ],
+                      "else": [
+                        "<td>",
+                        {
+                          "esc": "text"
+                        },
+                        "</td>"
+                      ]
+                    }
+                  ],
+                  "else": [
+                    "<td>",
+                    {
+                      "esc": "@item"
+                    },
+                    "</td>"
+                  ]
+                }
+              ]
+            },
+            "</tr>"
+          ]
+        }
+      ]
+    },
+    "</tbody></table>"
+  ],
+  "flow": [
+    "<div class='flow'>",
+    {
+      "each": "steps",
+      "body": [
+        "<div class='",
+        {
+          "lookup": "variant",
+          "table": {
+            "here": "step here",
+            "teeth": "step teeth",
+            "done": "step done"
+          },
+          "default": "step"
+        },
+        "'>",
+        {
+          "if": {
+            "truthy": "n"
+          },
+          "then": [
+            "<span class='s-n'>",
+            {
+              "esc": "n"
+            },
+            "</span>"
+          ]
+        },
+        "<div class='s-h'>",
+        {
+          "esc": "head"
+        },
+        "</div>",
+        {
+          "if": {
+            "truthy": "sub"
+          },
+          "then": [
+            "<div class='s-s'>",
+            {
+              "esc": "sub"
+            },
+            "</div>"
+          ]
+        },
+        "</div>",
+        {
+          "if": {
+            "not": {
+              "truthy": "@last"
+            }
+          },
+          "then": [
+            {
+              "lookup": "@root.connector",
+              "table": {
+                "arrow": "<span class='flow-conn'>&#8594;</span>",
+                "dot": "<span class='flow-conn dot'>&middot;</span>",
+                "none": ""
+              },
+              "default": "<span class='flow-conn'>&#8594;</span>"
+            }
+          ]
+        }
+      ]
+    },
+    "</div>"
+  ],
+  "code": [
+    "<div class='",
+    {
+      "lookup": "mode",
+      "table": {
+        "command": "code code-command",
+        "filename": "code code-filename",
+        "snippet": "code code-snippet"
+      },
+      "default": "code code-command"
+    },
+    "'>",
+    {
+      "if": {
+        "truthy": "caption"
+      },
+      "then": [
+        "<div class='code-cap'>",
+        {
+          "esc": "caption"
+        },
+        "</div>"
+      ]
+    },
+    "<pre class='code-body'>",
+    {
+      "each": "spans",
+      "body": [
+        "<span class='",
+        {
+          "lookup": "cls",
+          "table": {
+            "comment": "t-comment",
+            "string": "t-string",
+            "keyword": "t-keyword",
+            "value": "t-value",
+            "dim": "t-dim",
+            "plain": "t-plain"
+          },
+          "default": "t-plain"
+        },
+        "'>",
+        {
+          "esc": "text"
+        },
+        "</span>"
+      ]
+    },
+    "</pre></div>"
+  ],
+  "style_ab": [
+    "<div class='style-ab' data-default='",
+    {
+      "esc": "default"
+    },
+    "'>",
+    "<div class='sab-tabs' role='tablist'>",
+    {
+      "each": "voices",
+      "body": [
+        "<button class='sab-tab' role='tab' data-voice='",
+        {
+          "esc": "id"
+        },
+        "' data-line=\"",
+        {
+          "esc": "line"
+        },
+        "\" aria-selected='",
+        {
+          "if": {
+            "eqp": [
+              "id",
+              "@root.default"
+            ]
+          },
+          "then": [
+            "true"
+          ],
+          "else": [
+            "false"
+          ]
+        },
+        "'>",
+        {
+          "if": {
+            "truthy": "dot"
+          },
+          "then": [
+            "<span class='sab-dot'></span>"
+          ]
+        },
+        {
+          "esc": "label"
+        },
+        "</button>"
+      ]
+    },
+    "</div>",
+    "<div class='sab-line'></div>",
+    "<div class='sab-stage'>",
+    {
+      "each": "voices",
+      "body": [
+        "<div class='sab-world",
+        {
+          "if": {
+            "eqp": [
+              "id",
+              "@root.default"
+            ]
+          },
+          "then": [
+            " sab-on"
+          ]
+        },
+        "' data-voice='",
+        {
+          "esc": "id"
+        },
+        "' data-style='",
+        {
+          "esc": "id"
+        },
+        "'>",
+        {
+          "compose": "preview"
+        },
+        "</div>"
+      ]
+    },
+    "</div>",
+    "<script>",
+    "(function(){var s=document.currentScript;if(!s)return;var r=s.parentElement;var tabs=r.querySelectorAll('.sab-tab'),worlds=r.querySelectorAll('.sab-world'),line=r.querySelector('.sab-line');function act(v){tabs.forEach(function(t){var on=t.getAttribute('data-voice')===v;t.setAttribute('aria-selected',on?'true':'false');if(on&&line)line.textContent=t.getAttribute('data-line')||'';});worlds.forEach(function(w){w.classList.toggle('sab-on',w.getAttribute('data-voice')===v);});}tabs.forEach(function(t){t.addEventListener('click',function(){var v=t.getAttribute('data-voice');act(v);try{localStorage.setItem('stddoc-style',v);}catch(e){}});});var stored=null;try{stored=localStorage.getItem('stddoc-style');}catch(e){}var has=false;worlds.forEach(function(w){if(w.getAttribute('data-voice')===stored)has=true;});var def=r.getAttribute('data-default')||(worlds[0]&&worlds[0].getAttribute('data-voice'))||'';act(has?stored:def);})();",
+    "</script>",
+    "</div>"
+  ],
+  "kicker": [
+    "<div class='kicker'>",
+    {
+      "esc": "text"
+    },
+    "</div>"
+  ],
+  "panel": [
+    "<div class='panel pn-",
+    {
+      "esc": "variant",
+      "default": "lift"
+    },
+    "'>",
+    {
+      "if": {
+        "truthy": "lead"
+      },
+      "then": [
+        "<div class='pn-lead'>",
+        {
+          "esc": "lead"
+        },
+        "</div>"
+      ]
+    },
+    "<div class='pn-body'>",
+    {
+      "esc": "body"
+    },
+    "</div></div>"
+  ],
+  "gradient-band": [
+    "<div class='gradband'><div class='gb-text'>",
+    {
+      "esc": "text"
+    },
+    "</div>",
+    {
+      "if": {
+        "truthy": "sub"
+      },
+      "then": [
+        "<div class='gb-sub'>",
+        {
+          "esc": "sub"
+        },
+        "</div>"
+      ]
+    },
+    "</div>"
+  ],
+  "namecard": [
+    "<div class='namecard'>",
+    {
+      "if": {
+        "truthy": "lead"
+      },
+      "then": [
+        "<div class='nc-lead'>",
+        {
+          "esc": "lead"
+        },
+        "</div>"
+      ]
+    },
+    "<div class='nc-name'>",
+    {
+      "esc": "name"
+    },
+    "</div>",
+    {
+      "if": {
+        "truthy": "sub"
+      },
+      "then": [
+        "<div class='nc-sub'>",
+        {
+          "esc": "sub"
+        },
+        "</div>"
+      ]
+    },
+    "</div>"
+  ],
+  "action": [
+    "<div class='act-btn' data-idle=\"",
+    {
+      "esc": "idle_text",
+      "default": "IDLE — ready"
+    },
+    "\" data-done=\"",
+    {
+      "esc": "done_text",
+      "default": "COMPLETED ✓"
+    },
+    "\">",
+    {
+      "if": {
+        "truthy": "steps"
+      },
+      "then": [
+        "<div class='acb-pipe'>",
+        {
+          "each": "steps",
+          "body": [
+            "<div class='acb-stage' data-detail=\"",
+            {
+              "esc": "detail",
+              "default": ""
+            },
+            "\"><div class='acb-sh'>",
+            {
+              "esc": "label"
+            },
+            "</div>",
+            {
+              "if": {
+                "truthy": "detail"
+              },
+              "then": [
+                "<div class='acb-ss'>",
+                {
+                  "esc": "detail"
+                },
+                "</div>"
+              ]
+            },
+            "</div>"
+          ]
+        },
+        "</div>"
+      ]
+    },
+    "<div class='acb-row'>",
+    "<button class='acb-run'>",
+    {
+      "esc": "run_label",
+      "default": "▶ Run"
+    },
+    "</button>",
+    {
+      "if": {
+        "truthy": "steps"
+      },
+      "then": [
+        "<button class='acb-reset' disabled>reset</button>"
+      ]
+    },
+    "<span class='acb-status'></span>",
+    "</div>",
+    "<script>",
+    "(function(){var s=document.currentScript;if(!s)return;var r=s.parentElement;var btn=r.querySelector('.acb-run'),rst=r.querySelector('.acb-reset'),sta=r.querySelector('.acb-status');var stages=Array.from(r.querySelectorAll('.acb-stage'));var idle=r.getAttribute('data-idle')||'IDLE';var done=r.getAttribute('data-done')||'COMPLETED ✓';var timers=[];function dot(){return \"<span class='acb-dot'></span>\";}function setS(cls,html){sta.className='acb-status '+cls;sta.innerHTML=html;}function clear(){stages.forEach(function(e){e.classList.remove('acb-lit','acb-done');});}function finish(){stages.forEach(function(e){e.classList.remove('acb-lit');e.classList.add('acb-done');});setS('done',dot()+done);btn.disabled=false;if(rst)rst.disabled=false;}function run(){clear();btn.disabled=true;if(rst)rst.disabled=true;setS('running',dot()+'WORKING…');timers.forEach(clearTimeout);timers=[];if(!stages.length){timers.push(setTimeout(finish,800));return;}stages.forEach(function(e,i){timers.push(setTimeout(function(){stages.forEach(function(p,j){p.classList.remove('acb-lit');if(j<i)p.classList.add('acb-done');});e.classList.add('acb-lit');var det=e.getAttribute('data-detail')||'';setS('running',dot()+'WORKING…'+(det?' — '+det:''));if(i===stages.length-1){timers.push(setTimeout(finish,650));}},700*(i+1)));});}btn.addEventListener('click',run);if(rst)rst.addEventListener('click',function(){timers.forEach(clearTimeout);timers=[];clear();setS('idle',dot()+idle);rst.disabled=true;btn.disabled=false;});setS('idle',dot()+idle);})();",
+    "</script>",
+    "</div>"
+  ],
+  "ask": [
+    "<div class='ask-block'>",
+    "<div class='ask-prompt'>",
+    {
+      "esc": "prompt"
+    },
+    "</div>",
+    "<div class='cf-q' data-cf-control='",
+    {
+      "esc": "control",
+      "default": "radio"
+    },
+    "' data-cf-id='",
+    {
+      "esc": "id"
+    },
+    "' data-cf-prompt='",
+    {
+      "esc": "prompt"
+    },
+    "'>",
+    {
+      "if": {
+        "eq": [
+          "control",
+          "select"
+        ]
+      },
+      "then": [
+        "<select><option value=''>— pick one —</option>",
+        {
+          "each": "choices",
+          "body": [
+            "<option value='",
+            {
+              "esc": "value"
+            },
+            "'>",
+            {
+              "esc": "label"
+            },
+            "</option>"
+          ]
+        },
+        "</select>"
+      ],
+      "else": [
+        {
+          "if": {
+            "eq": [
+              "control",
+              "text"
+            ]
+          },
+          "then": [
+            "<textarea class='cf-q-text' rows='1' placeholder='",
+            {
+              "esc": "placeholder"
+            },
+            "'></textarea>"
+          ],
+          "else": [
+            {
+              "each": "choices",
+              "body": [
+                "<label><input type='",
+                {
+                  "esc": "@root.control",
+                  "default": "radio"
+                },
+                "' value='",
+                {
+                  "esc": "value"
+                },
+                "'> ",
+                {
+                  "esc": "label"
+                },
+                "</label>"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "</div>",
+    {
+      "if": {
+        "truthy": "hint"
+      },
+      "then": [
+        "<div class='ask-hint'>",
+        {
+          "esc": "hint"
+        },
+        "</div>"
+      ]
+    },
+    "</div>"
+  ],
+  "figure": [
+    {
+      "if": {
+        "eq": [
+          "name",
+          "balloon-playful"
+        ]
+      },
+      "then": [
+        "<svg class='figure figure-balloon' viewBox='0 0 80 120' xmlns='http://www.w3.org/2000/svg' aria-label='balloon'><ellipse cx='40' cy='42' rx='33' ry='40' fill='#ff5da2'/><ellipse cx='30' cy='30' rx='10' ry='14' fill='#ffa9cf' opacity='.7'/><polygon points='40,80 33,90 47,90' fill='#ff5da2'/><path d='M40 90 q8 12 -2 22 q-8 8 2 8' stroke='#c08ad0' stroke-width='2' fill='none'/></svg>"
+      ]
+    }
+  ],
+  "howto": [
+    "<div class='howto'><h3>",
+    {
+      "if": {
+        "truthy": "label"
+      },
+      "then": [
+        "<span class='ht-n'>",
+        {
+          "esc": "label"
+        },
+        "</span> "
+      ]
+    },
+    {
+      "esc": "title"
+    },
+    "</h3>",
+    {
+      "if": {
+        "truthy": "intro"
+      },
+      "then": [
+        "<ol><li>",
+        {
+          "esc": "intro"
+        },
+        "</li></ol>"
+      ]
+    },
+    {
+      "if": {
+        "truthy": "code_block"
+      },
+      "then": [
+        {
+          "compose": "code_block"
+        }
+      ]
+    },
+    "<ol",
+    {
+      "if": {
+        "truthy": "intro"
+      },
+      "then": [
+        " start='2'"
+      ]
+    },
+    ">",
+    {
+      "each": "steps",
+      "body": [
+        "<li>",
+        {
+          "esc": "@item"
+        },
+        "</li>"
+      ]
+    },
+    "</ol></div>"
+  ]
+}

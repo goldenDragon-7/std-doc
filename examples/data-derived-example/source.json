@@ -1,0 +1,45 @@
+{
+  "title": "Self-Test Doc",
+  "generated_date": "2026-06-06",
+  "groups": ["Core", "Extras"],
+  "root": {
+    "summary": "A minimal doc-tree exercising the std-doc v2 generic renderer.",
+    "facets": { "purpose": "prove the drop-ins run", "scope": "generic, no project names" }
+  },
+  "nodes": [
+    {
+      "slug": "alpha", "group": "Core", "title": "Alpha — the spine",
+      "tagline": "first node", "status": "LIVE",
+      "badges": { "repo": "demo", "schema": "v2" },
+      "diagrams": [ { "caption": "tiny flow", "ascii": "src -> publish -> html" } ],
+      "sections": [
+        {
+          "name": "Rendering", "icon": "🔧", "tag": "core", "summary": "how it renders",
+          "items": [
+            { "name": "render_node", "desc": "node -> page",
+              "citations": [ { "path": "engine/scripts/publish.py", "line": "180-210",
+                               "evidence": "MEASURED", "note": "the node renderer" } ],
+              "evidence": {
+                "provenance": { "sources": [ { "kind": "self", "ref": "selftest", "path": "selftest/source.json" } ] },
+                "forensic": { "documents": [ { "kind": "prose-doc", "ref": "note.md",
+                              "title": "A prose proof", "markdown": "# Heading\\nLine with a cite x.py:12\\n- bullet" } ] },
+                "code_inventory": { "depts": [ { "department": "demo", "public_functions": [
+                              { "file": "publish.py", "function": "build", "signature": "build(doc)->dict" } ] } ] },
+                "related": [ { "title": "Beta", "note": "see also the second node" } ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "beta", "group": "Extras", "title": "Beta — the extra",
+      "tagline": "second node", "status": "WIP",
+      "sections": [
+        { "name": "Misc", "summary": "no evidence here (proves the additive path)",
+          "items": [ { "name": "plain_item", "desc": "an item with a citation only",
+            "citations": [ { "path": "x.py", "line": "1", "evidence": "CITED" } ] } ] }
+      ]
+    }
+  ]
+}

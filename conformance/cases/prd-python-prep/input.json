@@ -1,0 +1,235 @@
+{
+  "title": "Python-Prep — make the engine portable",
+  "generated_date": "2026-06-14",
+  "groups": ["The Ask", "The Argument", "The Build"],
+  "root": {
+    "summary": "Before we write a line of Go: get the Python engine into a state where the port is a transcription, not a redesign. The forcing function is one line — the same plugin file, unmodified, renders byte-identical HTML under both engines. Everything below is conscripted by it. (v2 — corrected after Mr. Dragon's catch: there is no heavy-two exception, and raw() is a security debt to eliminate, not a feature to bless.)",
+    "facets": {
+      "The endpoint": "One plugin file → byte-identical HTML on Python AND Go.",
+      "The method": "Write top-down by dependency. The top line demands every layer beneath it; the build order is that chain reversed.",
+      "We stand here": "A working Python reference engine, 24 primitives (22 already clean), ~156 green tests, golden HTML on disk.",
+      "The crux (your call)": "Where does expressiveness come from — composing safe atoms, or a raw() escape hatch? (Answer: composition. raw() dies.)"
+    }
+  },
+  "nodes": [
+    {
+      "slug": "the-ask",
+      "group": "The Ask",
+      "title": "The one-sentence ask",
+      "tagline": "what we get when prep is done",
+      "status": "WIP",
+      "badges": {"scope": "python-prep", "not": "the Go port itself"},
+      "blocks": [
+        {"type": "hero", "at": "lead",
+         "text": "The same plugin file, unmodified, renders byte-identical HTML under both the Python reference and the Go binary.",
+         "sub": "That single line is the forcing function. We don't argue for the prerequisites — this line conscripts them, visibly, and you watch the demand cascade."}
+      ],
+      "sections": [
+        {"name": "Why this is the line", "icon": "🎯", "summary": "The reframe you handed me, stated as the endpoint.",
+         "items": [
+           {"name": "The binary is the full engine", "desc": "No reduced-scope port. The public artifact does everything the Python reference does — render, freeze, lint, roll, serve. Scope is settled; it is not a crux."},
+           {"name": "A plugin must not be host-language code", "desc": "If a primitive is Python, porting means hand-rewriting 24 files into Go and re-blessing goldens twice. If a primitive is engine-language-independent, you port the CORE once and the library is shared, untouched."}
+         ]},
+        {"name": "The hard properties (each names a prerequisite)", "icon": "🔩", "summary": "Read the endpoint's properties — each one secretly conscripts a layer below.",
+         "items": [
+           {"name": "“the same plugin file, unmodified”", "desc": "→ plugins cannot be host-language code → a language-independent plugin format. (Layer −1.)"},
+           {"name": "“byte-identical”", "desc": "→ both engines must agree on escape table, JSON key ordering, number and newline rules → a frozen wire spec. (Layer −2.)"},
+           {"name": "“under both engines”", "desc": "→ a conformance oracle that runs the SAME inputs on both and diffs bytes → language-neutral golden pairs. (Layer −3.)"},
+           {"name": "“renders”", "desc": "→ a stable contract for what a plugin is → the 7-member primitive trait, already declared language-agnostic in core/primitive.py. (Layer −4 — reuse.)"}
+         ]}
+      ]
+    },
+    {
+      "slug": "the-endpoint",
+      "group": "The Argument",
+      "title": "Layer 0 — render the endpoint",
+      "tagline": "the artifact the reader looks at",
+      "status": "WIP",
+      "blocks": [
+        {"type": "endpoint", "at": "lead",
+         "caption": "The conformance run that defines 'done' for python-prep",
+         "ascii": "  conformance/hero-basic/input.json\n            |\n      +-----+------+----------------+\n      |                             |\n  python engine               go    binary\n      |                             |\n  out.html  ====  diff  ====  out.html\n      |                             |\n      +------------ BYTE-IDENTICAL --+\n                    => GREEN"},
+        {"type": "compare",
+         "left": {"title": "Today — plugins are Python", "items": [
+           "A primitive IS a Python class (render returns an f-string).",
+           "Porting = hand-rewrite 24 files in Go.",
+           "Goldens get re-blessed once per language.",
+           "Two implementations drift; the contract lives in code, not data."]},
+         "right": {"title": "After prep — plugins are data", "items": [
+           "A primitive IS a declarative spec, language-free.",
+           "Porting = port the CORE once; library is shared.",
+           "Goldens are language-neutral input→output pairs.",
+           "One spec, two hosts, byte-identical or the build is red."]}}
+      ],
+      "sections": [
+        {"name": "What 'done' looks like, measured", "icon": "✅", "summary": "Not a feeling — a green diff.",
+         "items": [
+           {"name": "The oracle exists and is green on Python", "desc": "Every golden expressed as input.json → expected/*.html, run by a language-neutral harness.",
+            "citations": [{"path": "engine/tests/golden/", "line": "1", "evidence": "MEASURED", "note": "golden HTML already on disk — the seed of the oracle"}]},
+           {"name": "The wire spec is written down", "desc": "protocol/wire-spec.md pins escape, ordering, numbers, newlines so Go matches rather than guesses.",
+            "citations": [{"path": "engine/core/page.py", "line": "43-44", "evidence": "MEASURED", "note": "esc = html.escape; raw = passthrough — the escape semantics to pin"}]},
+           {"name": "raw() is gone and representative plugins run from data", "desc": "hero, decisionmatrix, descent re-expressed in the format; the 2 bespoke pages re-expressed as compositions; grep for raw() in primitives returns zero.",
+            "citations": [{"path": "engine/core/primitive.py", "line": "9-12", "evidence": "MEASURED", "note": "contract already says 'plain data in, a string out, no Python-isms'"}]}
+         ]}
+      ]
+    },
+    {
+      "slug": "the-descent",
+      "group": "The Argument",
+      "title": "The descent — what the endpoint conscripts",
+      "tagline": "top line demands the whole stack",
+      "status": "WIP",
+      "blocks": [
+        {"type": "descent", "at": "lead", "layers": [
+          {"title": "Same plugin → byte-identical HTML on both engines", "why": "the endpoint — the line the reader looks at", "tag": "net-new"},
+          {"title": "A language-independent plugin format", "why": "so a plugin is data, not Python — ported zero times", "tag": "net-new"},
+          {"title": "A frozen wire spec", "why": "escape table, JSON ordering, number & newline rules both engines obey", "tag": "net-new"},
+          {"title": "Language-neutral golden pairs", "why": "input.json → expected.html; the oracle that says byte-identical or red", "tag": "net-new"},
+          {"title": "The 7-member primitive contract", "why": "already declared language-agnostic in core/primitive.py", "tag": "reuse"},
+          {"title": "Python reference engine + golden HTML on disk", "why": "24 primitives, ~156 green tests — we stand here", "tag": "reuse", "here": true}
+        ]}
+      ],
+      "sections": [
+        {"name": "The gotcha layer (named out loud)", "icon": "⚠️", "summary": "Every real design has one unglamorous landmine. Here it is.",
+         "items": [
+           {"name": "Silent cross-language divergence in the wire spec", "desc": "html.escape turns ' into &#x27; and \" into &quot;; Python preserves dict insertion order; floats and trailing newlines format a specific way. A Go port that guesses any of these produces HTML that looks right and diffs wrong. The wire spec is the antidote — and it is boring, which is why it gets skipped. We will not skip it."}
+         ]}
+      ]
+    },
+    {
+      "slug": "the-format",
+      "group": "The Argument",
+      "title": "What a plugin is — and the raw() trap",
+      "tagline": "your call",
+      "status": "WIP",
+      "blocks": [
+        {"type": "hero", "at": "lead",
+         "text": "Expressiveness comes from composing safe atoms — not from a raw() hole punched through the page.",
+         "sub": "Your catch: statemachine isn't a primitive monster. It's a set of simple primitive shapes PLUS a template for composing them. That dissolves the 'heavy two' and exposes the real decision."},
+        {"type": "compare",
+         "left": {"title": "The raw() trap (what I almost blessed)", "items": [
+           "“Some primitives are too hard — let them inject raw HTML.”",
+           "A stranger's source.json can inject <script> → runs in the reader's browser.",
+           "Freeze gate catches external refs, NOT inline injection.",
+           "It's a confession the primitive vocabulary ran out.",
+           "Betrays covenant II (expression is the payload) and the §6 security mission."]},
+         "right": {"title": "Composition (the right answer)", "items": [
+           "Primitives are safe atoms: structured in, escaped out, no raw.",
+           "A composition is primitives nested in data — a template.",
+           "statemachine becomes: general primitives + a composition, raw()=0.",
+           "A stranger can only COMPOSE safe atoms — no injection truck-route.",
+           "Expression scales by growing the shared vocabulary, not by punting."]}},
+        {"type": "decisionmatrix",
+         "columns": ["Structured primitives + composition", "raw() HTML passthrough", "WASM / code plugins"],
+         "rows": [
+           {"label": "Expressive enough for the 2 bespoke pages", "cells": [
+             {"text": "compose atoms", "verdict": "have"}, {"text": "inject", "verdict": "have"}, {"text": "arbitrary", "verdict": "have"}]},
+           {"label": "Safe when a STRANGER writes source.json", "cells": [
+             {"text": "isolated", "verdict": "have"}, {"text": "injection seam", "verdict": "miss"}, {"text": "arbitrary code", "verdict": "miss"}]},
+           {"label": "Language-independent (one file, both engines)", "cells": [
+             {"text": "pure data", "verdict": "have"}, {"text": "it's a hole", "verdict": "part"}, {"text": "host runtime ×2", "verdict": "miss"}]},
+           {"label": "Freeze-clean — no exfil / injection seam", "cells": [
+             {"text": "clean", "verdict": "have"}, {"text": "open seam", "verdict": "miss"}, {"text": "wasm host", "verdict": "miss"}]},
+           {"label": "Honors 'expression is the payload'", "cells": [
+             {"text": "grows vocab", "verdict": "have"}, {"text": "punts", "verdict": "miss"}, {"text": "opaque", "verdict": "part"}]},
+           {"label": "raw() sites it implies (measured: 40 today)", "cells": [
+             {"text": "0", "verdict": "have"}, {"text": "40+", "verdict": "miss"}, {"text": "n/a", "verdict": "part"}]}
+         ]},
+        {"type": "crux",
+         "title": "Decided — expressiveness comes from composition",
+         "options": [
+           {"key": "a", "text": "Structured primitives composed into templates — no raw(), no expression mini-language ✓ LOCKED"},
+           {"key": "b", "text": "Keep a raw() HTML passthrough as an escape hatch"},
+           {"key": "c", "text": "WASM / compiled code plugins — both engines host a runtime"}
+         ],
+         "lean": "a",
+         "yourcall": false},
+        {"type": "crux",
+         "title": "Decided — a composition is just data (no new machinery)",
+         "options": [
+           {"key": "a", "text": "A composition IS a source.json that nests primitive blocks (templates are data, like everything else) ✓ LOCKED"},
+           {"key": "b", "text": "Add a named, reusable 'template/component' concept to the engine"}
+         ],
+         "lean": "a",
+         "yourcall": false}
+      ],
+      "sections": [
+        {"name": "The measurement (your catch, quantified)", "icon": "📐", "summary": "I used file-LOC as a proxy for complexity. It lied. Here is the truth.",
+         "items": [
+           {"name": "raw() is concentrated in exactly 2 files", "desc": "statemachine (26 sites) + citizenlifecycle (14 sites) = 40 of 42. The other 22 primitives use raw() zero times — they are already clean, safe, structured plugins.",
+            "citations": [{"path": "engine/primitives/statemachine.py", "line": "1-13", "evidence": "MEASURED", "note": "13 trivial template primitives in one file — NOT one hard primitive"}]},
+           {"name": "There is no 'heavy two'", "desc": "statemachine is 13 tiny primitives (Kicker, Nav, Rails, Swim, Duo, TransitionTable…), each as simple as hero. Nothing computes geometry — CSS does layout; the data carries col/style/cls verbatim. The 250/137 LOC was bundling, not difficulty.",
+            "citations": [{"path": "engine/primitives/citizenlifecycle.py", "line": "1", "evidence": "MEASURED", "note": "same shape: loop + conditional + esc + interpolation"}]}
+         ]},
+        {"name": "Why raw() must die", "icon": "🛡️", "summary": "Two reasons, and they are the same reason.",
+         "items": [
+           {"name": "Security — the stranger's source.json", "desc": "We ship a signed binary to people who write their OWN source.json. A raw() pathway lets a malicious source inject markup/script the reader's browser executes. The freeze gate stops exfil (external refs), not inline injection. Designing raw() out removes the seam entirely — the §6 'field of fear' answer made literal."},
+           {"name": "Expressiveness — a raw() is a missing primitive", "desc": "Every raw() call is a place the vocabulary ran out and we punted to hand-HTML. The 40 sites are a punch-list: each becomes a structured primitive or a composition. raw()→0 is both the security gate AND the expressiveness win."}
+         ]},
+        {"name": "The residual judgment (a P3 detail, not a top crux)", "icon": "🔎", "summary": "One real design call, smaller than the two above.",
+         "items": [
+           {"name": "Primitive-extraction granularity", "desc": "When we dissolve statemachine, what's the right grain? Is 'swim-lane grid' one primitive or several (lane / beat / cell)? Judgment call, made during P4, provable by the golden oracle either way."}
+         ]}
+      ]
+    },
+    {
+      "slug": "the-wbs",
+      "group": "The Build",
+      "title": "Fold it forward — the WBS",
+      "tagline": "the descent reversed into build order",
+      "status": "WIP",
+      "badges": {"phases": "6", "honest first brick": "P1 (golden pairs)", "hard gate": "raw() == 0"},
+      "blocks": [
+        {"type": "descent", "at": "lead", "layers": [
+          {"title": "P1 — Extract golden pairs", "why": "input.json → expected/*.html; replace assertIn with byte-diff. THE LONG POLE.", "tag": "net-new", "here": true},
+          {"title": "P2 — Write the wire spec", "why": "escape table, JSON ordering, number/newline, palette token resolution", "tag": "net-new"},
+          {"title": "P3 — Design the plugin format", "why": "structured primitives + composition; no raw(), no expr; prove on hero + decisionmatrix + descent", "tag": "net-new"},
+          {"title": "P4 — Dissolve the 2 compositions, kill raw()", "why": "extract general shapes to primitives; re-express the 2 pages as nested-block data; gate: raw()==0", "tag": "net-new"},
+          {"title": "P5 — Convert the clean 22 to data", "why": "each gated green by P1 byte-identity (strangler proof)", "tag": "net-new"},
+          {"title": "P6 — Freeze & tag the reference", "why": "settle #2 widget, re-bless once, tag Python as spec-of-record → Go begins", "tag": "partial"}
+        ]}
+      ],
+      "sections": [
+        {"name": "P1 — Extract golden pairs", "icon": "🟢", "tag": "honest first brick", "summary": "Unglamorous, and the one thing everything downstream needs. Nothing has an oracle without it.",
+         "items": [
+           {"name": "Lift fixtures into data", "desc": "fixtures.py builds doc-trees as Python dicts; the self-doc and examples already have source.json. Convert every golden case to a checked-in input.json.",
+            "citations": [{"path": "engine/tests/fixtures.py", "line": "1", "evidence": "MEASURED", "note": "golden inputs live as Python dicts today"}]},
+           {"name": "Replace substring asserts with byte-diff", "desc": "Tests like assertIn(\"class='badges'\", html) can't run cross-language. Diff full output against expected/*.html.",
+            "citations": [{"path": "engine/tests/test_strangler.py", "line": "37-50", "evidence": "MEASURED", "note": "assertIn checks — Python-only conformance"}]},
+           {"name": "A neutral harness", "desc": "A runner that takes a case dir, renders input.json, diffs bytes against expected/. Both engines call the same harness contract."}
+         ]},
+        {"name": "P2 — Write the wire spec", "icon": "📜", "summary": "The contract Go matches instead of guessing. Short on purpose.",
+         "items": [
+           {"name": "Escape table", "desc": "html.escape semantics: & < > and quote=True (' → &#x27;, \" → &quot;). With raw() removed, escape is the ONLY text path — which is exactly what makes the wire spec small.",
+            "citations": [{"path": "engine/core/page.py", "line": "43-48", "evidence": "MEASURED"}]},
+           {"name": "Ordering & formatting", "desc": "dict/JSON key insertion order preserved; number formatting; trailing-newline policy on each rendered file."},
+           {"name": "Palette token resolution", "desc": "How var(--token) names resolve; which primitives are palette-free vs palette-bound (callout is loud if a key is undeclared).",
+            "citations": [{"path": "engine/core/palette.py", "line": "1", "evidence": "CITED"}]}
+         ]},
+        {"name": "P3 — Design the plugin format", "icon": "🧩", "summary": "The crux, decided and proven small before scaling.",
+         "items": [
+           {"name": "Spec the format", "desc": "Per Crux 1: iteration (with index/last metadata), conditional, map-lookup-with-default, escape — and COMPOSITION (a block may nest child blocks). No raw(), no expression language. The minimum that expresses decisionmatrix AND lets statemachine be a composition."},
+           {"name": "Prove on three", "desc": "Re-express hero (trivial), decisionmatrix (loop+map+default), descent (loop+conditional+connector). Green via P1 or the format is wrong."}
+         ]},
+        {"name": "P4 — Dissolve the 2 compositions, kill raw()", "icon": "🛡️", "tag": "hard gate", "summary": "The security-and-expressiveness phase. The 40 raw() sites are the punch-list.",
+         "items": [
+           {"name": "Extract general shapes into primitives", "desc": "The reusable atoms hiding inside statemachine/citizenlifecycle (lane, beat, cell, track, snode, transition-row…) become real library primitives — structured, no raw().",
+            "citations": [{"path": "engine/primitives/statemachine.py", "line": "102-131", "evidence": "MEASURED", "note": "Swim etc. are general grid atoms, not page-specific"}]},
+           {"name": "Re-express the 2 pages as compositions", "desc": "state-machine.html and citizen-lifecycle.html become source.json that nests those primitives — no bespoke .py renderer. Byte-identical via P1's golden."},
+           {"name": "The gate: raw() == 0", "desc": "Add a test that greps the primitive library for raw() and fails if any remain; then delete raw() from the ctx contract entirely. The injection seam is closed by construction.",
+            "citations": [{"path": "engine/core/page.py", "line": "44", "evidence": "MEASURED", "note": "raw = passthrough — the line to remove once nothing needs it"}]}
+         ]},
+        {"name": "P5 — Convert the clean 22 to data", "icon": "🔁", "summary": "Mechanical once the format is proven; each gated by the oracle.",
+         "items": [
+           {"name": "One primitive at a time, stay green", "desc": "Honor the strangler proof: every already-published page stays byte-identical as each primitive moves from code to data."}
+         ]},
+        {"name": "P6 — Freeze & tag the reference", "icon": "🏁", "summary": "Settle the loose end, then declare the spec frozen.",
+         "items": [
+           {"name": "Resolve widget #2 honestly", "desc": "Fix the stale-banner copy + contrast in lib/feedback.{js,css}; re-bless goldens ONCE. Under the new architecture this is a one-time reference edit — the language-neutral golden pairs carry forward to Go unchanged, so the old 'double re-bless' fear is gone.",
+            "citations": [{"path": "engine/lib/feedback.js", "line": "505-516", "evidence": "MEASURED", "note": "false 'no agent watching' copy"}]},
+           {"name": "Tag Python as spec-of-record", "desc": "The reference engine self-hosts the doc and is the oracle. Go ports the CORE against it, green at every line."}
+         ]}
+      ]
+    }
+  ]
+}

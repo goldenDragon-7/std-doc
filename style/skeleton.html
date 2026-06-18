@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SKELETON — Dense-Report Doc + Diagram Kit</title>
+<!--
+  ════════════════════════════════════════════════════════════════════
+  LIVING-DOCUMENT SKELETON  ·  Dialect A (Dense Report), standard palette
+  ────────────────────────────────────────────────────────────────────
+  This is a paste-able starter. Keep the :root palette EXACTLY — these
+  are the canonical hues of the standard palette.
+  Below the palette you get every diagram idiom we used in the
+  Signals-Watch PRD, each in its own labelled block. Delete what you
+  don't need; copy a block to repeat it. Body font is mono (Dialect A).
+  ════════════════════════════════════════════════════════════════════
+-->
+<style>
+:root{
+  /* ── CANONICAL PALETTE — do not invent new hues ── */
+  --bg:#0a0e17; --surface:#111827; --surface2:#1a2236; --border:#1e293b;
+  --glow:#22d3ee; --glow-dim:rgba(34,211,238,0.15); --glow-bright:rgba(34,211,238,0.4);
+  --amber:#f59e0b; --amber-dim:rgba(245,158,11,0.15); --amber-bright:rgba(245,158,11,0.4);
+  --green:#10b981; --green-dim:rgba(16,185,129,0.15); --green-bright:rgba(16,185,129,0.4);
+  --red:#ef4444; --red-dim:rgba(239,68,68,0.15); --red-bright:rgba(239,68,68,0.4);
+  --purple:#a78bfa; --purple-dim:rgba(167,139,250,0.15); --purple-bright:rgba(167,139,250,0.4);
+  --lavender:#c4b5fd; --lavender-dim:rgba(196,181,253,0.15);
+  --gold:#fbbf24; --gold-dim:rgba(251,191,36,0.15); --gold-bright:rgba(251,191,36,0.4);
+  --pink:#f472b6; --blue:#3b82f6; --blue-dim:rgba(59,130,246,.12); --blue-bright:rgba(59,130,246,.4);
+  --text:#f1f5f9; --text-2:#cbd5e1; --text-dim:#94a3b8; --text-faint:#64748b;
+  --mono:'SF Mono','Cascadia Code','Fira Code',ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--mono);background:var(--bg);color:var(--text);line-height:1.6;font-size:14px;
+  background-image:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(34,211,238,0.06),transparent);}
+.wrap{max-width:1000px;margin:0 auto;padding:3.5rem 1.6rem 6rem;}
+
+/* ── masthead + prose ── */
+.kicker{font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.22em;color:var(--glow);margin-bottom:1rem;}
+h1{font-size:2.3rem;line-height:1.1;letter-spacing:-.01em;margin-bottom:.6rem;}
+h1 .em{color:var(--glow);text-shadow:0 0 30px var(--glow-bright);}
+.sub{color:var(--text-dim);font-size:.92rem;max-width:64ch;}
+.divider{height:1px;background:linear-gradient(90deg,var(--glow-bright),transparent);margin:2.6rem 0;}
+h2{font-size:.7rem;text-transform:uppercase;letter-spacing:.16em;color:var(--amber);margin:2.8rem 0 1.1rem;display:flex;align-items:center;gap:.6rem;}
+h2::before{content:"";width:18px;height:1px;background:var(--amber);display:inline-block;}
+p{color:var(--text-2);margin:.7rem 0;max-width:78ch;}
+p .hl{color:var(--text);background:var(--glow-dim);padding:0 .25em;border-radius:2px;}
+code{color:var(--glow);font-size:.82em;background:var(--surface2);padding:1px 6px;border-radius:3px;}
+.q{border-left:2px solid var(--glow);padding:.2rem 0 .2rem 1rem;color:var(--text);font-style:italic;margin:1rem 0;}
+.method{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--glow);border-radius:8px;padding:1.3rem 1.5rem;margin:1.4rem 0;}
+.method b{color:var(--glow);}
+.cap{font-size:.66rem;color:var(--text-faint);text-align:center;margin:.5rem 0 0;letter-spacing:.03em;}
+.cap b{color:var(--lavender);}
+
+/* ── IDIOM: descent (vertical conscription stack) ── */
+.descent{margin:1.6rem 0;}
+.layer{position:relative;border:1px solid var(--border);border-radius:9px;background:var(--surface);padding:1rem 1.3rem;}
+.conscript{text-align:center;color:var(--red);font-size:.66rem;letter-spacing:.05em;padding:.45rem 0;}
+.conscript .arr{font-size:1rem;display:block;color:var(--glow);line-height:1;}
+.layer .lid{font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;color:var(--text-faint);margin-bottom:.35rem;}
+.layer .lname{font-size:.95rem;color:var(--text);font-weight:700;}
+.layer .ldesc{font-size:.78rem;color:var(--text-dim);margin-top:.25rem;}
+.layer.l0{border-color:var(--glow-bright);box-shadow:0 0 30px rgba(34,211,238,0.1);}
+.layer.l0 .lname{color:var(--glow);}
+.layer.here{border-color:var(--green-bright);background:linear-gradient(180deg,var(--green-dim),var(--surface));}
+.layer.here .lname,.layer.here .lid{color:var(--green);}
+.tag{display:inline-block;font-size:.56rem;text-transform:uppercase;letter-spacing:.08em;padding:.12rem .5rem;border-radius:4px;margin-left:.5rem;vertical-align:middle;}
+.tag.new{background:var(--amber-dim);color:var(--amber);border:1px solid var(--amber-bright);}
+.tag.reuse{background:var(--green-dim);color:var(--green);border:1px solid var(--green-bright);}
+
+/* ── IDIOM: two-column compare (bad/good) ── */
+.svt{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.4rem 0;}
+.svt-col{border:1px solid var(--border);border-radius:9px;padding:1.2rem;background:var(--surface);}
+.svt-col.bad{border-color:var(--red-bright);box-shadow:0 0 24px rgba(239,68,68,.07);}
+.svt-col.good{border-color:var(--glow-bright);box-shadow:0 0 24px rgba(34,211,238,.07);}
+.svt-col h4{font-size:.66rem;text-transform:uppercase;letter-spacing:.12em;margin-bottom:.9rem;}
+.svt-col.bad h4{color:var(--red);} .svt-col.good h4{color:var(--glow);}
+.dots{display:flex;gap:.32rem;flex-wrap:wrap;align-items:center;}
+.dot{width:.62rem;height:.62rem;border-radius:50%;background:var(--text-faint);display:inline-block;}
+.dot.a{background:var(--glow);box-shadow:0 0 6px var(--glow-bright);} .dot.p{background:var(--gold);box-shadow:0 0 6px var(--gold-bright);} .dot.d{background:var(--lavender);} .dot.x{background:#23304a;}
+.svt-col .note{font-size:.7rem;color:var(--text-dim);margin-top:.9rem;}
+
+/* ── IDIOM: spectrum (gradient bar + 3 cells) — "the missing axis" ── */
+.spectrum{border:1px solid var(--border);border-radius:9px;padding:1.4rem 1.3rem 1.1rem;background:var(--surface);margin:1.4rem 0;}
+.spec-bar{height:10px;border-radius:6px;margin:.4rem 0 1rem;background:linear-gradient(90deg,var(--gold),var(--glow) 52%,var(--text-faint));}
+.spec-row{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;}
+.spec-cell{text-align:center;} .spec-cell .g{font-size:1.5rem;} .spec-cell .n{font-size:.78rem;font-weight:700;margin:.25rem 0;}
+.spec-cell .d{font-size:.66rem;color:var(--text-dim);} .spec-cell .clk{font-size:.6rem;color:var(--text-faint);margin-top:.3rem;}
+.spec-axis{display:flex;justify-content:space-between;font-size:.6rem;color:var(--text-faint);letter-spacing:.06em;}
+
+/* ── IDIOM: decision matrix (rows × cols → verdict) — "the heart" ── */
+.matrix-wrap{overflow-x:auto;margin:1.4rem 0;}
+.matrix{border-collapse:separate;border-spacing:5px;width:100%;min-width:660px;}
+.matrix th{font-size:.6rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);padding:.5rem .4rem;text-align:center;vertical-align:bottom;}
+.matrix .corner{font-size:.56rem;color:var(--text-faint);text-align:right;font-style:italic;}
+.matrix td{text-align:center;padding:.55rem .3rem;border-radius:7px;font-size:.6rem;font-weight:700;letter-spacing:.03em;}
+.matrix .chal{text-align:right;font-size:.7rem;font-weight:700;color:var(--text);padding-right:.6rem;}
+.v-a{background:var(--glow-dim);color:var(--glow);border:1px solid var(--glow-bright);}
+.v-b{background:var(--gold-dim);color:var(--gold);border:1px solid var(--gold-bright);}
+.v-c{background:var(--purple-dim);color:var(--lavender);border:1px solid var(--purple-bright);}
+.v-d{background:var(--surface2);color:var(--text-faint);border:1px solid var(--border);}
+.legend{display:flex;gap:1rem;flex-wrap:wrap;font-size:.64rem;color:var(--text-dim);margin-top:.7rem;}
+.legend span{display:inline-flex;align-items:center;gap:.35rem;} .legend i{width:.7rem;height:.7rem;border-radius:3px;display:inline-block;}
+
+/* ── IDIOM: three axes (have/have/missing) ── */
+.axes{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin:1.4rem 0;}
+.axis{border:1px solid var(--border);border-radius:9px;padding:1.1rem;background:var(--surface);}
+.axis .an{font-size:.82rem;font-weight:700;margin-bottom:.3rem;} .axis .aq{font-size:.7rem;color:var(--text-dim);font-style:italic;margin-bottom:.6rem;}
+.axis .as{font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;padding:.2rem .55rem;border-radius:4px;display:inline-block;}
+.axis.have .an{color:var(--green);} .axis.have .as{background:var(--green-dim);color:var(--green);border:1px solid var(--green-bright);}
+.axis.have2 .an{color:var(--blue);} .axis.have2 .as{background:var(--blue-dim);color:var(--blue);border:1px solid var(--blue-bright);}
+.axis.missing .an{color:var(--red);} .axis.missing .as{background:var(--red-dim);color:var(--red);border:1px solid var(--red-bright);}
+.axis.missing{border-color:var(--red-bright);box-shadow:0 0 24px rgba(239,68,68,.08);}
+
+/* ── IDIOM: seam / pipeline (N nodes with arrows) ── */
+.seam{display:grid;grid-template-columns:repeat(5,1fr);gap:.5rem;align-items:stretch;margin:1.4rem 0;}
+.seam .node{border:1px solid var(--border);border-radius:9px;padding:.9rem .7rem;background:var(--surface);text-align:center;position:relative;}
+.seam .node .nh{font-size:.62rem;font-weight:700;margin-bottom:.3rem;color:var(--glow);} .seam .node .nd{font-size:.6rem;color:var(--text-dim);}
+.seam .arrow{position:absolute;right:-.5rem;top:50%;transform:translateY(-50%);color:var(--glow);font-size:.9rem;z-index:2;}
+
+/* ── IDIOM: crux cards (the questions) ── */
+.crux{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.3rem 0;}
+.cbox{border:1px solid var(--purple-bright);border-radius:9px;padding:1.2rem;background:linear-gradient(180deg,var(--purple-dim),var(--surface));}
+.cbox .cn{font-size:.62rem;text-transform:uppercase;letter-spacing:.12em;color:var(--lavender);margin-bottom:.5rem;}
+.cbox .cq{font-size:.92rem;color:var(--text);margin-bottom:.5rem;} .cbox .ce{font-size:.74rem;color:var(--text-dim);}
+.footline{text-align:center;color:var(--text-faint);font-size:.78rem;font-style:italic;margin-top:3rem;}
+@media(max-width:720px){.axes,.crux,.svt{grid-template-columns:1fr}.spec-row{grid-template-columns:1fr}.seam{grid-template-columns:1fr}.seam .arrow{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="kicker">DOC TYPE · author · by descent</div>
+  <h1>The <span class="em">Thing</span> You're Proposing</h1>
+  <p class="sub">One-sentence what-the-reader-gets. Keep it concrete and human.</p>
+
+  <div class="method">
+    <p style="margin-top:0"><b>The method.</b> Start from <span class="hl">the one thing the reader sees</span>
+    and ask, at every layer: <em>for this to exist, what must be true the layer below?</em> The endpoint is the
+    <b>forcing function</b>; every layer beneath is <em>conscripted</em> by the line above.</p>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- IDIOM: descent -->
+  <h2>The descent</h2>
+  <div class="descent">
+    <div class="layer l0"><div class="lid">Layer 0 · endpoint</div><div class="lname">What they see</div><div class="ldesc">the artifact</div></div>
+    <div class="conscript"><span class="arr">↑</span>cannot exist without</div>
+    <div class="layer"><div class="lid">Layer −1</div><div class="lname">prerequisite <span class="tag new">net-new</span></div><div class="ldesc">…</div></div>
+    <div class="conscript"><span class="arr">↑</span>cannot exist without</div>
+    <div class="layer here"><div class="lid">Layer −N · HERE</div><div class="lname">what you already stand on <span class="tag reuse">we stand here</span></div><div class="ldesc">…</div></div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- IDIOM: two-column compare -->
+  <h2>Diagram 1 — root cause, two columns</h2>
+  <div class="svt">
+    <div class="svt-col bad"><h4>✗ the problem</h4><div class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div><p class="note">why it fails.</p></div>
+    <div class="svt-col good"><h4>✓ the fix</h4><div class="dots"><span class="dot a"></span><span class="dot p"></span><span class="dot d"></span></div><p class="note">what changes.</p></div>
+  </div>
+
+  <!-- IDIOM: spectrum -->
+  <h2>Diagram 2 — the missing axis</h2>
+  <div class="spectrum">
+    <div class="spec-axis"><span>◀ low end</span><span>the axis →</span><span>high end ▶</span></div>
+    <div class="spec-bar"></div>
+    <div class="spec-row">
+      <div class="spec-cell"><div class="g">🔥</div><div class="n">STATE A</div><div class="d">desc</div><div class="clk">behaviour</div></div>
+      <div class="spec-cell"><div class="g">😴</div><div class="n">STATE B</div><div class="d">desc</div><div class="clk">behaviour</div></div>
+      <div class="spec-cell"><div class="g">💭</div><div class="n">STATE C</div><div class="d">desc</div><div class="clk">behaviour</div></div>
+    </div>
+  </div>
+  <p class="cap"><b>Cross-link your littermate docs here.</b></p>
+
+  <!-- IDIOM: decision matrix -->
+  <h2>Diagram 3 — the heart, as a matrix</h2>
+  <div class="matrix-wrap"><table class="matrix">
+    <thead><tr><th class="corner">rows ↓ vs cols →</th><th>col 1</th><th>col 2</th><th>col 3</th><th>col 4</th></tr></thead>
+    <tbody>
+      <tr><td class="chal">row 1</td><td class="v-a">A</td><td class="v-a">A</td><td class="v-b">B</td><td class="v-b">B</td></tr>
+      <tr><td class="chal">row 2</td><td class="v-a">A</td><td class="v-c">C</td><td class="v-c">C</td><td class="v-d">D</td></tr>
+      <tr><td class="chal">row 3</td><td class="v-c">C</td><td class="v-c">C</td><td class="v-d">D</td><td class="v-d">D</td></tr>
+    </tbody>
+  </table></div>
+  <div class="legend">
+    <span><i class="v-a"></i> <b style="color:var(--glow)">A</b> — verdict</span>
+    <span><i class="v-b"></i> <b style="color:var(--gold)">B</b> — verdict</span>
+    <span><i class="v-c"></i> <b style="color:var(--lavender)">C</b> — verdict</span>
+    <span><i class="v-d"></i> <b style="color:var(--text-faint)">D</b> — verdict</span>
+  </div>
+  <p>Read the <b>shape</b>, not the cells: name the corner where each verdict clusters and what that says.</p>
+
+  <!-- IDIOM: three axes -->
+  <h2>Diagram 4 — two axes we have, one we don't</h2>
+  <div class="axes">
+    <div class="axis have"><div class="an">Axis 1</div><div class="aq">"question?"</div><div class="as">✓ built</div></div>
+    <div class="axis have2"><div class="an">Axis 2</div><div class="aq">"question?"</div><div class="as">✓ built</div></div>
+    <div class="axis missing"><div class="an">Axis 3</div><div class="aq">"question?"</div><div class="as">✗ missing · the gap</div></div>
+  </div>
+
+  <!-- IDIOM: seam -->
+  <h2>Diagram 5 — the pipeline with teeth</h2>
+  <div class="seam">
+    <div class="node"><div class="nh">① STEP</div><div class="nd">desc</div><span class="arrow">→</span></div>
+    <div class="node"><div class="nh">② STEP</div><div class="nd">desc</div><span class="arrow">→</span></div>
+    <div class="node"><div class="nh">③ STEP</div><div class="nd">desc</div><span class="arrow">→</span></div>
+    <div class="node"><div class="nh">④ STEP</div><div class="nd">desc</div><span class="arrow">→</span></div>
+    <div class="node"><div class="nh">⑤ STEP</div><div class="nd">desc</div></div>
+  </div>
+
+  <!-- IDIOM: live mermaid diagram, with fullscreen pan-zoom (the mermaid kit).
+       Authoring is JUST this card: a .diagram-card wrapping a .mermaid-wrap > .mermaid
+       source block, with a .dc-label and a .fz-btn. inject.py SEES class="mermaid" and
+       auto-wires the kit (mermaid@11 + svg-pan-zoom CDNs + /lib/mermaid.css + /lib/mermaid.js).
+       You do NOT paste any CSS, the fullscreen overlay, or any <script> — the controller
+       creates the overlay and renders with the dark theme. Frozen docs bake this to static
+       SVG + inline pan-zoom (self-contained). Source-text traps + full details:
+       protocol/mermaid-gotchas.md. -->
+  <h2>Diagram 6 — a live diagram (mermaid + pan-zoom)</h2>
+  <div class="diagram-card">
+    <div class="dc-top">
+      <span class="dc-label">Flow · what this diagram shows</span>
+      <button class="fz-btn">&#x26F6; fullscreen</button>
+    </div>
+    <div class="mermaid-wrap">
+      <div class="mermaid">flowchart TD
+  A[Start] --> B{Decision}
+  B -->|yes| C[Do the thing]
+  B -->|no| D[Skip]
+  C --> E[Done]
+  D --> E</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- IDIOM: crux cards — THESE ARE THE QUESTIONS the interactive layer captures -->
+  <h2>The fork that decides next</h2>
+  <div class="crux">
+    <div class="cbox"><div class="cn">Crux 1 <span style="color:var(--lavender);float:right;">◀ YOUR CALL</span></div><div class="cq">Question A or B?</div><div class="ce">your read + the tradeoff.</div></div>
+    <div class="cbox"><div class="cn">Crux 2 <span style="color:var(--lavender);float:right;">◀ YOUR CALL</span></div><div class="cq">Question A or B?</div><div class="ce">your read + the tradeoff.</div></div>
+  </div>
+
+  <!-- IDIOM: structured controls — let the reader ANSWER a crux by picking, not typing.
+       data-cf-control = radio | checkbox | select ; the pick lands in the inbox as a
+       structured `control` comment. Styling + capture ship in the feedback library. -->
+  <h2>Answer it here — pick, don't type</h2>
+  <div class="cf-q" data-cf-control="radio" data-cf-id="crux-1-pick" data-cf-prompt="Crux 1 — which way?">
+    <label><input type="radio" value="a"> Option A</label>
+    <label><input type="radio" value="b"> Option B</label>
+  </div>
+  <div class="cf-q" data-cf-control="checkbox" data-cf-id="must-haves" data-cf-prompt="What must land before we ship?">
+    <label><input type="checkbox" value="auth"> Auth</label>
+    <label><input type="checkbox" value="docs"> Docs</label>
+    <label><input type="checkbox" value="tests"> Tests</label>
+  </div>
+  <div class="cf-q" data-cf-control="select" data-cf-id="rollout-ring" data-cf-prompt="Start the rollout on which ring?">
+    <select>
+      <option value="">— pick one —</option>
+      <option value="canary">Canary</option>
+      <option value="release">Release</option>
+      <option value="fleet">Whole fleet</option>
+    </select>
+  </div>
+
+  <p class="footline">The proof is the unwind itself: you cannot draw the top line without every layer beneath it. 💌</p>
+
+</div>
+</body>
+</html>

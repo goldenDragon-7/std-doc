@@ -1,0 +1,39 @@
+{
+  "title": "Cardgrid Variants",
+  "generated_date": "2026-06-15",
+  "groups": [
+    "Soul"
+  ],
+  "palette": {
+    "rose": { "label": "Rose", "color": "#fb7faf" }
+  },
+  "root": {
+    "summary": "Exercises the cardgrid analogy variant + dot separator + accent eyebrow."
+  },
+  "nodes": [
+    {
+      "slug": "frames",
+      "group": "Soul",
+      "title": "Cardgrid — analogy + separator + eyebrow",
+      "status": "LIVE",
+      "tagline": "variant sizing, dot separators, accent-threaded eyebrow",
+      "blocks": [
+        {
+          "type": "cardgrid",
+          "variant": "analogy",
+          "separator": "dot",
+          "cards": [
+            { "ent": "rose", "eyebrow": "BEFORE", "icon": "📬", "title": "a noisy feed", "body": "text that drops what it can't hold" },
+            { "ent": "rose", "eyebrow": "AFTER", "icon": "🎈", "title": "a page that answers", "body": "warmth as the cheap path" }
+          ]
+        },
+        {
+          "type": "cardgrid",
+          "cards": [
+            { "title": "plain card", "body": "no variant, no separator — byte-identical baseline" }
+          ]
+        }
+      ]
+    }
+  ]
+}

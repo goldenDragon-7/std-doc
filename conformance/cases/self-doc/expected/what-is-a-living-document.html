@@ -1,0 +1,168 @@
+<!doctype html><html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>What is a Living Document</title><style>/* techno-dark — the default dark high-diagram dialect. */
+:root{--bg:#0a0e17;--surface:#111827;--surface2:#1a2236;--border:#1e293b;
+ --glow:#22d3ee;--glow-dim:rgba(34,211,238,.15);--amber:#f59e0b;--green:#10b981;
+ --red:#ef4444;--purple:#a78bfa;--lavender:#c4b5fd;--gold:#fbbf24;
+ --text:#f1f5f9;--text-2:#cbd5e1;--text-dim:#94a3b8;--text-faint:#64748b;
+ --mono:'SF Mono',ui-monospace,monospace;--sans:-apple-system,'Segoe UI',Roboto,sans-serif}
+
+*{box-sizing:border-box} body{background:var(--bg);color:var(--text);font-family:var(--sans);margin:0;line-height:1.6}
+.shell{max-width:1340px;margin:0 auto;display:grid;grid-template-columns:250px 1fr}
+.nav{position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 14px 48px 22px;border-right:1px solid var(--border)}
+.nav .brand{font-family:var(--mono);font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--glow);font-weight:700;margin-bottom:14px}
+.nav a.root{display:block;font-weight:700;color:var(--text);padding:6px 8px;border-radius:8px;margin-bottom:8px}
+.nav a.root.active,.nav a.root:hover{background:var(--glow-dim);color:var(--glow)}
+.nav .grp{margin:14px 0 2px;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--lavender);padding:4px 8px}
+.nav ul{list-style:none;margin:2px 0 6px;padding:0 0 0 6px;border-left:1px solid var(--border)}
+.nav ul li a{display:flex;justify-content:space-between;gap:6px;font-size:13px;color:var(--text-dim);padding:4px 10px;border-radius:6px;border-left:2px solid transparent}
+.nav ul li a:hover,.nav ul li a.active{color:var(--glow);background:var(--glow-dim);border-left-color:var(--glow)}
+.nav .s{font-family:var(--mono);font-size:8.5px;font-weight:700;padding:1px 5px;border-radius:4px;border:1px solid currentColor}
+.s.b-live{color:var(--green)}.s.b-partial,.s.b-wip{color:var(--amber)}.s.b-debt{color:var(--red)}
+@media(max-width:920px){.shell{grid-template-columns:1fr}.nav{position:static;height:auto}.nav ul{display:none}}
+.wrap{max-width:1080px;margin:0 auto;padding:32px 24px 80px;min-width:0}
+a{color:var(--glow);text-decoration:none}a:hover{text-decoration:underline}
+kbd{font-family:var(--mono);font-size:12px;background:var(--surface2);border:1px solid var(--border);border-bottom-width:2px;border-radius:5px;padding:1px 6px;color:var(--text)}
+.back{font-family:var(--mono);font-size:13px;color:var(--text-faint)}
+h1{font-size:30px;margin:6px 0 4px;background:linear-gradient(90deg,var(--glow),var(--lavender));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.tagline{color:var(--text-2);font-size:15px;margin:0 0 14px}
+.badges{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}
+.badge{font-family:var(--mono);font-size:11px;padding:3px 9px;border-radius:5px;border:1px solid var(--border);background:var(--surface)}
+.b-live{color:var(--green);border-color:var(--green)}.b-partial,.b-wip{color:var(--amber);border-color:var(--amber)}.b-debt{color:var(--red);border-color:var(--red)}
+.facets{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:22px 0}
+.facet{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px}
+.facet .label{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--amber);margin-bottom:8px}
+.facet p{margin:0;font-size:13.5px;color:var(--text-2)}
+pre.diagram{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;overflow-x:auto;font-family:var(--mono);font-size:12px;color:var(--text-2)}
+h2{font-size:18px;margin:32px 0 14px;border-bottom:1px solid var(--border);padding-bottom:6px}
+.section{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;margin:12px 0}
+.section-head{display:flex;align-items:center;gap:10px;margin-bottom:4px}.section-head h3{margin:0;font-size:16px}
+.tag{font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:4px;text-transform:uppercase;color:var(--purple);background:rgba(167,139,250,.12)}
+.summary{color:var(--text-2);font-size:14px;margin:4px 0 12px}
+.item{border-left:2px solid var(--border);padding:4px 0 4px 14px;margin:10px 0}
+.item-name{font-family:var(--mono);font-size:13.5px;color:var(--glow)}.item-desc{font-size:13px;color:var(--text-2);margin:4px 0}
+.impl{list-style:none;padding:0;margin:6px 0 0}.impl li{font-family:var(--mono);font-size:11.5px;margin:3px 0;color:var(--text-dim)}
+.line{color:var(--gold)}.ev{font-size:10px;padding:1px 5px;border-radius:3px;margin:0 6px}
+.ev.MEASURED{color:var(--green);background:rgba(16,185,129,.12)}.ev.CITED{color:var(--glow);background:var(--glow-dim)}.ev.INFERRED{color:var(--text-faint);background:rgba(100,116,139,.12)}
+.note{color:var(--text-faint);font-style:italic}
+.footer{margin-top:50px;padding-top:16px;border-top:1px solid var(--border);font-family:var(--mono);font-size:11px;color:var(--text-faint)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px}
+.card:hover{border-color:var(--glow)}.card h3{margin:0 0 6px;font-size:16px}.card .ct{color:var(--text-dim);font-size:12.5px;margin:0}
+/* evidence drill-down */
+.evidence{margin-top:40px}.evidence h2{color:var(--purple)}
+.prov{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 16px}
+.prov .src{font-family:var(--mono);font-size:10.5px;padding:2px 8px;border-radius:5px;border:1px solid var(--border);background:var(--surface);color:var(--glow)}
+details.ev-node{background:var(--surface);border:1px solid var(--border);border-radius:10px;margin:10px 0;overflow:hidden}
+.ev-node>summary{cursor:pointer;padding:13px 16px;font-size:14px;font-weight:600;list-style:none;display:flex;gap:10px;flex-wrap:wrap;color:var(--glow)}
+.ev-node>summary::-webkit-details-marker{display:none}
+.ev-node>summary::before{content:'\25B8';color:var(--text-faint)}.ev-node[open]>summary::before{content:'\25BE'}
+.ev-meta{font-family:var(--mono);font-size:10.5px;color:var(--text-faint);font-weight:400}
+.ev-body{padding:6px 18px 18px;border-top:1px solid var(--border)}
+.ev-body h4{font-size:11.5px;font-family:var(--mono);text-transform:uppercase;color:var(--text-dim);margin:18px 0 8px}
+pre.ev-md{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;overflow-x:auto;white-space:pre-wrap;font-family:var(--mono);font-size:11.5px;color:var(--text-2);line-height:1.55}
+.kv{margin:5px 0;font-size:13px;color:var(--text-2)}.kv>.k{font-family:var(--mono);font-size:11px;color:var(--lavender);margin-right:6px}
+.gen-list{margin:4px 0;padding-left:18px}.gen-list li{font-size:12.5px;color:var(--text-2);margin:3px 0}
+.gen-block{border-left:2px solid var(--border);padding-left:10px;margin:7px 0}
+.ev-cite{font-family:var(--mono);font-size:11px;color:var(--gold);word-break:break-all;margin:3px 0}
+.frozen-banner{margin:0 0 18px;padding:9px 14px;border:1px solid var(--purple);border-radius:8px;background:rgba(167,139,250,.10);color:var(--lavender);font-family:var(--mono);font-size:11.5px}
+/* unlimited-hierarchy nav tree + legal numbering */
+.nav ul.nav-tree{list-style:none;margin:2px 0 4px;padding:0 0 0 9px;border-left:1px solid var(--border)}
+.nav ul.nav-tree.d0{padding-left:0;border-left:none;margin-top:6px}
+.nav ul.nav-tree li{margin:1px 0}
+.nav ul.nav-tree li a{display:flex;gap:7px;align-items:baseline;justify-content:flex-start;font-size:13px;color:var(--text-dim);padding:3px 8px;border-radius:6px;border-left:2px solid transparent}
+.nav ul.nav-tree li a:hover,.nav ul.nav-tree li a.active{color:var(--glow);background:var(--glow-dim);border-left-color:var(--glow)}
+.nav ul.nav-tree li a.onpath{color:var(--text)}
+.nav ul.nav-tree.d0>li>a{font-weight:700;color:var(--text)}
+.nav ul.nav-tree .nn{font-family:var(--mono);font-size:10px;color:var(--text-faint);white-space:nowrap}
+.nav ul.nav-tree li a.active .nn,.nav ul.nav-tree li a:hover .nn{color:var(--glow)}
+.nav ul.nav-tree .nt{flex:1;min-width:0}
+.crumb{font-family:var(--mono);font-size:11px;color:var(--text-faint);margin:0 0 10px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.crumb a{color:var(--text-faint)}.crumb a:hover{color:var(--glow)}
+.crumb .sep{color:var(--border)}.crumb .here{color:var(--text-dim)}
+.h1num{font-family:var(--mono);font-weight:700;color:var(--text-faint);-webkit-text-fill-color:var(--text-faint);margin-right:10px}
+.secnum,.cnum,.onum{font-family:var(--mono);color:var(--amber);margin-right:7px;font-size:.82em}
+ul.outline{list-style:none;padding-left:18px;border-left:1px solid var(--border);margin:6px 0}
+ul.outline.d0{padding-left:0;border-left:none}
+ul.outline li{margin:6px 0}
+ul.outline .ot{color:var(--text-faint);font-size:12.5px}
+/* full-text search (P0-2) */
+.cf-search-box{margin:0 0 12px}
+#cf-search{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:var(--sans);font-size:13px;padding:7px 10px;outline:none}
+#cf-search:focus{border-color:var(--glow);box-shadow:0 0 0 2px var(--glow-dim)}
+#cf-search-results{margin-top:6px}
+#cf-search-results.open{max-height:60vh;overflow-y:auto;border:1px solid var(--border);border-radius:8px;background:var(--surface);padding:4px}
+.cf-sr-none{font-size:12px;color:var(--text-faint);padding:6px 8px}
+.cf-sr-hit{padding:4px 2px;border-bottom:1px solid var(--border)}.cf-sr-hit:last-child{border-bottom:none}
+a.cf-sr-page{display:block;font-size:13px;color:var(--text);padding:3px 6px;border-radius:5px}
+a.cf-sr-page:hover{background:var(--glow-dim);color:var(--glow);text-decoration:none}
+a.cf-sr-sec{display:block;font-size:12px;color:var(--text-dim);padding:2px 6px 2px 16px;border-radius:5px}
+a.cf-sr-sec:hover{background:var(--glow-dim);color:var(--glow);text-decoration:none}
+.cf-sr-n{font-family:var(--mono);font-size:10px;color:var(--amber);margin-right:6px}
+</style><script src='search-index.js' defer></script><script>
+document.addEventListener('DOMContentLoaded',function(){
+  var box=document.getElementById('cf-search'),
+      out=document.getElementById('cf-search-results');
+  if(!box||!out)return;
+  function idx(){return window.CF_SEARCH_INDEX||[];}
+  function esc(s){return (s||'').replace(/[&<>]/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});}
+  box.addEventListener('input',function(){
+    var q=box.value.trim().toLowerCase();
+    if(!q){out.innerHTML='';out.classList.remove('open');return;}
+    var terms=q.split(/\s+/).filter(Boolean), hits=[];
+    idx().forEach(function(e){
+      var t=e.text||'', score=0;
+      terms.forEach(function(w){ if(t.indexOf(w)>=0) score++; });
+      if(score<terms.length)return;            // every term must appear
+      var secs=(e.sections||[]).filter(function(s){
+        return terms.some(function(w){return (s.text||'').indexOf(w)>=0;});
+      }).slice(0,3);
+      hits.push({e:e,score:score,secs:secs});
+    });
+    hits.sort(function(a,b){return b.score-a.score;});
+    if(!hits.length){out.innerHTML="<div class='cf-sr-none'>no matches</div>";
+      out.classList.add('open');return;}
+    out.innerHTML=hits.slice(0,20).map(function(h){
+      var e=h.e,
+          url=e.url+(h.secs[0]?('#'+h.secs[0].anchor):''),
+          sub=h.secs.map(function(s){
+            return "<a class='cf-sr-sec' href='"+e.url+'#'+s.anchor+"'>"
+              +"<span class='cf-sr-n'>"+esc(s.number)+"</span>"+esc(s.name)+"</a>";
+          }).join('');
+      return "<div class='cf-sr-hit'><a class='cf-sr-page' href='"+url+"'>"
+        +"<span class='cf-sr-n'>"+esc(e.number)+"</span>"+esc(e.title)+"</a>"+sub+"</div>";
+    }).join('');
+    out.classList.add('open');
+  });
+  box.addEventListener('keydown',function(ev){
+    if(ev.key==='Escape'){box.value='';out.innerHTML='';out.classList.remove('open');}
+  });
+});
+</script><script>
+(function(){
+  var KEY='cf-nav-scroll';
+  function navEl(){return document.querySelector('aside.nav');}
+  function save(){var n=navEl();if(n){try{sessionStorage.setItem(KEY,n.scrollTop);}catch(e){}}}
+  function restore(){var n=navEl();if(!n)return;try{var v=sessionStorage.getItem(KEY);
+    if(v!==null){n.scrollTop=parseInt(v,10)||0;return true;}}catch(e){}return false;}
+  document.addEventListener('DOMContentLoaded',function(){
+    var had=restore();
+    var n=navEl();
+    if(n){
+      // First visit (no stored pos): bring the active item into view.
+      if(!had){var a=n.querySelector('a.active');if(a&&a.scrollIntoView)
+        a.scrollIntoView({block:'center'});}
+      n.addEventListener('scroll',save,{passive:true});
+      n.addEventListener('click',function(e){if(e.target.closest&&e.target.closest('a'))save();},true);
+    }
+    window.addEventListener('beforeunload',save);
+    window.addEventListener('pagehide',save);
+  });
+})();
+</script></head><body><div class='shell'><aside class='nav'><div class='brand'>std-doc — the doc that documents itself</div><div class='cf-search-box'><input id='cf-search' type='search' placeholder='Search…' autocomplete='off' spellcheck='false'><div id='cf-search-results'></div></div><a class='root' href='index.html'>&#9672; index</a><ul class='nav-tree d0'><li><a class='onpath' href='start-here.html'><span class='nn'>1</span><span class='nt'>Start Here</span></a><ul class='nav-tree d1'><li><a class='active onpath' href='what-is-a-living-document.html'><span class='nn'>1.1</span><span class='nt'>What is a Living Document</span><span class='s b-live'>LIVE</span></a></li><li><a class='' href='quickstart.html'><span class='nn'>1.2</span><span class='nt'>From Zero to a Listening Doc</span><span class='s b-live'>LIVE</span></a></li></ul></li><li><a class='' href='the-four-moves.html'><span class='nn'>2</span><span class='nt'>The Four Moves</span></a><ul class='nav-tree d1'><li><a class='' href='move-1-method.html'><span class='nn'>2.1</span><span class='nt'>Move 1</span><span class='s b-live'>LIVE</span></a></li><li><a class='' href='move-2-style.html'><span class='nn'>2.2</span><span class='nt'>Move 2</span><span class='s b-live'>LIVE</span></a></li><li><a class='' href='move-3-serve.html'><span class='nn'>2.3</span><span class='nt'>Move 3</span><span class='s b-live'>LIVE</span></a></li><li><a class='' href='move-4-respond.html'><span class='nn'>2.4</span><span class='nt'>Move 4</span><span class='s b-live'>LIVE</span></a></li></ul></li><li><a class='' href='the-pluggable-renderer.html'><span class='nn'>3</span><span class='nt'>The Pluggable Renderer</span></a><ul class='nav-tree d1'><li><a class='' href='renderer-architecture.html'><span class='nn'>3.1</span><span class='nt'>The Pluggable Renderer</span><span class='s b-live'>LIVE</span></a></li><li><a class='' href='the-contract.html'><span class='nn'>3.2</span><span class='nt'>The Contract</span><span class='s b-live'>LIVE</span></a></li><li><a class='' href='the-registry.html'><span class='nn'>3.3</span><span class='nt'>The Registry</span><span class='s b-live'>LIVE</span></a></li><li><a class='' href='the-palette-engine.html'><span class='nn'>3.4</span><span class='nt'>The Palette Engine</span><span class='s b-live'>LIVE</span></a></li><li><a class='' href='the-primitive-library.html'><span class='nn'>3.5</span><span class='nt'>The Primitive Library</span><span class='s b-live'>LIVE</span></a></li><li><a class='' href='blocks-and-lint.html'><span class='nn'>3.6</span><span class='nt'>The blocks[] Stream + Assembled Lint</span><span class='s b-live'>LIVE</span></a></li><li><a class='' href='security-gate.html'><span class='nn'>3.7</span><span class='nt'>The Security Gate</span><span class='s b-live'>LIVE</span></a></li><li><a class='' href='d2-and-standalone.html'><span class='nn'>3.8</span><span class='nt'>D2 Diagrams + Standalone-Page Mode</span><span class='s b-live'>LIVE</span></a></li><li><a class='' href='write-your-own.html'><span class='nn'>3.9</span><span class='nt'>Write Your Own Plugin</span><span class='s b-live'>LIVE</span></a></li></ul></li><li><a class='' href='style-examples.html'><span class='nn'>4</span><span class='nt'>Style &amp; Examples</span></a><ul class='nav-tree d1'><li><a class='' href='style-reference.html'><span class='nn'>4.1</span><span class='nt'>Style Reference</span><span class='s b-live'>LIVE</span></a></li><li><a class='' href='bundled-examples.html'><span class='nn'>4.2</span><span class='nt'>Bundled Examples</span><span class='s b-live'>LIVE</span></a></li></ul></li><li><a class='' href='beyond-the-basics.html'><span class='nn'>5</span><span class='nt'>Beyond the Basics</span></a><ul class='nav-tree d1'><li><a class='' href='data-derived.html'><span class='nn'>5.1</span><span class='nt'>Move 0</span><span class='s b-live'>LIVE</span></a></li><li><a class='' href='lifecycle.html'><span class='nn'>5.2</span><span class='nt'>Lifecycle</span><span class='s b-live'>LIVE</span></a></li><li><a class='' href='gotchas.html'><span class='nn'>5.3</span><span class='nt'>Gotchas</span><span class='s b-live'>LIVE</span></a></li></ul></li><li><a class='' href='self-hosting-proof.html'><span class='nn'>6</span><span class='nt'>Self-Hosting &amp; Proof</span></a><ul class='nav-tree d1'><li><a class='' href='the-test-suite.html'><span class='nn'>6.1</span><span class='nt'>The Test Suite</span><span class='s b-live'>LIVE</span></a></li><li><a class='' href='this-doc-self-hosts.html'><span class='nn'>6.2</span><span class='nt'>This Document Is the Proof</span><span class='s b-live'>LIVE</span></a></li></ul></li></ul></aside><main class='wrap'><nav class='crumb'><a href='index.html'>&#9672;</a> <span class='sep'>&rsaquo;</span> <a href='start-here.html'>1 Start Here</a> <span class='sep'>&rsaquo;</span> <span class='here'>1.1 What is a Living Document</span></nav><h1 id='cf-what-is-a-living-document' data-cf-anchor='n=what-is-a-living-document'><span class='h1num'>1.1</span>What is a Living Document</h1><p class='tagline'>the document is the conversation</p><style>:root{--ent-core:#22d3ee;--ent-library:#34d399;--ent-paletteeng:#a78bfa;--ent-diagram:#60a5fa;--ent-gate:#f87171;--ent-live:#34d399;--ent-wip:#fbbf24;--ent-captain:#e0b341;--ent-eic:#4f9cf9;}</style><div class='badges'><span class='badge b-live'>LIVE</span></div><div class='note'>the loop — no chat round-trip</div><pre class='diagram'>  reader selects a sentence
+        |
+        v
+  comment lands in feedback/inbox.jsonl  ──►  agent (Monitor fires)
+        ^                                          |
+        |                                          v
+  page reloads, walks you            agent edits the HTML in place
+  through what changed   ◄──  + appends a batch to history.json</pre><h2>Sections</h2><div class='section' id='cf-what-is-a-living-document-s1' data-cf-anchor='n=what-is-a-living-document§1'><div class='section-head'><span>💬</span><h3><span class='secnum'>1.1 &sect;1</span>The core idea</h3><span class='tag'>concept</span></div><div class='summary'>A living document is the default shape for anything worth a reader&#x27;s attention. It is one self-contained HTML page, served locally, that listens.</div><div class='item' id='cf-what-is-a-living-document-s1-i1' data-cf-anchor='n=what-is-a-living-document§1.1'><div class='item-name'>Talk to the page, not a chatbot</div><div class='item-desc'>The reader selects a sentence, picks an element, or leaves a page note. The comment is the unit of conversation, anchored to the exact text it is about.</div></div><div class='item' id='cf-what-is-a-living-document-s1-i2' data-cf-anchor='n=what-is-a-living-document§1.2'><div class='item-name'>The agent edits in place</div><div class='item-desc'>There is no separate reply thread. The agent changes the document itself, then the page reloads with scroll preserved and walks the reader to each change.</div></div><div class='item' id='cf-what-is-a-living-document-s1-i3' data-cf-anchor='n=what-is-a-living-document§1.3'><div class='item-name'>Self-contained + local</div><div class='item-desc'>One HTML page, served from localhost by a stdlib HTTP server. No build pipeline, no framework, no network dependency for the core.</div></div></div><div class='section' id='cf-what-is-a-living-document-s2' data-cf-anchor='n=what-is-a-living-document§2'><div class='section-head'><span>🎯</span><h3><span class='secnum'>1.1 &sect;2</span>When to reach for it</h3><span class='tag'>usage</span></div><div class='summary'>Any time a reader should be able to respond to a document instead of replying in chat.</div><div class='item' id='cf-what-is-a-living-document-s2-i1' data-cf-anchor='n=what-is-a-living-document§2.1'><div class='item-name'>Proposals and designs</div><div class='item-desc'>Draft something the reader can comment on sentence-by-sentence — the open decisions sit waiting to be clicked.</div></div><div class='item' id='cf-what-is-a-living-document-s2-i2' data-cf-anchor='n=what-is-a-living-document§2.2'><div class='item-name'>Existing static HTML</div><div class='item-desc'>If you already have a folder of *.html and only want commenting, skip straight to Move 3 (Serve). The engine works on any folder of pages.</div></div></div><div class='footer'>Derived from source.json &middot; std-doc v2 &middot; JSON canonical, HTML rendered</div></main></div></body></html>

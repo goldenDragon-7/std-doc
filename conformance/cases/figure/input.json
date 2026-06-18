@@ -1,0 +1,25 @@
+{
+  "title": "Figure",
+  "generated_date": "2026-06-15",
+  "groups": [
+    "Soul"
+  ],
+  "root": {
+    "summary": "Exercises the figure primitive (named curated inline SVG) for byte-identity."
+  },
+  "nodes": [
+    {
+      "slug": "balloon",
+      "group": "Soul",
+      "title": "Figure — the balloon",
+      "status": "LIVE",
+      "tagline": "named curated inline-SVG art, injection-safe",
+      "blocks": [
+        {
+          "type": "figure",
+          "name": "balloon-playful"
+        }
+      ]
+    }
+  ]
+}

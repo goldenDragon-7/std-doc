@@ -1,0 +1,6 @@
+/* playful — bright/rounded/fun, emoji-friendly. */
+:root{--bg:#fff7fb;--surface:#ffffff;--surface2:#ffeef6;--border:#ffd0e6;
+ --glow:#e0218a;--glow-dim:rgba(224,33,138,.14);--amber:#ff8c00;--green:#13b97a;
+ --red:#ff4d6d;--purple:#8b5cf6;--lavender:#b794f6;--gold:#ffb703;
+ --text:#2b1830;--text-2:#52385c;--text-dim:#7a5c84;--text-faint:#a98bb3;
+ --mono:'SF Mono',ui-monospace,monospace;--sans:'Comic Sans MS','Baloo 2',-apple-system,sans-serif}

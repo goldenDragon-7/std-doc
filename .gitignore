@@ -1,0 +1,19 @@
+# runtime artifacts from serving docs — not skill source
+# (does NOT match go/stddoc-lib/lib/feedback.{css,js}, which live outside a feedback/ dir)
+**/feedback/*
+
+# python bytecode
+__pycache__/
+*.py[cod]
+
+# macOS noise
+.DS_Store
+
+# transient scheduler lock
+.claude/scheduled_tasks.lock
+
+# release artifacts
+/dist/
+
+# night-shift voice-baking output (regenerable)
+style-interview/demo/_voices/

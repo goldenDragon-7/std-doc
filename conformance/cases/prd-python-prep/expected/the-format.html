@@ -1,0 +1,161 @@
+<!doctype html><html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>What a plugin is — and the raw() trap</title><style>/* techno-dark — the default dark high-diagram dialect. */
+:root{--bg:#0a0e17;--surface:#111827;--surface2:#1a2236;--border:#1e293b;
+ --glow:#22d3ee;--glow-dim:rgba(34,211,238,.15);--amber:#f59e0b;--green:#10b981;
+ --red:#ef4444;--purple:#a78bfa;--lavender:#c4b5fd;--gold:#fbbf24;
+ --text:#f1f5f9;--text-2:#cbd5e1;--text-dim:#94a3b8;--text-faint:#64748b;
+ --mono:'SF Mono',ui-monospace,monospace;--sans:-apple-system,'Segoe UI',Roboto,sans-serif}
+
+*{box-sizing:border-box} body{background:var(--bg);color:var(--text);font-family:var(--sans);margin:0;line-height:1.6}
+.shell{max-width:1340px;margin:0 auto;display:grid;grid-template-columns:250px 1fr}
+.nav{position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 14px 48px 22px;border-right:1px solid var(--border)}
+.nav .brand{font-family:var(--mono);font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--glow);font-weight:700;margin-bottom:14px}
+.nav a.root{display:block;font-weight:700;color:var(--text);padding:6px 8px;border-radius:8px;margin-bottom:8px}
+.nav a.root.active,.nav a.root:hover{background:var(--glow-dim);color:var(--glow)}
+.nav .grp{margin:14px 0 2px;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--lavender);padding:4px 8px}
+.nav ul{list-style:none;margin:2px 0 6px;padding:0 0 0 6px;border-left:1px solid var(--border)}
+.nav ul li a{display:flex;justify-content:space-between;gap:6px;font-size:13px;color:var(--text-dim);padding:4px 10px;border-radius:6px;border-left:2px solid transparent}
+.nav ul li a:hover,.nav ul li a.active{color:var(--glow);background:var(--glow-dim);border-left-color:var(--glow)}
+.nav .s{font-family:var(--mono);font-size:8.5px;font-weight:700;padding:1px 5px;border-radius:4px;border:1px solid currentColor}
+.s.b-live{color:var(--green)}.s.b-partial,.s.b-wip{color:var(--amber)}.s.b-debt{color:var(--red)}
+@media(max-width:920px){.shell{grid-template-columns:1fr}.nav{position:static;height:auto}.nav ul{display:none}}
+.wrap{max-width:1080px;margin:0 auto;padding:32px 24px 80px;min-width:0}
+a{color:var(--glow);text-decoration:none}a:hover{text-decoration:underline}
+kbd{font-family:var(--mono);font-size:12px;background:var(--surface2);border:1px solid var(--border);border-bottom-width:2px;border-radius:5px;padding:1px 6px;color:var(--text)}
+.back{font-family:var(--mono);font-size:13px;color:var(--text-faint)}
+h1{font-size:30px;margin:6px 0 4px;background:linear-gradient(90deg,var(--glow),var(--lavender));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.tagline{color:var(--text-2);font-size:15px;margin:0 0 14px}
+.badges{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}
+.badge{font-family:var(--mono);font-size:11px;padding:3px 9px;border-radius:5px;border:1px solid var(--border);background:var(--surface)}
+.b-live{color:var(--green);border-color:var(--green)}.b-partial,.b-wip{color:var(--amber);border-color:var(--amber)}.b-debt{color:var(--red);border-color:var(--red)}
+.facets{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:22px 0}
+.facet{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px}
+.facet .label{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--amber);margin-bottom:8px}
+.facet p{margin:0;font-size:13.5px;color:var(--text-2)}
+pre.diagram{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;overflow-x:auto;font-family:var(--mono);font-size:12px;color:var(--text-2)}
+h2{font-size:18px;margin:32px 0 14px;border-bottom:1px solid var(--border);padding-bottom:6px}
+.section{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;margin:12px 0}
+.section-head{display:flex;align-items:center;gap:10px;margin-bottom:4px}.section-head h3{margin:0;font-size:16px}
+.tag{font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:4px;text-transform:uppercase;color:var(--purple);background:rgba(167,139,250,.12)}
+.summary{color:var(--text-2);font-size:14px;margin:4px 0 12px}
+.item{border-left:2px solid var(--border);padding:4px 0 4px 14px;margin:10px 0}
+.item-name{font-family:var(--mono);font-size:13.5px;color:var(--glow)}.item-desc{font-size:13px;color:var(--text-2);margin:4px 0}
+.impl{list-style:none;padding:0;margin:6px 0 0}.impl li{font-family:var(--mono);font-size:11.5px;margin:3px 0;color:var(--text-dim)}
+.line{color:var(--gold)}.ev{font-size:10px;padding:1px 5px;border-radius:3px;margin:0 6px}
+.ev.MEASURED{color:var(--green);background:rgba(16,185,129,.12)}.ev.CITED{color:var(--glow);background:var(--glow-dim)}.ev.INFERRED{color:var(--text-faint);background:rgba(100,116,139,.12)}
+.note{color:var(--text-faint);font-style:italic}
+.footer{margin-top:50px;padding-top:16px;border-top:1px solid var(--border);font-family:var(--mono);font-size:11px;color:var(--text-faint)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px}
+.card:hover{border-color:var(--glow)}.card h3{margin:0 0 6px;font-size:16px}.card .ct{color:var(--text-dim);font-size:12.5px;margin:0}
+/* evidence drill-down */
+.evidence{margin-top:40px}.evidence h2{color:var(--purple)}
+.prov{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 16px}
+.prov .src{font-family:var(--mono);font-size:10.5px;padding:2px 8px;border-radius:5px;border:1px solid var(--border);background:var(--surface);color:var(--glow)}
+details.ev-node{background:var(--surface);border:1px solid var(--border);border-radius:10px;margin:10px 0;overflow:hidden}
+.ev-node>summary{cursor:pointer;padding:13px 16px;font-size:14px;font-weight:600;list-style:none;display:flex;gap:10px;flex-wrap:wrap;color:var(--glow)}
+.ev-node>summary::-webkit-details-marker{display:none}
+.ev-node>summary::before{content:'\25B8';color:var(--text-faint)}.ev-node[open]>summary::before{content:'\25BE'}
+.ev-meta{font-family:var(--mono);font-size:10.5px;color:var(--text-faint);font-weight:400}
+.ev-body{padding:6px 18px 18px;border-top:1px solid var(--border)}
+.ev-body h4{font-size:11.5px;font-family:var(--mono);text-transform:uppercase;color:var(--text-dim);margin:18px 0 8px}
+pre.ev-md{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;overflow-x:auto;white-space:pre-wrap;font-family:var(--mono);font-size:11.5px;color:var(--text-2);line-height:1.55}
+.kv{margin:5px 0;font-size:13px;color:var(--text-2)}.kv>.k{font-family:var(--mono);font-size:11px;color:var(--lavender);margin-right:6px}
+.gen-list{margin:4px 0;padding-left:18px}.gen-list li{font-size:12.5px;color:var(--text-2);margin:3px 0}
+.gen-block{border-left:2px solid var(--border);padding-left:10px;margin:7px 0}
+.ev-cite{font-family:var(--mono);font-size:11px;color:var(--gold);word-break:break-all;margin:3px 0}
+.frozen-banner{margin:0 0 18px;padding:9px 14px;border:1px solid var(--purple);border-radius:8px;background:rgba(167,139,250,.10);color:var(--lavender);font-family:var(--mono);font-size:11.5px}
+/* unlimited-hierarchy nav tree + legal numbering */
+.nav ul.nav-tree{list-style:none;margin:2px 0 4px;padding:0 0 0 9px;border-left:1px solid var(--border)}
+.nav ul.nav-tree.d0{padding-left:0;border-left:none;margin-top:6px}
+.nav ul.nav-tree li{margin:1px 0}
+.nav ul.nav-tree li a{display:flex;gap:7px;align-items:baseline;justify-content:flex-start;font-size:13px;color:var(--text-dim);padding:3px 8px;border-radius:6px;border-left:2px solid transparent}
+.nav ul.nav-tree li a:hover,.nav ul.nav-tree li a.active{color:var(--glow);background:var(--glow-dim);border-left-color:var(--glow)}
+.nav ul.nav-tree li a.onpath{color:var(--text)}
+.nav ul.nav-tree.d0>li>a{font-weight:700;color:var(--text)}
+.nav ul.nav-tree .nn{font-family:var(--mono);font-size:10px;color:var(--text-faint);white-space:nowrap}
+.nav ul.nav-tree li a.active .nn,.nav ul.nav-tree li a:hover .nn{color:var(--glow)}
+.nav ul.nav-tree .nt{flex:1;min-width:0}
+.crumb{font-family:var(--mono);font-size:11px;color:var(--text-faint);margin:0 0 10px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.crumb a{color:var(--text-faint)}.crumb a:hover{color:var(--glow)}
+.crumb .sep{color:var(--border)}.crumb .here{color:var(--text-dim)}
+.h1num{font-family:var(--mono);font-weight:700;color:var(--text-faint);-webkit-text-fill-color:var(--text-faint);margin-right:10px}
+.secnum,.cnum,.onum{font-family:var(--mono);color:var(--amber);margin-right:7px;font-size:.82em}
+ul.outline{list-style:none;padding-left:18px;border-left:1px solid var(--border);margin:6px 0}
+ul.outline.d0{padding-left:0;border-left:none}
+ul.outline li{margin:6px 0}
+ul.outline .ot{color:var(--text-faint);font-size:12.5px}
+/* full-text search (P0-2) */
+.cf-search-box{margin:0 0 12px}
+#cf-search{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:var(--sans);font-size:13px;padding:7px 10px;outline:none}
+#cf-search:focus{border-color:var(--glow);box-shadow:0 0 0 2px var(--glow-dim)}
+#cf-search-results{margin-top:6px}
+#cf-search-results.open{max-height:60vh;overflow-y:auto;border:1px solid var(--border);border-radius:8px;background:var(--surface);padding:4px}
+.cf-sr-none{font-size:12px;color:var(--text-faint);padding:6px 8px}
+.cf-sr-hit{padding:4px 2px;border-bottom:1px solid var(--border)}.cf-sr-hit:last-child{border-bottom:none}
+a.cf-sr-page{display:block;font-size:13px;color:var(--text);padding:3px 6px;border-radius:5px}
+a.cf-sr-page:hover{background:var(--glow-dim);color:var(--glow);text-decoration:none}
+a.cf-sr-sec{display:block;font-size:12px;color:var(--text-dim);padding:2px 6px 2px 16px;border-radius:5px}
+a.cf-sr-sec:hover{background:var(--glow-dim);color:var(--glow);text-decoration:none}
+.cf-sr-n{font-family:var(--mono);font-size:10px;color:var(--amber);margin-right:6px}
+</style><script src='search-index.js' defer></script><script>
+document.addEventListener('DOMContentLoaded',function(){
+  var box=document.getElementById('cf-search'),
+      out=document.getElementById('cf-search-results');
+  if(!box||!out)return;
+  function idx(){return window.CF_SEARCH_INDEX||[];}
+  function esc(s){return (s||'').replace(/[&<>]/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});}
+  box.addEventListener('input',function(){
+    var q=box.value.trim().toLowerCase();
+    if(!q){out.innerHTML='';out.classList.remove('open');return;}
+    var terms=q.split(/\s+/).filter(Boolean), hits=[];
+    idx().forEach(function(e){
+      var t=e.text||'', score=0;
+      terms.forEach(function(w){ if(t.indexOf(w)>=0) score++; });
+      if(score<terms.length)return;            // every term must appear
+      var secs=(e.sections||[]).filter(function(s){
+        return terms.some(function(w){return (s.text||'').indexOf(w)>=0;});
+      }).slice(0,3);
+      hits.push({e:e,score:score,secs:secs});
+    });
+    hits.sort(function(a,b){return b.score-a.score;});
+    if(!hits.length){out.innerHTML="<div class='cf-sr-none'>no matches</div>";
+      out.classList.add('open');return;}
+    out.innerHTML=hits.slice(0,20).map(function(h){
+      var e=h.e,
+          url=e.url+(h.secs[0]?('#'+h.secs[0].anchor):''),
+          sub=h.secs.map(function(s){
+            return "<a class='cf-sr-sec' href='"+e.url+'#'+s.anchor+"'>"
+              +"<span class='cf-sr-n'>"+esc(s.number)+"</span>"+esc(s.name)+"</a>";
+          }).join('');
+      return "<div class='cf-sr-hit'><a class='cf-sr-page' href='"+url+"'>"
+        +"<span class='cf-sr-n'>"+esc(e.number)+"</span>"+esc(e.title)+"</a>"+sub+"</div>";
+    }).join('');
+    out.classList.add('open');
+  });
+  box.addEventListener('keydown',function(ev){
+    if(ev.key==='Escape'){box.value='';out.innerHTML='';out.classList.remove('open');}
+  });
+});
+</script><script>
+(function(){
+  var KEY='cf-nav-scroll';
+  function navEl(){return document.querySelector('aside.nav');}
+  function save(){var n=navEl();if(n){try{sessionStorage.setItem(KEY,n.scrollTop);}catch(e){}}}
+  function restore(){var n=navEl();if(!n)return;try{var v=sessionStorage.getItem(KEY);
+    if(v!==null){n.scrollTop=parseInt(v,10)||0;return true;}}catch(e){}return false;}
+  document.addEventListener('DOMContentLoaded',function(){
+    var had=restore();
+    var n=navEl();
+    if(n){
+      // First visit (no stored pos): bring the active item into view.
+      if(!had){var a=n.querySelector('a.active');if(a&&a.scrollIntoView)
+        a.scrollIntoView({block:'center'});}
+      n.addEventListener('scroll',save,{passive:true});
+      n.addEventListener('click',function(e){if(e.target.closest&&e.target.closest('a'))save();},true);
+    }
+    window.addEventListener('beforeunload',save);
+    window.addEventListener('pagehide',save);
+  });
+})();
+</script></head><body><div class='shell'><aside class='nav'><div class='brand'>Python-Prep — make the engine portable</div><div class='cf-search-box'><input id='cf-search' type='search' placeholder='Search…' autocomplete='off' spellcheck='false'><div id='cf-search-results'></div></div><a class='root' href='index.html'>&#9672; index</a><ul class='nav-tree d0'><li><a class='' href='the-ask-section.html'><span class='nn'>1</span><span class='nt'>The Ask</span></a><ul class='nav-tree d1'><li><a class='' href='the-ask.html'><span class='nn'>1.1</span><span class='nt'>The one-sentence ask</span><span class='s b-wip'>WIP</span></a></li></ul></li><li><a class='onpath' href='the-argument.html'><span class='nn'>2</span><span class='nt'>The Argument</span></a><ul class='nav-tree d1'><li><a class='' href='the-endpoint.html'><span class='nn'>2.1</span><span class='nt'>Layer 0</span><span class='s b-wip'>WIP</span></a></li><li><a class='' href='the-descent.html'><span class='nn'>2.2</span><span class='nt'>The descent</span><span class='s b-wip'>WIP</span></a></li><li><a class='active onpath' href='the-format.html'><span class='nn'>2.3</span><span class='nt'>What a plugin is</span><span class='s b-wip'>WIP</span></a></li></ul></li><li><a class='' href='the-build.html'><span class='nn'>3</span><span class='nt'>The Build</span></a><ul class='nav-tree d1'><li><a class='' href='the-wbs.html'><span class='nn'>3.1</span><span class='nt'>Fold it forward</span><span class='s b-wip'>WIP</span></a></li></ul></li></ul></aside><main class='wrap'><nav class='crumb'><a href='index.html'>&#9672;</a> <span class='sep'>&rsaquo;</span> <a href='the-argument.html'>2 The Argument</a> <span class='sep'>&rsaquo;</span> <span class='here'>2.3 What a plugin is</span></nav><h1 id='cf-the-format' data-cf-anchor='n=the-format'><span class='h1num'>2.3</span>What a plugin is — and the raw() trap</h1><p class='tagline'>your call</p><style>.hero{margin:1.6rem 0 1.2rem}.hero .hero-ask{font-size:1.7rem;line-height:1.2;font-weight:700;color:var(--glow);letter-spacing:-.01em;text-shadow:0 0 30px color-mix(in srgb,var(--glow) 40%,transparent)}.hero .hero-sub{font-size:.86rem;color:var(--text-dim);margin-top:.5rem;max-width:64ch}.cmp{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.4rem 0}.cmp .cmp-col{border:1px solid var(--border);border-radius:9px;padding:1.2rem;background:var(--surface)}.cmp .cmp-col.bad{border-color:color-mix(in srgb,var(--red) 40%,transparent);box-shadow:0 0 24px color-mix(in srgb,var(--red) 8%,transparent)}.cmp .cmp-col.good{border-color:color-mix(in srgb,var(--glow) 40%,transparent);box-shadow:0 0 24px color-mix(in srgb,var(--glow) 8%,transparent)}.cmp .cmp-col h4{font-size:.66rem;text-transform:uppercase;letter-spacing:.12em;margin:0 0 .9rem}.cmp .cmp-col.bad h4{color:var(--red)}.cmp .cmp-col.good h4{color:var(--glow)}.cmp .cmp-col.accent{border-color:color-mix(in srgb,var(--c) 40%,transparent);box-shadow:0 0 24px color-mix(in srgb,var(--c) 8%,transparent)}.cmp .cmp-col.accent h4{color:var(--c)}.cmp .cmp-items{margin:0;padding-left:1.1rem;color:var(--text-2);font-size:.78rem;line-height:1.7}.cmp .cmp-pill{display:inline-block;font-size:.58rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.12em .5em;border-radius:.7em;margin:-.5rem 0 .8rem;color:var(--c,var(--text-2));border:1px solid color-mix(in srgb,var(--c,var(--border)) 45%,transparent);background:color-mix(in srgb,var(--c,var(--border)) 12%,transparent)}@media(max-width:720px){.cmp{grid-template-columns:1fr}}.dm-wrap{overflow-x:auto;margin:1.4rem 0}.dm{border-collapse:separate;border-spacing:5px;width:100%}.dm th{font-size:.6rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);padding:.5rem .4rem;text-align:center;vertical-align:bottom}.dm .corner{border:0}.dm td.lbl{text-align:right;font-size:.72rem;font-weight:700;color:var(--text);padding-right:.6rem;white-space:nowrap}.dm td.cell{text-align:center;padding:.55rem .4rem;border-radius:7px;font-size:.62rem;font-weight:700;letter-spacing:.03em}.dm .c-miss{background:color-mix(in srgb,var(--red) 14%,transparent);color:var(--red);border:1px solid color-mix(in srgb,var(--red) 45%,transparent)}.dm .c-have{background:color-mix(in srgb,var(--green) 14%,transparent);color:var(--green);border:1px solid color-mix(in srgb,var(--green) 45%,transparent)}.dm .c-part{background:color-mix(in srgb,var(--gold) 14%,transparent);color:var(--gold);border:1px solid color-mix(in srgb,var(--gold) 45%,transparent)}.dm .c-unknown{background:color-mix(in srgb,var(--lavender) 14%,transparent);color:var(--lavender);border:1px solid color-mix(in srgb,var(--lavender) 45%,transparent)}.dm .c-neutral{background:color-mix(in srgb,var(--text-dim) 10%,transparent);color:var(--text-dim);border:1px solid color-mix(in srgb,var(--text-dim) 30%,transparent)}.crux-box{position:relative;border:1px solid color-mix(in srgb,var(--purple) 45%,transparent);border-radius:9px;padding:1.2rem 1.3rem;margin:1.3rem 0;background:linear-gradient(180deg,color-mix(in srgb,var(--purple) 12%,transparent),var(--surface))}.crux-box .cx-title{font-size:.95rem;color:var(--text);font-weight:700;margin-bottom:.4rem;padding-right:6rem}.crux-box .cx-yc{position:absolute;top:1.2rem;right:1.3rem;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--lavender);font-weight:700}.crux-box .cx-opt{display:flex;gap:.6rem;align-items:flex-start;padding:.5rem .6rem;border-radius:7px;margin-top:.45rem;border:1px solid transparent}.crux-box .cx-opt .k{font-weight:700;color:var(--lavender);text-transform:uppercase}.crux-box .cx-opt .t{color:var(--text-2)}.crux-box .cx-opt.lean{border-color:color-mix(in srgb,var(--green) 45%,transparent);background:color-mix(in srgb,var(--green) 10%,transparent)}.crux-box .cx-opt.lean .k{color:var(--green)}.crux-box .cx-opt.lean .lean-tag{margin-left:auto;font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:var(--green);font-weight:700;white-space:nowrap}</style><div class='hero'><div class='hero-ask'>Expressiveness comes from composing safe atoms — not from a raw() hole punched through the page.</div><div class='hero-sub'>Your catch: statemachine isn&#x27;t a primitive monster. It&#x27;s a set of simple primitive shapes PLUS a template for composing them. That dissolves the &#x27;heavy two&#x27; and exposes the real decision.</div></div><div class='badges'><span class='badge b-wip'>WIP</span></div><h2>Sections</h2><div class='section' id='cf-the-format-s1' data-cf-anchor='n=the-format§1'><div class='section-head'><span>📐</span><h3><span class='secnum'>2.3 &sect;1</span>The measurement (your catch, quantified)</h3></div><div class='summary'>I used file-LOC as a proxy for complexity. It lied. Here is the truth.</div><div class='item' id='cf-the-format-s1-i1' data-cf-anchor='n=the-format§1.1'><div class='item-name'>raw() is concentrated in exactly 2 files</div><div class='item-desc'>statemachine (26 sites) + citizenlifecycle (14 sites) = 40 of 42. The other 22 primitives use raw() zero times — they are already clean, safe, structured plugins.</div><ul class='impl'><li>engine/primitives/statemachine.py<span class='line'>:1-13</span><span class='ev MEASURED'>MEASURED</span><span class='note'>13 trivial template primitives in one file — NOT one hard primitive</span></li></ul></div><div class='item' id='cf-the-format-s1-i2' data-cf-anchor='n=the-format§1.2'><div class='item-name'>There is no &#x27;heavy two&#x27;</div><div class='item-desc'>statemachine is 13 tiny primitives (Kicker, Nav, Rails, Swim, Duo, TransitionTable…), each as simple as hero. Nothing computes geometry — CSS does layout; the data carries col/style/cls verbatim. The 250/137 LOC was bundling, not difficulty.</div><ul class='impl'><li>engine/primitives/citizenlifecycle.py<span class='line'>:1</span><span class='ev MEASURED'>MEASURED</span><span class='note'>same shape: loop + conditional + esc + interpolation</span></li></ul></div></div><div class='section' id='cf-the-format-s2' data-cf-anchor='n=the-format§2'><div class='section-head'><span>🛡️</span><h3><span class='secnum'>2.3 &sect;2</span>Why raw() must die</h3></div><div class='summary'>Two reasons, and they are the same reason.</div><div class='item' id='cf-the-format-s2-i1' data-cf-anchor='n=the-format§2.1'><div class='item-name'>Security — the stranger&#x27;s source.json</div><div class='item-desc'>We ship a signed binary to people who write their OWN source.json. A raw() pathway lets a malicious source inject markup/script the reader&#x27;s browser executes. The freeze gate stops exfil (external refs), not inline injection. Designing raw() out removes the seam entirely — the §6 &#x27;field of fear&#x27; answer made literal.</div></div><div class='item' id='cf-the-format-s2-i2' data-cf-anchor='n=the-format§2.2'><div class='item-name'>Expressiveness — a raw() is a missing primitive</div><div class='item-desc'>Every raw() call is a place the vocabulary ran out and we punted to hand-HTML. The 40 sites are a punch-list: each becomes a structured primitive or a composition. raw()→0 is both the security gate AND the expressiveness win.</div></div></div><div class='section' id='cf-the-format-s3' data-cf-anchor='n=the-format§3'><div class='section-head'><span>🔎</span><h3><span class='secnum'>2.3 &sect;3</span>The residual judgment (a P3 detail, not a top crux)</h3></div><div class='summary'>One real design call, smaller than the two above.</div><div class='item' id='cf-the-format-s3-i1' data-cf-anchor='n=the-format§3.1'><div class='item-name'>Primitive-extraction granularity</div><div class='item-desc'>When we dissolve statemachine, what&#x27;s the right grain? Is &#x27;swim-lane grid&#x27; one primitive or several (lane / beat / cell)? Judgment call, made during P4, provable by the golden oracle either way.</div></div></div><div class='cmp'><div class='cmp-col bad'><h4>The raw() trap (what I almost blessed)</h4><ul class='cmp-items'><li>“Some primitives are too hard — let them inject raw HTML.”</li><li>A stranger&#x27;s source.json can inject &lt;script&gt; → runs in the reader&#x27;s browser.</li><li>Freeze gate catches external refs, NOT inline injection.</li><li>It&#x27;s a confession the primitive vocabulary ran out.</li><li>Betrays covenant II (expression is the payload) and the §6 security mission.</li></ul></div><div class='cmp-col good'><h4>Composition (the right answer)</h4><ul class='cmp-items'><li>Primitives are safe atoms: structured in, escaped out, no raw.</li><li>A composition is primitives nested in data — a template.</li><li>statemachine becomes: general primitives + a composition, raw()=0.</li><li>A stranger can only COMPOSE safe atoms — no injection truck-route.</li><li>Expression scales by growing the shared vocabulary, not by punting.</li></ul></div></div><div class='dm-wrap'><table class='dm'><thead><tr><th class='corner'></th><th>Structured primitives + composition</th><th>raw() HTML passthrough</th><th>WASM / code plugins</th></tr></thead><tbody><tr><td class='lbl'>Expressive enough for the 2 bespoke pages</td><td class='cell c-have'>compose atoms</td><td class='cell c-have'>inject</td><td class='cell c-have'>arbitrary</td></tr><tr><td class='lbl'>Safe when a STRANGER writes source.json</td><td class='cell c-have'>isolated</td><td class='cell c-miss'>injection seam</td><td class='cell c-miss'>arbitrary code</td></tr><tr><td class='lbl'>Language-independent (one file, both engines)</td><td class='cell c-have'>pure data</td><td class='cell c-part'>it&#x27;s a hole</td><td class='cell c-miss'>host runtime ×2</td></tr><tr><td class='lbl'>Freeze-clean — no exfil / injection seam</td><td class='cell c-have'>clean</td><td class='cell c-miss'>open seam</td><td class='cell c-miss'>wasm host</td></tr><tr><td class='lbl'>Honors &#x27;expression is the payload&#x27;</td><td class='cell c-have'>grows vocab</td><td class='cell c-miss'>punts</td><td class='cell c-part'>opaque</td></tr><tr><td class='lbl'>raw() sites it implies (measured: 40 today)</td><td class='cell c-have'>0</td><td class='cell c-miss'>40+</td><td class='cell c-part'>n/a</td></tr></tbody></table></div><div class='crux-box'><div class='cx-title'>Decided — expressiveness comes from composition</div><div class='cx-opt lean'><span class='k'>a</span><span class='t'>Structured primitives composed into templates — no raw(), no expression mini-language ✓ LOCKED</span><span class='lean-tag'>recommended</span></div><div class='cx-opt'><span class='k'>b</span><span class='t'>Keep a raw() HTML passthrough as an escape hatch</span></div><div class='cx-opt'><span class='k'>c</span><span class='t'>WASM / compiled code plugins — both engines host a runtime</span></div></div><div class='crux-box'><div class='cx-title'>Decided — a composition is just data (no new machinery)</div><div class='cx-opt lean'><span class='k'>a</span><span class='t'>A composition IS a source.json that nests primitive blocks (templates are data, like everything else) ✓ LOCKED</span><span class='lean-tag'>recommended</span></div><div class='cx-opt'><span class='k'>b</span><span class='t'>Add a named, reusable &#x27;template/component&#x27; concept to the engine</span></div></div><div class='footer'>Derived from source.json &middot; std-doc v2 &middot; JSON canonical, HTML rendered</div></main></div></body></html>

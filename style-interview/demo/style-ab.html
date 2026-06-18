@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pick Your Voice — fractal voice, three worlds</title>
+<style>
+  :root { --ui-bg:#0d1117; --ui-fg:#e6edf3; --ui-dim:#8b949e; --ui-line:#30363d;
+    /* standard tokens so the injected feedback widget rhymes with this frame */
+    --bg:#0d1117; --surface:#161b22; --surface2:#1f2630; --fg:#e6edf3; --dim:#8b949e;
+    --line:#30363d; --glow:#22d3ee; --accent-ink:#04121a; }
+  * { box-sizing:border-box; }
+  html,body { margin:0; }
+  body { background:var(--ui-bg); color:var(--ui-fg); font-family:-apple-system,'Segoe UI',Roboto,sans-serif; line-height:1.5; }
+  .frame { max-width:1180px; margin:0 auto; padding:22px 20px 60px; }
+  .kicker { font-size:12px; letter-spacing:.22em; text-transform:uppercase; color:var(--ui-dim); }
+  .frame > h1.ttl { font-size:23px; margin:.2em 0 .1em; font-weight:800; }
+  .frame > p.sub { color:var(--ui-dim); margin:.1em 0 18px; max-width:66ch; }
+  .frame > p.sub b { color:#cdd6e0; }
+
+  .tabs { display:flex; gap:8px; flex-wrap:wrap; }
+  .tab { appearance:none; cursor:pointer; border:1px solid var(--ui-line); background:#161b22; color:var(--ui-fg);
+    font:inherit; font-weight:700; padding:9px 16px; border-radius:10px 10px 0 0; border-bottom:none;
+    display:flex; align-items:center; gap:8px; opacity:.6; transition:.15s; }
+  .tab:hover { opacity:.85; } .tab[aria-selected="true"] { opacity:1; background:#1f2630; }
+  .tab .dot { width:11px; height:11px; border-radius:50%; box-shadow:0 0 0 2px rgba(255,255,255,.08); }
+  .tab.parchment .dot { background:#c2a878; } .tab.techno .dot { background:#22d3ee; } .tab.playful .dot { background:#ff5da2; }
+  .tabline { font-size:12.5px; color:var(--ui-dim); margin:10px 2px 0; min-height:1.2em; }
+  .tabline b { color:#cdd6e0; }
+  .stage { border:1px solid var(--ui-line); border-radius:0 12px 12px 12px; overflow:hidden; }
+
+  /* ---- shared structure; PALETTE comes from the locked voice via [data-style] ---- */
+  .world { padding:34px 40px 40px; transition:.25s;
+    background:radial-gradient(120% 100% at 0% 0%, var(--surface2), var(--bg));
+    color:var(--fg); font-family:var(--font, -apple-system,'Segoe UI',Roboto,sans-serif); }
+  .world .eyebrow { font-size:11px; letter-spacing:.24em; text-transform:uppercase; color:var(--glow); }
+  .world h2.h { margin:.12em 0 .1em; line-height:1.12; font-size:29px; font-weight:800;
+    background:linear-gradient(90deg, var(--fg), var(--glow)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .world .tag { margin:.1em 0 1.2em; color:var(--dim); }
+  .world .lede { max-width:64ch; color:var(--fg); }
+  .sech { font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--dim); margin:24px 0 10px; font-weight:700; }
+
+  /* flow diagram (steps L→R) */
+  .flow { display:flex; align-items:stretch; gap:0; flex-wrap:wrap; }
+  .step { padding:11px 14px; border-radius:11px; min-width:118px; background:var(--surface); border:1px solid var(--line); }
+  .step .s-h { font-weight:700; font-size:14px; color:var(--fg); }
+  .step .s-s { font-size:12.5px; color:var(--dim); }
+  .step.here { background:linear-gradient(90deg, var(--glow-dim), transparent); border-color:var(--glow); }
+  .step.here .s-h { color:var(--glow); }
+  .arrow { display:flex; align-items:center; padding:0 9px; color:var(--dim); font-weight:700; }
+  .step.teeth { position:relative; border-color:var(--red); }
+
+  /* matrix */
+  .matrix-wrap { overflow-x:auto; }
+  table.matrix { border-collapse:separate; border-spacing:5px; }
+  table.matrix th { font-size:11px; text-transform:uppercase; letter-spacing:.05em; font-weight:700; padding:6px 10px; text-align:left; color:var(--dim); }
+  table.matrix td { padding:8px 12px; border-radius:8px; font-size:13px; white-space:nowrap; }
+  table.matrix .rowh { font-weight:700; color:var(--fg); }
+  .v-win { color:var(--green);  box-shadow:inset 0 0 0 1px var(--green); }
+  .v-ok  { color:var(--gold);   box-shadow:inset 0 0 0 1px var(--gold); }
+  .v-q   { color:var(--purple); box-shadow:inset 0 0 0 1px var(--purple); }
+  .v-no  { color:var(--dim);    box-shadow:inset 0 0 0 1px var(--line); }
+
+  /* a real interaction control */
+  .control { margin-top:8px; padding:14px 16px; border-radius:12px; max-width:60ch; background:var(--surface); border:1px solid var(--line); }
+  .control .q { font-weight:700; margin-bottom:9px; color:var(--fg); }
+  .control label { display:inline-flex; align-items:center; gap:7px; margin:3px 14px 3px 0; cursor:pointer; font-size:14px; }
+  .control .btn { margin-top:11px; appearance:none; border:none; cursor:pointer; font:inherit; font-weight:700; padding:8px 16px; border-radius:9px; background:var(--glow); color:var(--accent-ink); }
+
+  .why { margin-top:28px; padding:16px 20px; border-radius:13px; max-width:66ch; font-size:14.5px;
+    background:linear-gradient(90deg, var(--glow-dim), transparent); border-left:3px solid var(--glow); color:var(--dim); }
+  .why b { font-weight:800; color:var(--fg); }
+
+  .balloon { float:right; width:96px; height:auto; margin:0 0 8px 14px; }
+
+
+
+
+  /* the name-card: the voice hands you the name you'd call the awareness.
+     Floats to the upper-right of the world so it reads like a signature. */
+  .namecard { float:right; clear:right; max-width:228px; margin:2px 0 14px 22px; padding:12px 16px; border-radius:12px; font-size:14px; }
+  @media(max-width:760px){ .namecard{ float:none; max-width:none; margin:16px 0 0; } }
+  .namecard .nm { font-weight:800; }
+  .namecard .sub2 { display:block; font-size:12.5px; opacity:.78; margin-top:3px; }
+  /* ---- per-voice STRUCTURE only (palette comes from [data-style] tokens) ---- */
+  [data-style="parchment-light"] .world h2.h { font-weight:700; }
+  [data-style="parchment-light"] .tag { font-style:italic; }
+  [data-style="playful"] .step,
+  [data-style="playful"] .control,
+  [data-style="playful"] .namecard { border-radius:16px; }
+  [data-style="playful"] .step { box-shadow:0 3px 0 var(--surface2); }
+  [data-style="playful"] .world h2.h { font-size:31px; }
+  [data-style="playful"] .arrow { font-size:18px; }
+  [data-style="playful"] table.matrix td { border-radius:12px; }
+  [data-style="playful"] .control .btn { border-radius:20px; }
+  [data-style="playful"] .why { border:2px dashed var(--glow); background:var(--surface); }
+  .namecard { background:var(--surface); border:1px solid var(--line); }
+  .namecard .nm { color:var(--glow); }
+</style>
+  <script src="/lib/style-lock.js"></script>
+  <link rel="stylesheet" href="/lib/style-lock.css">
+  <link rel="stylesheet" href="/lib/feedback.css">
+</head>
+<body>
+<div class="frame">
+  <div class="kicker">std-doc · style-interview · page 3 of 7</div>
+  <h1 class="ttl">Pick your voice</h1>
+  <p class="sub">Three <b>voices</b>, not three skins. Each tab is a consistent document top to bottom — its subject, its diagram, its buttons, the roundness of its corners. That total self-consistency is <b>&ldquo;fractal voice&rdquo;</b>, and it's the cheap path on <b>both ends</b>: the reader spends nothing reconciling mismatches, and the writer chooses <em>once</em> — after that, the voice answers every choice (which diagram, which hue, which corner), so everything flows. Choose once, generate free. And the voice goes all the way down: pick one, and it even suggests <b>the name you'd call me</b>.</p>
+
+  <div class="tabs" role="tablist" aria-label="style">
+    <button class="tab parchment" role="tab" aria-selected="false" data-skin="s-parchment"><span class="dot"></span>parchment-light</button>
+    <button class="tab techno"   role="tab" aria-selected="true"  data-skin="s-techno"><span class="dot"></span>techno-dark</button>
+    <button class="tab playful"  role="tab" aria-selected="false" data-skin="s-playful"><span class="dot"></span>playful</button>
+  </div>
+  <div class="tabline" id="tabline"></div>
+
+  <div class="stage">
+
+    <!-- ===== techno-dark world (default) ===== -->
+    <article class="world s-techno" data-skin="s-techno" data-style="techno-dark">
+      <div class="namecard" data-cf-change="ch-doc-name">In this voice, you can call me <span class="nm">&rsquo;doc</span>.<span class="sub2">just &ldquo;&rsquo;doc&rdquo; — short for std-doc.</span></div>
+      <div class="eyebrow">release engineering</div>
+      <h2 class="h">The Deploy Pipeline</h2>
+      <div class="tag">every commit walks the same gauntlet — and one gate has teeth</div>
+      <p class="lede">Code doesn't reach production by trust. It earns each step: built reproducibly, tested green, canaried on one ring, then shipped to the fleet. The security gate is the step that can say no.</p>
+
+      <div class="sech">flow</div>
+      <div class="flow">
+        <div class="step"><div class="s-h">build</div><div class="s-s">reproducible · zero crates</div></div>
+        <div class="arrow">→</div>
+        <div class="step"><div class="s-h">test</div><div class="s-s">~107 green</div></div>
+        <div class="arrow">→</div>
+        <div class="step teeth"><div class="s-h">gate ⛔</div><div class="s-s">no external refs</div></div>
+        <div class="arrow">→</div>
+        <div class="step"><div class="s-h">canary</div><div class="s-s">one ring</div></div>
+        <div class="arrow">→</div>
+        <div class="step here"><div class="s-h">ship</div><div class="s-s">signed binary</div></div>
+      </div>
+
+      <div class="sech">compare</div>
+      <div class="matrix-wrap"><table class="matrix">
+        <thead><tr><th>engine vs need</th><th>portable</th><th>safe</th><th>fast</th></tr></thead>
+        <tbody>
+          <tr><td class="rowh">python+deps</td><td class="v-ok">~</td><td class="v-q">?</td><td class="v-ok">~</td></tr>
+          <tr><td class="rowh">signed go binary</td><td class="v-win">✓</td><td class="v-win">✓</td><td class="v-win">✓</td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="sech">decide</div>
+      <div class="control">
+        <div class="q">Which ring ships first this weekend?</div>
+        <label><input type="radio" name="ring-t"> canary only</label>
+        <label><input type="radio" name="ring-t" checked> canary → fleet</label>
+        <label><input type="radio" name="ring-t"> full fleet</label>
+        <div><button class="btn">submit answer</button></div>
+      </div>
+
+      <div class="why">JSON is the compact, precise form an LLM thinks in natively; this page is the expressive form. We derive page-from-JSON because that direction is the <b>easy</b> one — expanding a spec is computable; squeezing a page back isn't. Neither is "truth," neither is frosting. <b>Fewer tokens, fewer errors, fewer questions.</b></div>
+    </article>
+
+    <!-- ===== parchment world (hidden) ===== -->
+    <template data-skin="s-parchment">
+      <article class="world s-parchment" data-style="parchment-light">
+        <div class="namecard">In this voice, you can call me <span class="nm">Editor In Chief</span>.<span class="sub2">EIC for short, in the hallway.</span></div>
+        <div class="eyebrow">strategy memo · confidential</div>
+        <h2 class="h">Q3 Go-to-Market Plan</h2>
+        <div class="tag">three phases from quiet beta to public launch</div>
+        <p class="lede">We move deliberately: prove the value with a small design-partner cohort, widen to a waitlist once retention holds, then open the doors with the launch the market has been primed for.</p>
+
+        <div class="sech">phases</div>
+        <div class="flow">
+          <div class="step"><div class="s-h">Phase 1 · Beta</div><div class="s-s">10 design partners</div></div>
+          <div class="arrow">→</div>
+          <div class="step"><div class="s-h">Phase 2 · Waitlist</div><div class="s-s">gate on retention</div></div>
+          <div class="arrow">→</div>
+          <div class="step here"><div class="s-h">Phase 3 · Launch</div><div class="s-s">public, priced</div></div>
+        </div>
+
+        <div class="sech">vendor selection</div>
+        <div class="matrix-wrap"><table class="matrix">
+          <thead><tr><th>vendor vs criterion</th><th>cost</th><th>support</th><th>fit</th></tr></thead>
+          <tbody>
+            <tr><td class="rowh">Incumbent</td><td class="v-no">·</td><td class="v-win">✓</td><td class="v-ok">~</td></tr>
+            <tr><td class="rowh">Challenger</td><td class="v-win">✓</td><td class="v-ok">~</td><td class="v-win">✓</td></tr>
+          </tbody>
+        </table></div>
+
+        <div class="sech">approval</div>
+        <div class="control">
+          <div class="q">Approve the Phase 3 launch budget?</div>
+          <label><input type="radio" name="bud-p" checked> Approve as proposed</label>
+          <label><input type="radio" name="bud-p"> Approve with trim</label>
+          <label><input type="radio" name="bud-p"> Hold for review</label>
+          <div><button class="btn">record decision</button></div>
+        </div>
+
+        <div class="why">JSON is the compact, precise form an LLM thinks in natively; this page is the expressive form. We derive page-from-JSON because that direction is the <b>easy</b> one. Neither is "truth," neither is frosting. <b>Fewer tokens, fewer errors, fewer questions.</b></div>
+      </article>
+    </template>
+
+    <!-- ===== playful world (hidden) ===== -->
+    <template data-skin="s-playful">
+      <article class="world s-playful" data-style="playful">
+        <div class="namecard">In this voice, you can call me <span class="nm">Writer()</span>! 🎈<span class="sub2">silent parens among friends · &ldquo;Writer Paren-Paren&rdquo; when it's formal · &ldquo;Writer Open-Paren Close-Paren&rdquo; when mom's upset</span></div>
+        <svg class="balloon" viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg" aria-label="balloon">
+          <ellipse cx="40" cy="42" rx="33" ry="40" fill="#ff5da2"/>
+          <ellipse cx="30" cy="30" rx="10" ry="14" fill="#ffa9cf" opacity=".7"/>
+          <polygon points="40,80 33,90 47,90" fill="#ff5da2"/>
+          <path d="M40 90 q8 12 -2 22 q-8 8 2 8" stroke="#c08ad0" stroke-width="2" fill="none"/>
+        </svg>
+        <div class="eyebrow">kitchen notes 🍫</div>
+        <h2 class="h">Stovetop Fudge 🥄</h2>
+        <div class="tag">five steps, one happy little pan</div>
+        <p class="lede">No candy thermometer, no fear. Melt, stir, pour, chill, devour. The only rule: don't walk away while it's bubbling — fudge waits for no one! ✨</p>
+
+        <div class="sech">steps 👩‍🍳</div>
+        <div class="flow">
+          <div class="step"><div class="s-h">🔥 melt</div><div class="s-s">butter + sugar</div></div>
+          <div class="arrow">→</div>
+          <div class="step"><div class="s-h">🌀 stir</div><div class="s-s">2 min, no stop</div></div>
+          <div class="arrow">→</div>
+          <div class="step"><div class="s-h">🍫 mix</div><div class="s-s">chocolate in</div></div>
+          <div class="arrow">→</div>
+          <div class="step"><div class="s-h">🧊 chill</div><div class="s-s">2 hrs</div></div>
+          <div class="arrow">→</div>
+          <div class="step here"><div class="s-h">😋 eat</div><div class="s-s">we want to be here! 🎯</div></div>
+        </div>
+
+        <div class="sech">how sweet? 🍬</div>
+        <div class="matrix-wrap"><table class="matrix">
+          <thead><tr><th>add-in vs vibe</th><th>sweet</th><th>crunch</th><th>fancy</th></tr></thead>
+          <tbody>
+            <tr><td class="rowh">🥜 nuts</td><td class="v-ok">~</td><td class="v-win">✓</td><td class="v-ok">~</td></tr>
+            <tr><td class="rowh">🧂 sea salt</td><td class="v-q">?</td><td class="v-ok">~</td><td class="v-win">✓</td></tr>
+          </tbody>
+        </table></div>
+
+        <div class="sech">your call 💕</div>
+        <div class="control">
+          <div class="q">How sweet are we going? 🍭</div>
+          <label><input type="radio" name="sw-pl"> just a little</label>
+          <label><input type="radio" name="sw-pl" checked> classic</label>
+          <label><input type="radio" name="sw-pl"> DRAGON-level 🐉</label>
+          <div><button class="btn">let's gooo 🎈</button></div>
+        </div>
+
+        <div class="why">JSON is the compact, precise form an LLM thinks in natively; this page is the expressive form. We derive page-from-JSON because that's the <b>easy</b> direction. Neither is "truth," neither is frosting — and fun is a real voice, not a lesser one. <b>Fewer tokens, fewer errors, fewer questions.</b> 💛</div>
+      </article>
+    </template>
+
+  </div>
+  <div class="pgnav" data-cf-change="ch-page3-nav" style="margin-top:22px;font-size:13px;color:var(--ui-dim)">
+    ← <a href="action-button.html" style="color:var(--glow);text-decoration:none">page 2 · a document that does things</a>
+    &nbsp;·&nbsp; next → <a href="freeze-ship.html" style="color:var(--glow);text-decoration:none">page 4 · freeze &amp; ship</a>
+    &nbsp;·&nbsp; <a href="knowledge-palace.html" style="color:var(--glow);text-decoration:none">page 5 · the Knowledge Palace</a>
+  </div>
+</div>
+<div id="cf-whisper-mount"></div>
+
+<script>
+  var lines = {
+    "s-parchment":"<b>parchment-light</b> — a business plan. White, serif, calm. Hand it to a stranger and they just nod. You'd call me <b>Editor In Chief</b>.",
+    "s-techno":"<b>techno-dark</b> — a deploy pipeline. Our dialect: dark, glowing, diagrams with teeth. You'd call me <b>&rsquo;doc</b>.",
+    "s-playful":"<b>playful</b> — stovetop fudge. Bright, rounded, emoji, a balloon. You'd call me <b>Writer()</b>. 🎈"
+  };
+  var stage = document.querySelector('.stage'), tabline = document.getElementById('tabline');
+  function show(skin){
+    // remove current live world, render the chosen one from its template (or the inline default)
+    var cur = stage.querySelector('.world'); if (cur) cur.remove();
+    var tpl = stage.querySelector('template[data-skin="'+skin+'"]');
+    if (tpl) stage.insertBefore(tpl.content.cloneNode(true), null);
+    tabline.innerHTML = lines[skin] || '';
+  }
+  // stash the default techno world into a template too, so swaps are symmetric
+  (function(){
+    var def = stage.querySelector('.world.s-techno');
+    var t = document.createElement('template'); t.setAttribute('data-skin','s-techno');
+    t.content.appendChild(def.cloneNode(true)); stage.appendChild(t);
+  })();
+  // the choice LOCKS IN — page 3 is the only page that WRITES it; every later page reads
+  // it (via /lib/style-lock.js) and wears the voice. "Choose once, generate free," for real.
+  var skinToStyle = { "s-parchment":"parchment-light", "s-techno":"techno-dark", "s-playful":"playful" };
+  var styleToSkin = { "parchment-light":"s-parchment", "techno-dark":"s-techno", "playful":"s-playful" };
+  function lockVoice(skin){ try { localStorage.setItem('stddoc-style', skinToStyle[skin] || 'techno-dark'); } catch(e){} }
+  function selectTab(skin){
+    document.querySelectorAll('.tab').forEach(function(x){ x.setAttribute('aria-selected', x.getAttribute('data-skin')===skin ? 'true':'false'); });
+  }
+  document.querySelectorAll('.tab').forEach(function(t){
+    t.addEventListener('click', function(){
+      var skin = t.getAttribute('data-skin');
+      selectTab(skin); show(skin); lockVoice(skin);
+    });
+  });
+  // reflect a previously-locked voice when the reader returns to this page
+  (function(){
+    var stored; try { stored = localStorage.getItem('stddoc-style'); } catch(e){}
+    var skin = styleToSkin[stored];
+    if (skin && skin !== 's-techno'){ selectTab(skin); show(skin); }
+    else { tabline.innerHTML = lines["s-techno"]; }
+  })();
+</script>
+  <script src="/lib/feedback.js" defer></script>
+</body>
+</html>

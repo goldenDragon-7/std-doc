@@ -1,0 +1,77 @@
+{
+  "title": "Tree Primitive Conformance",
+  "generated_date": "2026-06-15",
+  "groups": [
+    "Cascade"
+  ],
+  "root": {
+    "summary": "Exercises the tree primitive end to end."
+  },
+  "nodes": [
+    {
+      "slug": "cascade",
+      "group": "Cascade",
+      "title": "Cascade — the decision tree",
+      "status": "LIVE",
+      "tagline": "every branch of the tree primitive",
+      "blocks": [
+        {
+          "type": "tree",
+          "label": "feedback.js — decision cascade",
+          "nodes": [
+            {
+              "label": "feedback.js",
+              "sublabel": "1,290 lines",
+              "decision": "rewrite",
+              "note": "Monolith — split by responsibility.",
+              "children": [
+                {
+                  "label": "renderQueue()",
+                  "decision": "keep",
+                  "sublabel": "pure",
+                  "children": [
+                    {
+                      "label": "escapeCell()",
+                      "decision": "keep"
+                    }
+                  ]
+                },
+                {
+                  "label": "legacyDiff()",
+                  "decision": "trash",
+                  "note": "dead since v3",
+                  "children": [
+                    {
+                      "label": "patchDOM()",
+                      "decision": "refactor",
+                      "sublabel": "constrained by parent"
+                    }
+                  ]
+                },
+                {
+                  "label": "unsortedHelpers",
+                  "children": [
+                    {
+                      "label": "todo()"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "tree",
+          "label": "legend suppressed",
+          "legend": false,
+          "nodes": [
+            {
+              "label": "rootOnly",
+              "decision": "refactor"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

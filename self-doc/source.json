@@ -1,0 +1,2639 @@
+{
+  "title": "std-doc — the doc that documents itself",
+  "generated_date": "2026-06-13",
+  "palette": {
+    "core": {
+      "label": "Core",
+      "color": "#22d3ee"
+    },
+    "library": {
+      "label": "Library",
+      "color": "#34d399"
+    },
+    "paletteeng": {
+      "label": "Palette",
+      "color": "#a78bfa"
+    },
+    "diagram": {
+      "label": "Diagram",
+      "color": "#60a5fa"
+    },
+    "gate": {
+      "label": "Gate",
+      "color": "#f87171"
+    },
+    "live": {
+      "label": "Live",
+      "color": "#34d399"
+    },
+    "wip": {
+      "label": "WIP",
+      "color": "#fbbf24"
+    },
+    "writer": {
+      "label": "Writer()",
+      "color": "#e0b341"
+    },
+    "eic": {
+      "label": "Editor",
+      "color": "#4f9cf9"
+    }
+  },
+  "groups": [
+    "Start Here",
+    "The Four Moves",
+    "The Pluggable Renderer",
+    "Style & Examples",
+    "Beyond the Basics",
+    "Self-Hosting & Proof"
+  ],
+  "root": {
+    "summary": "std-doc is the living-document standard: a single self-contained HTML page, served locally, that the reader can TALK TO. They select a sentence, pick an element, or leave a page note; the comment lands in a local inbox; the agent reads it, edits the page in place, and the page reloads and walks the reader through exactly what changed. No chat round-trip — the document IS the conversation. This doc is itself a std-doc: authored as a source.json doc-tree, derived to HTML by the tool's own `stddoc publish` command (go/cmd/stddoc). The tool documents itself.",
+    "facets": {
+      "what": "A living-document standard + a stdlib-only Go binary that makes any folder of HTML listen.",
+      "dependencies": "A single stdlib-only Go binary + a browser. Nothing else for the core. (Mermaid diagrams use a CDN in served mode — note this; D2 diagrams render natively in-process via the Go d2 library. Freezing Mermaid diagrams needs the Mermaid CLI.)",
+      "license": "MIT — self-contained in the skill directory.",
+      "shape": "Four moves: Method, Style, Serve, Respond. One optional Move 0 (data-derived docs) sits in front for structured, multi-page documents like this one.",
+      "the test": "Open it in a browser. That is the only honest check that it renders."
+    },
+    "diagrams": [
+      {
+        "ascii": "        ┌──────────────────────── std-doc ────────────────────────┐\n        │                                                          │\n        │   ENGINE                          RENDERER               │\n        │   the living-doc machinery        CORE + primitive lib   │\n        │   serve · watch · reply           registry · palette     │\n        │                                                          │\n        └──────────────────────────────────────────────────────────┘\n\n   source.json ──derive──▶ HTML ──serve──▶ you comment ──▶ edit the JSON\n       ▲ (canonical)                                              │\n       └──────────────────── reload + walkthrough ◀──────────────┘\n\n             freeze ──▶ portable .zip  (no CDN · no network · sealed)",
+        "caption": "std-doc at a glance — engine vs renderer, and the JSON→HTML→frozen pipeline you'll meet on every page below"
+      }
+    ]
+  },
+  "nodes": [
+    {
+      "slug": "what-is-a-living-document",
+      "group": "Start Here",
+      "title": "What is a Living Document",
+      "tagline": "the document is the conversation",
+      "status": "LIVE",
+      "diagrams": [
+        {
+          "caption": "the loop — no chat round-trip",
+          "ascii": "  reader selects a sentence\n        |\n        v\n  comment lands in feedback/inbox.jsonl  ──►  agent (Monitor fires)\n        ^                                          |\n        |                                          v\n  page reloads, walks you            agent edits the HTML in place\n  through what changed   ◄──  + appends a batch to history.json"
+        }
+      ],
+      "sections": [
+        {
+          "name": "The core idea",
+          "icon": "💬",
+          "tag": "concept",
+          "summary": "A living document is the default shape for anything worth a reader's attention. It is one self-contained HTML page, served locally, that listens.",
+          "items": [
+            {
+              "name": "Talk to the page, not a chatbot",
+              "desc": "The reader selects a sentence, picks an element, or leaves a page note. The comment is the unit of conversation, anchored to the exact text it is about."
+            },
+            {
+              "name": "The agent edits in place",
+              "desc": "There is no separate reply thread. The agent changes the document itself, then the page reloads with scroll preserved and walks the reader to each change."
+            },
+            {
+              "name": "Self-contained + local",
+              "desc": "One HTML page, served from localhost by a stdlib HTTP server. No build pipeline, no framework, no network dependency for the core."
+            }
+          ]
+        },
+        {
+          "name": "When to reach for it",
+          "icon": "🎯",
+          "tag": "usage",
+          "summary": "Any time a reader should be able to respond to a document instead of replying in chat.",
+          "items": [
+            {
+              "name": "Proposals and designs",
+              "desc": "Draft something the reader can comment on sentence-by-sentence — the open decisions sit waiting to be clicked."
+            },
+            {
+              "name": "Existing static HTML",
+              "desc": "If you already have a folder of *.html and only want commenting, skip straight to Move 3 (Serve). The engine works on any folder of pages."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "quickstart",
+      "group": "Start Here",
+      "title": "From Zero to a Listening Doc",
+      "tagline": "one command, then open the localhost URL",
+      "status": "LIVE",
+      "diagrams": [
+        {
+          "caption": "setup.sh does inject + serve in one step",
+          "ascii": "  setup.sh <your-doc-dir> [port]\n     |\n     └─ stddoc serve  → injects the feedback widget into every *.html (idempotent)\n                         creates feedback/inbox.jsonl + feedback/history.json\n                         picks a free port (5050+), serves with idle-timeout 0\n                         writes watcher.json heartbeat\n                         prints  http://localhost:PORT   ◄── open THIS, not file://"
+        }
+      ],
+      "sections": [
+        {
+          "name": "The one command",
+          "icon": "🚀",
+          "tag": "setup",
+          "summary": "One script injects the widget and starts the server.",
+          "items": [
+            {
+              "name": "setup.sh",
+              "desc": "Runs inject + serve, picks a free port (5050+), starts with --idle-timeout 0, and prints the URL.",
+              "citations": [
+                {
+                  "path": "setup.sh",
+                  "evidence": "CITED",
+                  "note": "inject + serve in one step; named in SKILL.md"
+                }
+              ]
+            },
+            {
+              "name": "Open the http:// URL, not file://",
+              "desc": "Only the served copy listens. A file:// page renders but shows no widget — the injected tags resolve /lib/* through the server."
+            }
+          ]
+        },
+        {
+          "name": "Then arm the watcher",
+          "icon": "👂",
+          "tag": "load-bearing",
+          "summary": "Without a Monitor on the inbox you are collecting comments nobody reads. This is the step that closes the loop.",
+          "items": [
+            {
+              "name": "stddoc serve — watcher built-in",
+              "desc": "`stddoc serve` does two jobs in one process: it streams each new inbox entry via the Monitor AND writes a presence heartbeat to feedback/watcher.json so the reader's page shows a calm '● watching' dot. No separate watch script needed.",
+              "citations": [
+                {
+                  "path": "go/cmd/stddoc/serve.go",
+                  "evidence": "CITED",
+                  "note": "inject + serve + presence heartbeat in one process; named in SKILL.md"
+                }
+              ]
+            },
+            {
+              "name": "Don't poll in a loop",
+              "desc": "Let the Monitor notification arrive. Polling burns context for nothing."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "move-1-method",
+      "group": "The Four Moves",
+      "title": "Move 1 — Method: Write by Descent",
+      "tagline": "top-down by dependency, ending in cruxes",
+      "status": "LIVE",
+      "diagrams": [
+        {
+          "caption": "descent — start at what the reader looks at, ask what must be true below",
+          "ascii": "  [ the one line that matters ]   ← render it, in colour\n        ↑ cannot exist without\n  [ prerequisite layer ]          ← each property names a prereq\n        ↑ cannot exist without\n  [ prerequisite layer ]\n        ↑ cannot exist without\n  [ ground you already stand on ] ← light it green: HERE\n\n  forward build order = this chain, reversed"
+        }
+      ],
+      "sections": [
+        {
+          "name": "Top-down, not wish-list",
+          "icon": "🪜",
+          "tag": "method",
+          "summary": "Don't write bottom-up ('here's what we have, here's what we could add'). Start with the single artifact the reader will look at, then at every layer ask: for this to exist, what must be true the layer below?",
+          "items": [
+            {
+              "name": "The forcing function",
+              "desc": "The endpoint conscripts every layer beneath it, so you never have to argue for the prerequisites — the top line visibly demands them. The proof of the proposal is the unwind itself."
+            },
+            {
+              "name": "Two honesty rules",
+              "desc": "Separate net-new from reuse ruthlessly (trust comes from NOT rebuilding what exists), and name the one unglamorous gotcha out loud as its own layer."
+            }
+          ]
+        },
+        {
+          "name": "The seven beats",
+          "icon": "📐",
+          "tag": "skeleton",
+          "summary": "The skeleton has a block for each beat.",
+          "items": [
+            {
+              "name": "1. The one-sentence ask",
+              "desc": "Concrete, human, what-they-get — not 'a system'."
+            },
+            {
+              "name": "2. The method box",
+              "desc": "State that the endpoint is the forcing function."
+            },
+            {
+              "name": "3. Layer 0 — render the endpoint",
+              "desc": "Show the actual artifact in colour; list its hard properties (each secretly names a prerequisite)."
+            },
+            {
+              "name": "4. The descent",
+              "desc": "The vertical stack, each layer joined by '↑ cannot … without'; tag every layer net-new or reuse; light the bottom green."
+            },
+            {
+              "name": "5. The diagrams",
+              "desc": "One per load-bearing idea (six idioms — see Move 2)."
+            },
+            {
+              "name": "6. Fold it forward",
+              "desc": "The same chain as a build table, Phase 0…N; call out reuse vs the honest first brick."
+            },
+            {
+              "name": "7. The cruxes",
+              "desc": "End on the 1–3 decisions genuinely the reader's to make; mark them '◀ YOUR CALL'; commit your own lean first, then invite override."
+            }
+          ],
+          "citations": [
+            {
+              "path": "method/prd-by-descent.md",
+              "evidence": "CITED",
+              "note": "the full writing method"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "move-2-style",
+      "group": "The Four Moves",
+      "title": "Move 2 — Style: One Dialect, One Palette",
+      "tagline": "colour means something, consistently",
+      "status": "LIVE",
+      "sections": [
+        {
+          "name": "Never invent a hue",
+          "icon": "🎨",
+          "tag": "palette",
+          "summary": "Paste the :root block from the skeleton verbatim. Colour is meaning, not decoration.",
+          "items": [
+            {
+              "name": "green",
+              "desc": "already built · 'we stand here' · a passing test"
+            },
+            {
+              "name": "red",
+              "desc": "the gap · the missing piece · the root-cause column"
+            },
+            {
+              "name": "gold",
+              "desc": "the tender/relational lane · held, not actioned"
+            },
+            {
+              "name": "lavender/purple",
+              "desc": "a question · a crux · '◀ YOUR CALL'"
+            },
+            {
+              "name": "cyan",
+              "desc": "the spine · the endpoint · the primary action"
+            },
+            {
+              "name": "blue",
+              "desc": "a second 'built' axis (sits beside green without clashing)"
+            }
+          ]
+        },
+        {
+          "name": "The six diagram idioms",
+          "icon": "📊",
+          "tag": "diagrams",
+          "summary": "Each is one CSS block in the skeleton.",
+          "items": [
+            {
+              "name": "descent",
+              "desc": "a dependency stack"
+            },
+            {
+              "name": "two-column compare",
+              "desc": "root cause: bad vs good"
+            },
+            {
+              "name": "spectrum",
+              "desc": "a missing axis as a gradient with 3 named stops"
+            },
+            {
+              "name": "decision matrix",
+              "desc": "the showpiece — rows × cols → a verdict; argue by the shape of the colour"
+            },
+            {
+              "name": "three axes",
+              "desc": "two things you compute, one you never have"
+            },
+            {
+              "name": "seam/pipeline",
+              "desc": "a flow with a step that has teeth"
+            }
+          ],
+          "citations": [
+            {
+              "path": "style/styleguide.md",
+              "evidence": "CITED",
+              "note": "full palette + all six idioms"
+            },
+            {
+              "path": "style/skeleton.html",
+              "evidence": "CITED",
+              "note": "copy-from starter with every piece live"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "move-3-serve",
+      "group": "The Four Moves",
+      "title": "Move 3 — Serve: Make the Page Listen",
+      "tagline": "inject · server · watch — the stdlib seam",
+      "status": "LIVE",
+      "diagrams": [
+        {
+          "caption": "the three engine parts",
+          "ascii": "  stddoc serve <dir>\n     ├─ inject    → adds <link>/<script> to every *.html (idempotent)\n     │               creates feedback/inbox.jsonl + feedback/history.json\n     ├─ server    → stdlib HTTP server (Go net/http): serves pages, accepts the POST, exposes /info\n     ├─ heartbeat → writes watcher.json so the reader sees '● watching'\n     └─ feedback.js/css → floating 💬, select-to-comment, polls history.json, auto-reloads"
+        }
+      ],
+      "sections": [
+        {
+          "name": "Three parts, all stdlib",
+          "icon": "🔌",
+          "tag": "engine",
+          "summary": "The engine depends on nothing but Go's standard library — one static binary, no install, no pip, no node.",
+          "items": [
+            {
+              "name": "stddoc serve — inject built-in",
+              "desc": "The `stddoc serve` subcommand injects the feedback link/script pair into every *.html (idempotent) and creates the feedback files on first run. Re-running regenerates them if stripped.",
+              "citations": [
+                {
+                  "path": "go/cmd/stddoc/serve.go",
+                  "evidence": "CITED",
+                  "note": "inject + serve combined in the Go binary"
+                }
+              ]
+            },
+            {
+              "name": "Go net/http server",
+              "desc": "A stdlib HTTP server (Go net/http): serves pages, accepts the comment POST, exposes /info and routes /lib/* to the embedded go/stddoc-lib/lib/.",
+              "citations": [
+                {
+                  "path": "go/internal/serve/",
+                  "evidence": "CITED",
+                  "note": "the stdlib Go server"
+                }
+              ]
+            },
+            {
+              "name": "feedback.js / feedback.css",
+              "desc": "The browser client: floating 💬, select-to-comment, structured controls, presence, threaded history. Polls history.json and auto-reloads on a new batch.",
+              "citations": [
+                {
+                  "path": "go/stddoc-lib/lib/feedback.js",
+                  "evidence": "CITED",
+                  "note": "the browser client; embedded in the Go binary via go/stddoc-lib"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Structured controls",
+          "icon": "🎛️",
+          "tag": "feature",
+          "summary": "When the answer is really 'which of these?', embed a radio / checkbox / select. The reader answers by picking; the selection lands as a structured control comment with no prose to parse.",
+          "items": [
+            {
+              "name": "Pure-markup authoring",
+              "desc": "A div with data-cf-control + data-cf-id + data-cf-prompt and labelled inputs. The library wires the control and a submit button and styles it from the palette."
+            },
+            {
+              "name": "Lock the choice in",
+              "desc": "To reply, read the value and anchor on the control's data-cf-id (a real id in the HTML, unlike runtime cf_ids)."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "move-4-respond",
+      "group": "The Four Moves",
+      "title": "Move 4 — Respond: Reply Inside the Page",
+      "tagline": "edit the HTML, then append a batch to history.json",
+      "status": "LIVE",
+      "sections": [
+        {
+          "name": "The two-part reply",
+          "icon": "✍️",
+          "tag": "protocol",
+          "summary": "When the Monitor fires, read the full inbox entry for the exact ids, then reply in two parts.",
+          "items": [
+            {
+              "name": "Part A — edit the HTML",
+              "desc": "Make the change they asked for and wrap the changed region in an anchor: data-cf-change='ch-<slug>'. One anchor per change. Locate the spot by the quote text — anchor.cf_id is assigned at page-load and is NOT in your file."
+            },
+            {
+              "name": "Part B — append to history.json",
+              "desc": "Newest last; keep it a valid array. The batch carries comments (echoed back) and changes (id, in_response_to, anchor, title, description). in_response_to must contain the comment id — that clears the 'processing…' banner; anchor must equal a data-cf-change you actually placed.",
+              "citations": [
+                {
+                  "path": "protocol/responding.md",
+                  "evidence": "CITED",
+                  "note": "full reply etiquette + schemas"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "The etiquette",
+          "icon": "🤝",
+          "tag": "soul",
+          "summary": "Promptness is the soul of it.",
+          "items": [
+            {
+              "name": "Answer what's there",
+              "desc": "Even a test comment deserves a real in-doc reply — that IS the proof the loop works."
+            },
+            {
+              "name": "Act in the document first, chat second",
+              "desc": "Make the change visible: a green panel, a re-coloured cell."
+            },
+            {
+              "name": "When they answer a crux, commit",
+              "desc": "Restyle the chosen option as decided."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "style-reference",
+      "group": "Style & Examples",
+      "title": "Style Reference — Palette + the Six Idioms",
+      "tagline": "colour means something; here is the whole vocabulary, rendered",
+      "status": "LIVE",
+      "sections": [
+        {
+          "name": "The palette, shown — not listed",
+          "icon": "🎨",
+          "tag": "palette",
+          "summary": "Never invent a hue — paste the :root block from style/skeleton.html verbatim and use colour to MEAN something. Below, each hue is a LIVE swatch (rendered by the cardgrid primitive) with its meaning printed on the card itself: the green card literally says 'we stand here'. Then the six diagram idioms, then the copy-from skeleton. (Full prose reference: style/styleguide.md.)"
+        }
+      ],
+      "blocks": [
+        {
+          "type": "cardgrid",
+          "cards": [
+            {
+              "ent": "live",
+              "title": "green — built",
+              "body": "we stand here · a passing test · net-done"
+            },
+            {
+              "ent": "gate",
+              "title": "red — the gap",
+              "body": "the missing piece · the root-cause column"
+            },
+            {
+              "ent": "writer",
+              "title": "gold — tender",
+              "body": "the relational lane · held, not actioned"
+            },
+            {
+              "ent": "paletteeng",
+              "title": "lavender — a question",
+              "body": "a crux · ◀ YOUR CALL"
+            },
+            {
+              "ent": "core",
+              "title": "cyan — the spine",
+              "body": "the endpoint · the primary action"
+            },
+            {
+              "ent": "diagram",
+              "title": "blue — second-built",
+              "body": "sits beside green without clashing"
+            }
+          ],
+          "style": "gradient"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Idiom",
+            "What it shows",
+            "Where to see it live"
+          ],
+          "groups": [
+            {
+              "name": "The six diagram idioms (each is one CSS block in skeleton.html)",
+              "rows": [
+                [
+                  {
+                    "text": "descent",
+                    "ent": "core"
+                  },
+                  "a dependency stack ('↑ cannot … without')",
+                  "Move 1 — Method, this doc"
+                ],
+                [
+                  {
+                    "text": "two-column compare",
+                    "ent": "diagram"
+                  },
+                  "root cause: bad vs good",
+                  "style/skeleton.html"
+                ],
+                [
+                  {
+                    "text": "spectrum",
+                    "ent": "diagram"
+                  },
+                  "a missing axis as a gradient with 3 named stops",
+                  "style/skeleton.html"
+                ],
+                [
+                  {
+                    "text": "decision matrix",
+                    "ent": "paletteeng"
+                  },
+                  "the showpiece — rows × cols → a verdict, argued by the shape of the colour",
+                  "style/skeleton.html"
+                ],
+                [
+                  {
+                    "text": "three axes",
+                    "ent": "diagram"
+                  },
+                  "two things you compute, one you never have",
+                  "style/skeleton.html"
+                ],
+                [
+                  {
+                    "text": "seam / pipeline",
+                    "ent": "library"
+                  },
+                  "a flow with a step that has teeth",
+                  "the swimlane on the Primitive Library page"
+                ]
+              ]
+            }
+          ]
+        },
+        {
+          "type": "callout",
+          "kind": "paletteeng",
+          "lead": "The copy-from starter is style/skeleton.html.",
+          "body": "It holds every piece live: the :root palette block, all six diagram idioms as ready CSS, and the seven-beat descent skeleton. styleguide.md is the prose reference beside it. Open skeleton.html in a browser to see the idioms rendered in full."
+        }
+      ]
+    },
+    {
+      "slug": "bundled-examples",
+      "group": "Style & Examples",
+      "title": "Bundled Examples — Worked, Runnable",
+      "tagline": "three complete examples ship in the skill",
+      "status": "LIVE",
+      "sections": [
+        {
+          "name": "Three examples — and you're inside one",
+          "icon": "📦",
+          "tag": "examples",
+          "summary": "The most complete example is the page you are reading: this whole doc is the data-derived example (Move 0) — authored as source.json, derived by `stddoc publish`, listening right now. The other two are served live below; open them.",
+          "items": [
+            {
+              "name": "hello-living-doc → http://localhost:5491",
+              "desc": "The minimal end-to-end living document: a single page that listens. Open it, select a sentence, watch the comment widget. SERVED LIVE.",
+              "citations": [
+                {
+                  "path": "examples/hello-living-doc/",
+                  "evidence": "MEASURED",
+                  "note": "served on :5491 this shift"
+                }
+              ]
+            },
+            {
+              "name": "structured-controls → http://localhost:5492",
+              "desc": "radio / checkbox / select answered by PICKING, not typing. Open it and submit a choice — it lands as a structured control comment. SERVED LIVE.",
+              "citations": [
+                {
+                  "path": "examples/structured-controls/",
+                  "evidence": "MEASURED",
+                  "note": "served on :5492 this shift"
+                }
+              ]
+            },
+            {
+              "name": "data-derived-example → you are looking at it",
+              "desc": "A worked source.json doc-tree exercising the v2 renderer. This very document is built by the same path; the Self-Hosting node proves it.",
+              "citations": [
+                {
+                  "path": "examples/data-derived-example/source.json",
+                  "evidence": "MEASURED",
+                  "note": "the canonical doc-tree example"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "blocks": [
+        {
+          "type": "callout",
+          "kind": "live",
+          "lead": "Don't take my word for it — open them.",
+          "body": "hello-living-doc is live at http://localhost:5491 and structured-controls at http://localhost:5492. Both are real, served, talk-to-able pages. The third example, data-derived, is the document you are reading."
+        }
+      ]
+    },
+    {
+      "slug": "data-derived",
+      "group": "Beyond the Basics",
+      "title": "Move 0 — The Optional Pre-Step",
+      "tagline": "still four moves — this one is numbered 0 because it runs BEFORE Move 1, only when the doc is structured",
+      "status": "LIVE",
+      "diagrams": [
+        {
+          "caption": "JSON is the source of truth; HTML is a build artifact",
+          "ascii": "  source.json  ──stddoc publish──►  index.html + one <node>.html per node + left-nav\n      ▲                                    │\n      │                               (never hand-edited)\n  you edit here                             │\n      │                                    ▼\n  stddoc serve ◄── on every save ── rebuilds HTML (watch mode)\n      │\n  stddoc freeze ──► portable server-free snapshot + .zip"
+        }
+      ],
+      "sections": [
+        {
+          "name": "Why it's called Move 0",
+          "icon": "🔢",
+          "tag": "clarification",
+          "summary": "std-doc is FOUR moves: Method, Style, Serve, Respond. This is not a fifth — it's a Move 0: an OPTIONAL pre-step that runs in front of Move 1, and ONLY when a document is structured (many pages over one knowledge base). A single hand-authored page skips it entirely and the four moves are unchanged. It's numbered 0, not 5, precisely because it's additive and comes first — count it if you like, but the method is still four moves."
+        },
+        {
+          "name": "Why a doc-tree",
+          "icon": "🌳",
+          "tag": "forcing-function",
+          "summary": "When a document is structured — many pages over one knowledge base — author a canonical source.json and let the HTML be 100% derived. A publisher that renders a complete page from JSON alone proves the JSON had everything; the HTML can't drift because it's regenerated, never edited.",
+          "items": [
+            {
+              "name": "stddoc publish",
+              "desc": "Derives HTML from source.json and wires the feedback widget every run (so it can't be stripped by a rewrite). The Go binary at go/cmd/stddoc handles this in the `publish` subcommand.",
+              "citations": [
+                {
+                  "path": "go/cmd/stddoc/publish.go",
+                  "evidence": "CITED",
+                  "note": "the data-derived publisher (Go binary)"
+                }
+              ]
+            },
+            {
+              "name": "stddoc serve — auto-rebuild in watch mode",
+              "desc": "With `stddoc serve`, saving source.json triggers an automatic rebuild of the published HTML — no separate watch script needed."
+            },
+            {
+              "name": "stddoc freeze",
+              "desc": "`stddoc freeze` bakes a portable, server-free snapshot. Freezing Mermaid diagram docs needs the Mermaid CLI — the binary refuses rather than ship broken diagrams. D2 diagrams render in-process and freeze cleanly."
+            }
+          ]
+        },
+        {
+          "name": "The schema",
+          "icon": "📋",
+          "tag": "schema",
+          "summary": "title + nodes[] are required; each node needs slug + title. Everything else is optional. A node becomes one HTML page with sections → items, optional diagrams, badges, and an additive free-form evidence drill-down.",
+          "items": [
+            {
+              "name": "Additive by design",
+              "desc": "The evidence object is free-form and ignored by any renderer that doesn't opt in — proven by injecting a sample on every node and diffing to a byte-identical render."
+            },
+            {
+              "name": "Multi-page note",
+              "desc": "All pages share one feedback/ dir, so when you reply set the change's page field — that's what makes History click-to-navigate across pages.",
+              "citations": [
+                {
+                  "path": "protocol/doctree-schema.md",
+                  "evidence": "CITED",
+                  "note": "the source.json contract"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "lifecycle",
+      "group": "Beyond the Basics",
+      "title": "Lifecycle — When a Doc Earns a Home",
+      "tagline": "live ⇄ shelved · locked · sealed — nothing is ever deleted",
+      "status": "LIVE",
+      "sections": [
+        {
+          "name": "Two orthogonal axes",
+          "icon": "♻️",
+          "tag": "lifecycle",
+          "summary": "An ad-hoc doc can live and die with the session. A doc worth keeping gets a durable home: library/<slug>/{index.html, meta.json, feedback/}.",
+          "items": [
+            {
+              "name": "Liveness (mechanical, reversible)",
+              "desc": "◉ LIVE (server up) ⇄ ❄ SHELVED (server off, history kept). shelve stops + stamps; wake serves again + re-arms the Monitor."
+            },
+            {
+              "name": "Decision (sticky)",
+              "desc": "🔒 LOCKED = declared final. Seal is the one move to cold storage: strip the injected tags → clean static, then move library/<slug> → archive/<slug>. wake un-archives and restores interactivity."
+            }
+          ],
+          "citations": [
+            {
+              "path": "go/cmd/stddoc/",
+              "evidence": "CITED",
+              "note": "the four lifecycle verbs are subcommands of the stddoc binary: roll (version), graduate (shed comment round), freeze (snapshot), serve (wake)"
+            },
+            {
+              "path": "protocol/library-schema.md",
+              "evidence": "CITED",
+              "note": "durable meta.json record"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "gotchas",
+      "group": "Beyond the Basics",
+      "title": "Gotchas — These Will Bite",
+      "tagline": "the unglamorous truths, named out loud",
+      "status": "LIVE",
+      "sections": [
+        {
+          "name": "Serving",
+          "icon": "⚠️",
+          "tag": "gotcha",
+          "summary": "The server is tiny and stdlib-only — which means a few sharp edges.",
+          "items": [
+            {
+              "name": "--idle-timeout 0 is mandatory",
+              "desc": "The server auto-shuts-down after 600s of no requests by default. A doc you set up before the reader opens it will quietly die in 10 minutes. setup.sh sets it."
+            },
+            {
+              "name": "macOS has no setsid",
+              "desc": "Start the server with run_in_background or via setup.sh — never a start that depends on setsid."
+            },
+            {
+              "name": "Per-doc nohup dies on parent exit",
+              "desc": "Fine for an ad-hoc doc (dies with your session, by design). For something long-lived, run it under a persistent service."
+            }
+          ]
+        },
+        {
+          "name": "Authoring & files",
+          "icon": "🧨",
+          "tag": "gotcha",
+          "summary": "The traps that have actually cost time.",
+          "items": [
+            {
+              "name": "Widget tags wiped by full HTML rewrites",
+              "desc": "The widget tags live in the HTML, so regenerating a page from scratch silently strips them. Re-run `stddoc serve` (which injects) or `stddoc publish` (which re-wires automatically) after any hand-rewrite."
+            },
+            {
+              "name": "history.json is append-only",
+              "desc": "Append, never prepend or overwrite — the client walks from the end to find the latest batch."
+            },
+            {
+              "name": "Mermaid dark-theme traps",
+              "desc": "Three silent bombs: emoji in subgraph labels, \\n in pipe edge labels, Bootstrap classDef colors on a dark theme. See protocol/mermaid-gotchas.md for fixes and confirm zero bomb icons in a browser.",
+              "citations": [
+                {
+                  "path": "protocol/mermaid-gotchas.md",
+                  "evidence": "CITED",
+                  "note": "the three silent bombs + fixes + pan-zoom viewer"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "renderer-architecture",
+      "group": "The Pluggable Renderer",
+      "title": "The Pluggable Renderer — CORE + Primitive Library",
+      "tagline": "the moat: add a visual by writing a module, never editing the core",
+      "status": "LIVE",
+      "diagrams": [
+        {
+          "caption": "the split — CORE owns orchestration, primitives own pixels",
+          "ascii": "  source.json ──► CORE  (walk · numbering · nav · anchors · CSS dedup)\n                    │        owns the palette + security gate + freeze\n                    │\n                    ▼  dispatch each typed block by `type`\n               REGISTRY ──► primitive.render(block, ctx) ──► content HTML\n                    │             (core wraps the anchor around it)\n                    └─ unknown/throwing type ──► visible error block (never crash)"
+        }
+      ],
+      "sections": [
+        {
+          "name": "Why it exists",
+          "icon": "🧩",
+          "tag": "architecture",
+          "summary": "A doc engine that documents a large, evolving system must grow new visuals without a whole-system release. The renderer splits into a stable CORE and a swappable LIBRARY of primitives, so a new component is one self-contained module against a frozen contract.",
+          "items": [
+            {
+              "name": "The CORE",
+              "desc": "Owns the doc-tree walk, node numbering, left-nav, anchors (data-cf-change / data-cf-anchor), CSS/asset dedup, freeze orchestration, the palette, and the security gate. It never knows what a 'swimlane' is.",
+              "citations": [
+                {
+                  "path": "go/internal/{core,registry,gate}/",
+                  "evidence": "MEASURED",
+                  "note": "the shipped engine: core (walk, page, palette, diagrams), registry (the dispatch table), gate (the freeze security gate) — conformance 8/8 byte-identical"
+                }
+              ]
+            },
+            {
+              "name": "The LIBRARY",
+              "desc": "36 first-party primitives — 30 template-driven (data → HTML by a declarative template in go/stddoc-lib/templates.json) plus 6 code-driven (sections, diagrams, statetrack, swimlane, tree, evidence). Each turns one typed block into HTML and nothing more.",
+              "citations": [
+                {
+                  "path": "go/internal/core/install.go",
+                  "evidence": "MEASURED",
+                  "note": "buildRegistry installs all 36: the 30 template-driven (auto-registered from templates.json) + 6 code-driven, each Register(type, renderFunc, css)"
+                }
+              ]
+            },
+            {
+              "name": "The moat",
+              "desc": "No other doc engine binds ONE named-entity palette across every component AND closes the agent-edits-back loop. Comment capture is commodity; this pairing is not."
+            }
+          ]
+        },
+        {
+          "name": "How it was built — strangler-fig",
+          "icon": "🌿",
+          "tag": "migration",
+          "summary": "The renderer was not rewritten in place. Today's hand-ordered render_node was wrapped as primitives BYTE-IDENTICAL first (the golden-master gate), then the core was hollowed out behind the contract.",
+          "items": [
+            {
+              "name": "Decisions D1–D6",
+              "desc": "BUILD the renderer + palette (the moat); ADOPT only the diagram layer (D2 binary, Mermaid fallback). Clean-room a small registry (studied markdown-it-py, depend on none) — 85 LOC in the shipped Go. Port the token→CSS pattern (Style Dictionary's idea), stay dependency-free. Contract is language-agnostic, which is why the Go port re-implemented it without re-designing — conformance 8/8 byte-identical."
+            },
+            {
+              "name": "Phased P0–P6",
+              "desc": "P0 contract + probes → P1 strangler-wrap existing renderers → P2 blocks[]+lint → P3 palette + palette-bound primitives → P4 D2 diagrams → P5 security gate → P6 standalone bespoke pages.",
+              "citations": [
+                {
+                  "path": "docs/proposals/pluggable-renderer/PRD.md",
+                  "evidence": "CITED",
+                  "note": "the by-descent PRD + WBS that drove the build"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "blocks": [
+        {
+          "type": "hero",
+          "text": "Make the renderer pluggable — add an idiom without touching the core.",
+          "sub": "One stable contract in; a self-contained primitive module out. The core never learns a new type."
+        },
+        {
+          "type": "endpoint",
+          "caption": "what a data-derived block becomes — rendered, not described",
+          "ascii": "source.json            ->   published page\n{ \"type\":\"descent\",          .layer .lname  (cyan)\n  \"layers\":[ ... ] }          .conscript  \"^ cannot ... without\"\n                               .layer.here  (green: we stand here)"
+        },
+        {
+          "type": "descent",
+          "layers": [
+            {
+              "title": "Pluggable renderer",
+              "why": "the ask — idioms as data",
+              "tag": "net-new"
+            },
+            {
+              "title": "Primitive registry",
+              "why": "type -> handler dispatch, with a boundary",
+              "tag": "reuse"
+            },
+            {
+              "title": "blocks[] stream + palette + gate",
+              "why": "the shared rails every primitive rides",
+              "tag": "reuse"
+            },
+            {
+              "title": "The doc-tree walk (core)",
+              "why": "numbering, nav, anchors — owns the page, not the content",
+              "tag": "reuse",
+              "here": true
+            }
+          ]
+        },
+        {
+          "type": "decisionmatrix",
+          "columns": [
+            "Build it",
+            "Adopt a library"
+          ],
+          "rows": [
+            {
+              "label": "D1 · Registry",
+              "cells": [
+                {
+                  "text": "85 LOC, ours",
+                  "verdict": "have"
+                },
+                {
+                  "text": "heavy dep",
+                  "verdict": "miss"
+                }
+              ]
+            },
+            {
+              "label": "D2 · Diagram engine",
+              "cells": [
+                {
+                  "text": "wrap d2/mermaid",
+                  "verdict": "part"
+                },
+                {
+                  "text": "d2 binary",
+                  "verdict": "have"
+                }
+              ]
+            },
+            {
+              "label": "D3 · Palette",
+              "cells": [
+                {
+                  "text": "named tokens, ours",
+                  "verdict": "have"
+                },
+                {
+                  "text": "no fit",
+                  "verdict": "miss"
+                }
+              ]
+            },
+            {
+              "label": "D4 · Freeze gate",
+              "cells": [
+                {
+                  "text": "stdlib scan",
+                  "verdict": "have"
+                },
+                {
+                  "text": "none safe",
+                  "verdict": "miss"
+                }
+              ]
+            },
+            {
+              "label": "D5 · Assembled lint",
+              "cells": [
+                {
+                  "text": "per-primitive validate()",
+                  "verdict": "have"
+                },
+                {
+                  "text": "partial",
+                  "verdict": "part"
+                }
+              ]
+            },
+            {
+              "label": "D6 · Lang-agnostic contract",
+              "cells": [
+                {
+                  "text": "7 members, portable",
+                  "verdict": "have"
+                },
+                {
+                  "text": "python-bound",
+                  "verdict": "miss"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "the-contract",
+      "group": "The Pluggable Renderer",
+      "title": "The Contract — Register(type, render, css)",
+      "tagline": "three parts, one boundary, five invariants — the surface the Go port ships",
+      "status": "LIVE",
+      "sections": [
+        {
+          "name": "The contract, as the binary ships it",
+          "icon": "📜",
+          "tag": "contract",
+          "summary": "go/internal/registry/registry.go defines the one stable surface. A primitive is a render func plus its CSS, installed under a type — no class, no inheritance. The leaner-than-the-reference shape is deliberate: freeze and the palette live in the core/gate, not on every primitive, so registering one is just three things.",
+          "items": [
+            {
+              "name": "type : string",
+              "desc": "The registry key / JSON discriminator. The block's `type` selects exactly this handler."
+            },
+            {
+              "name": "RenderFunc(block, ctx) -> (html, error)",
+              "desc": "The inner HTML for one block. The core wraps the anchor around your output; an error you return is caught at the boundary, never propagated."
+            },
+            {
+              "name": "css : string",
+              "desc": "CSS this primitive needs, registered alongside the func. Collected once and deduped by the core."
+            },
+            {
+              "name": "the boundary — Register then Render",
+              "desc": "Register(type, fn, css) installs the handler; Render(type, block, ctx) dispatches it WITH a boundary — an unknown type OR a func returning an error becomes a VISIBLE error block, never an exception that breaks the page, never a silent drop.",
+              "citations": [
+                {
+                  "path": "go/internal/registry/registry.go",
+                  "line": "16-72",
+                  "evidence": "MEASURED",
+                  "note": "RenderFunc type + Registry{funcs,css} + Register/Render with the crash-proof boundary — go/internal/registry/registry.go, conformance 8/8 byte-identical"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "The five invariants you must honor",
+          "icon": "⚖️",
+          "tag": "invariants",
+          "summary": "From protocol/primitives.md — the rules a primitive author cannot break.",
+          "items": [
+            {
+              "name": "1 · Anchors are core, never yours",
+              "desc": "Emit content only; the core assigns data-cf-anchor. Never write your own data-cf-*."
+            },
+            {
+              "name": "2 · Freeze = zero external refs",
+              "desc": "freeze() output must contain no http(s)://, protocol-relative //host, or CDN src/href. The gate scans it and fails the build naming your type."
+            },
+            {
+              "name": "3 · stdlib only",
+              "desc": "No third-party dependencies — the shipped binary is one static Go executable (http, json, html-escape, crypto are all stdlib; d2 renders in-process). Nothing to audit in a supply chain."
+            },
+            {
+              "name": "4 · Helpers arrive via ctx",
+              "desc": "Never import the core. ctx carries esc, palette, registry, anchor, render_evidence, status_class — keeping the contract language-agnostic for the Go port."
+            },
+            {
+              "name": "5 · Be palette-bound where it makes sense",
+              "desc": "ctx['palette'].var(key) returns var(--ent-<key>) and raises loudly on an undeclared entity.",
+              "citations": [
+                {
+                  "path": "protocol/primitives.md",
+                  "line": "26-38",
+                  "evidence": "MEASURED",
+                  "note": "the five author-facing invariants, verbatim"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "the-registry",
+      "group": "The Pluggable Renderer",
+      "title": "The Registry — Dispatch with a Boundary",
+      "tagline": "85 LOC, clean-room, zero-dep — and it never lets a page crash",
+      "status": "LIVE",
+      "sections": [
+        {
+          "name": "Three jobs",
+          "icon": "🗂️",
+          "tag": "core",
+          "summary": "A type→handler map plus a dispatch that can never break the page. Studied markdown-it-py's renderer.rules and MJML's component registry; took the shape, wrote our own, depend on neither.",
+          "items": [
+            {
+              "name": "Register(type, fn, css)",
+              "desc": "Install a render func and its CSS under a type. Has(type) reports membership; Types() lists them sorted."
+            },
+            {
+              "name": "CSS(type)",
+              "desc": "Fetch a type's static CSS (\"\" if none) — the core collects and dedupes these once per page."
+            },
+            {
+              "name": "Render(type, block, ctx)",
+              "desc": "Dispatch WITH a boundary: an unknown type OR a func returning an error yields a VISIBLE error block (the Sphinx rule) — never an exception that breaks the page, never a silent drop. Always returns (html, nil).",
+              "citations": [
+                {
+                  "path": "go/internal/registry/registry.go",
+                  "line": "22-81",
+                  "evidence": "MEASURED",
+                  "note": "errorBlock + Registry.Register/CSS/Render boundary — go/internal/registry/registry.go, byte-identical error block"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "the-palette-engine",
+      "group": "The Pluggable Renderer",
+      "title": "The Palette Engine — One Set of Colors, Every Component",
+      "tagline": "ported token→CSS pattern (D3), dependency-free — the moat",
+      "status": "LIVE",
+      "diagrams": [
+        {
+          "caption": "one declared palette colors everything",
+          "ascii": "  root.palette = { writer:{label,color}, eic:{label,color} }\n        │  compile\n        ▼\n  CSS custom props  --ent-writer  --ent-eic\n        │  primitives reference via ctx['palette'].var('writer')\n        ▼\n  chips · callouts · card-grids · tables · (D2 theme) diagrams  ◄ all one palette"
+        }
+      ],
+      "sections": [
+        {
+          "name": "How it works",
+          "icon": "🎨",
+          "tag": "palette",
+          "summary": "A doc declares one named-entity palette at root. The engine compiles it to CSS custom properties (--ent-<key>) and hands primitives a helper to reference an entity's color.",
+          "items": [
+            {
+              "name": "Palette.var(key)",
+              "desc": "Returns var(--ent-<key>). One declared set colors chips, callouts, card-grids, tables and (via D2 theme interpolation) diagrams."
+            },
+            {
+              "name": "expand_chips(text, palette)",
+              "desc": "Inline entity-chip expansion in prose."
+            },
+            {
+              "name": "PaletteError — loud on typo",
+              "desc": "Referencing an undeclared entity is a LOUD error, never a silently colorless component.",
+              "citations": [
+                {
+                  "path": "go/internal/palette/palette.go",
+                  "evidence": "MEASURED",
+                  "note": "PaletteError + Palette.Var + expand_chips"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "the-primitive-library",
+      "group": "The Pluggable Renderer",
+      "title": "The Primitive Library — All 36",
+      "tagline": "every first-party visual, by family",
+      "status": "LIVE",
+      "sections": [
+        {
+          "name": "All 36, rendered — the catalog IS the demo",
+          "icon": "🧩",
+          "tag": "showroom",
+          "summary": "No cryptic list. The table below is the complete catalog of all 36 first-party primitives — and it is itself rendered by the table primitive, with each name tinted by the palette engine. The chips, the band, and the diagrams beneath it are likewise produced live by the Go registry dispatching chip, callout, swimlane and statetrack blocks as you loaded this page. (The core renders author-placed blocks after a node's sections — Move 0 ordering — so the showroom sits here, directly below this one line, not buried under a long prose list.)"
+        }
+      ],
+      "blocks": [
+        {
+          "type": "callout",
+          "kind": "core",
+          "lead": "Everything from here down is rendered live by the primitives it documents.",
+          "body": "These are not screenshots or descriptions. The colored chips, this band, the table, and the swimlane + state-track diagrams below were all produced by the engine's own primitive modules, dispatched through the Go registry as the page loaded. A doc about a render engine, rendered by that engine."
+        },
+        {
+          "type": "chip",
+          "ent": "core",
+          "label": "core"
+        },
+        {
+          "type": "chip",
+          "ent": "library",
+          "label": "library"
+        },
+        {
+          "type": "chip",
+          "ent": "paletteeng",
+          "label": "palette"
+        },
+        {
+          "type": "chip",
+          "ent": "diagram",
+          "label": "diagram"
+        },
+        {
+          "type": "chip",
+          "ent": "gate",
+          "label": "gate"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Primitive",
+            "type",
+            "Renders"
+          ],
+          "groups": [
+            {
+              "name": "Strangler-wrapped originals (P1)",
+              "rows": [
+                [
+                  {
+                    "text": "sections",
+                    "ent": "library"
+                  },
+                  "sections",
+                  "the sections / items / citations region (the node workhorse)"
+                ],
+                [
+                  {
+                    "text": "diagrams",
+                    "ent": "library"
+                  },
+                  "diagrams",
+                  "ASCII + caption diagram cards"
+                ],
+                [
+                  {
+                    "text": "children",
+                    "ent": "library"
+                  },
+                  "children",
+                  "the 'Descend' card grid for a branch node"
+                ],
+                [
+                  {
+                    "text": "evidence",
+                    "ent": "library"
+                  },
+                  "evidence",
+                  "additive collapsed <details> drill-down"
+                ],
+                [
+                  {
+                    "text": "badges",
+                    "ent": "library"
+                  },
+                  "badges",
+                  "status + free badge chips on a node header"
+                ]
+              ]
+            },
+            {
+              "name": "Palette-bound (P3)",
+              "rows": [
+                [
+                  {
+                    "text": "chip",
+                    "ent": "paletteeng"
+                  },
+                  "chip",
+                  "an inline entity chip (the colored pills above)"
+                ],
+                [
+                  {
+                    "text": "callout",
+                    "ent": "paletteeng"
+                  },
+                  "callout",
+                  "a colored band (the lead paragraph above)"
+                ],
+                [
+                  {
+                    "text": "cardgrid",
+                    "ent": "paletteeng"
+                  },
+                  "cardgrid",
+                  "an N-column grid of tinted entity cards"
+                ],
+                [
+                  {
+                    "text": "table",
+                    "ent": "paletteeng"
+                  },
+                  "table",
+                  "grouped headers + per-cell entity color — THIS table"
+                ]
+              ]
+            },
+            {
+              "name": "Diagram — D2 / Mermaid fallback (P4)",
+              "rows": [
+                [
+                  {
+                    "text": "swimlane",
+                    "ent": "diagram"
+                  },
+                  "swimlane",
+                  "JSON → D2 → SVG, palette-themed lanes"
+                ],
+                [
+                  {
+                    "text": "statetrack",
+                    "ent": "diagram"
+                  },
+                  "statetrack",
+                  "a state machine: D2 with Mermaid fallback"
+                ]
+              ]
+            },
+            {
+              "name": "Bespoke standalone-page families (P6)",
+              "rows": [
+                [
+                  {
+                    "text": "citizenlifecycle",
+                    "ent": "library"
+                  },
+                  "html",
+                  "the Citizen-Lifecycle page family"
+                ],
+                [
+                  {
+                    "text": "statemachine",
+                    "ent": "library"
+                  },
+                  "kicker",
+                  "the state-machine page family (~250 LOC)"
+                ]
+              ]
+            }
+          ]
+        },
+        {
+          "type": "swimlane",
+          "label": "swimlane primitive — the curate seam (Writer deposits, Editor descends)",
+          "lanes": [
+            {
+              "name": "Writer()",
+              "ent": "writer",
+              "steps": [
+                "collect",
+                "deposit to 1-raw"
+              ]
+            },
+            {
+              "name": "Editor-in-Chief",
+              "ent": "eic",
+              "steps": [
+                "curate",
+                "draft",
+                "review",
+                "publish"
+              ]
+            }
+          ],
+          "flow": [
+            [
+              "deposit to 1-raw",
+              "curate"
+            ],
+            [
+              "publish",
+              "collect"
+            ]
+          ]
+        },
+        {
+          "type": "statetrack",
+          "label": "statetrack primitive — a std-doc's own lifecycle",
+          "states": [
+            {
+              "id": "draft",
+              "ent": "wip"
+            },
+            {
+              "id": "live",
+              "ent": "live"
+            },
+            {
+              "id": "locked",
+              "ent": "core"
+            },
+            {
+              "id": "sealed",
+              "ent": "gate"
+            }
+          ],
+          "transitions": [
+            [
+              "draft",
+              "live",
+              "publish + serve"
+            ],
+            [
+              "live",
+              "locked",
+              "lock"
+            ],
+            [
+              "locked",
+              "sealed",
+              "seal → archive"
+            ],
+            [
+              "sealed",
+              "live",
+              "wake"
+            ]
+          ]
+        },
+        {
+          "type": "threeaxes",
+          "axes": [
+            {
+              "name": "Markup",
+              "kind": "computed",
+              "note": "class-based HTML we can grep on every page"
+            },
+            {
+              "name": "Visual fidelity vs refA",
+              "kind": "computed",
+              "note": "diffable against the gold-standard doc"
+            },
+            {
+              "name": "The reader's felt understanding",
+              "kind": "blind",
+              "note": "can't even be seen from the page today"
+            }
+          ]
+        },
+        {
+          "type": "spectrum",
+          "stops": [
+            {
+              "label": "Hand-authored HTML",
+              "note": "a person writes the markup directly"
+            },
+            {
+              "label": "Data-derived block",
+              "note": "source.json names a type; the primitive renders it"
+            },
+            {
+              "label": "Frozen snapshot",
+              "note": "the same bytes, server-free, external-ref-free"
+            }
+          ]
+        },
+        {
+          "type": "callout",
+          "kind": "core",
+          "lead": "The rest of the library — every remaining primitive, rendered live.",
+          "body": "Everything below this line was produced by the engine as you loaded the page: each block is the very primitive it documents. No screenshots. This is the rest of the 36, the ones the catalog above names — now shown, not just listed."
+        },
+        {
+          "type": "prose",
+          "text": "prose — flowing body copy with an optional lede emphasis"
+        },
+        {
+          "type": "prose",
+          "lede": true,
+          "text": "This sentence is a prose block — the workhorse for narrative text. With lede:true it renders larger, to open a section; without it, it's ordinary body copy. Everything you're reading in the atlas that isn't a diagram is prose."
+        },
+        {
+          "type": "prose",
+          "text": "code — syntax-tinted command or snippet, span by span"
+        },
+        {
+          "type": "code",
+          "mode": "command",
+          "caption": "publish the atlas from its canonical JSON",
+          "spans": [
+            {
+              "cls": "keyword",
+              "text": "stddoc publish "
+            },
+            {
+              "cls": "plain",
+              "text": "self-doc/source.json published/ "
+            },
+            {
+              "cls": "value",
+              "text": "--style techno-dark"
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "badges — compact key:value chips with a status pill"
+        },
+        {
+          "type": "badges",
+          "badges": {
+            "engine": "Go",
+            "deps": "stdlib-only",
+            "diagrams": "in-process d2"
+          },
+          "status": "LIVE"
+        },
+        {
+          "type": "prose",
+          "text": "flow — a left-to-right pipeline of numbered beats"
+        },
+        {
+          "type": "flow",
+          "connector": "arrow",
+          "steps": [
+            {
+              "n": "01",
+              "head": "source.json",
+              "sub": "the canonical doc-tree you edit"
+            },
+            {
+              "n": "02",
+              "head": "derive",
+              "sub": "the engine expands JSON into HTML"
+            },
+            {
+              "n": "03",
+              "head": "serve",
+              "sub": "the page listens for your comments"
+            },
+            {
+              "n": "04",
+              "head": "freeze",
+              "variant": "here",
+              "sub": "a portable, network-free snapshot"
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "mermaid — a Mermaid diagram (rendered via CDN in served mode)"
+        },
+        {
+          "type": "mermaid",
+          "caption": "the four moves, as a Mermaid graph",
+          "mermaid": "graph LR\n  A[Method] --> B[Style]\n  B --> C[Serve]\n  C --> D[Respond]\n  D -->|comment| C"
+        },
+        {
+          "type": "prose",
+          "text": "ascii — a hand-drawn ASCII diagram in a mono pre"
+        },
+        {
+          "type": "ascii",
+          "caption": "the strangler boundary, drawn in text",
+          "ascii": "  JSON  ──derive──▶  HTML  ──freeze──▶  .zip\n   ▲                                  \n   └────────── you edit here ──────────"
+        },
+        {
+          "type": "prose",
+          "text": "namecard — the name a voice offers a reader"
+        },
+        {
+          "type": "namecard",
+          "lead": "In this voice, you can call me",
+          "name": "Writer() 🎈",
+          "sub": "silent parens among friends · “Writer Paren-Paren” when it's formal · “Writer Open-Paren Close-Paren” when mom's upset"
+        },
+        {
+          "type": "prose",
+          "text": "panel — a raised surface — lift by tone, not shadow"
+        },
+        {
+          "type": "panel",
+          "variant": "tint",
+          "lead": "Even the shadow is on-brand.",
+          "body": "When a shadow IS warranted, tint it with the accent instead of neutral black — the depth reads as part of the palette, like elements floating in a colored twilight rather than punched out of the page."
+        },
+        {
+          "type": "prose",
+          "text": "gradient-band — a quiet atmospheric wash"
+        },
+        {
+          "type": "gradient-band",
+          "text": "Atmosphere, not decoration.",
+          "sub": "Two near-neighbours of the accent, washing one direction, low and quiet. A gradient should whisper — the moment it spans the color wheel it screams crypto landing page."
+        },
+        {
+          "type": "prose",
+          "text": "figure — a bundled inline SVG, baked into the page"
+        },
+        {
+          "type": "figure",
+          "name": "balloon-playful"
+        },
+        {
+          "type": "prose",
+          "text": "howto — a titled step block with an embedded code snippet"
+        },
+        {
+          "type": "howto",
+          "label": "a way to draw →",
+          "title": "add a primitive",
+          "steps": [
+            "Implement the primitive contract in primitives/ — a small, pure step from data to drawn SVG, registered into the shared library. Browse the bestiary and examples/ in the repo for patterns to start from.",
+            "Add a test that proves the existing pages are unchanged, and that yours renders in all three voices.",
+            "Open a pull request. Reviewed, merged, and the whole library gains it at once — no forking the core, ever."
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "tree — a decision cascade — keep / refactor / rewrite / trash"
+        },
+        {
+          "type": "tree",
+          "label": "close the self-hosting gap",
+          "nodes": [
+            {
+              "label": "P0 · Spec the interactive-primitive category",
+              "decision": "rewrite",
+              "sublabel": "design first",
+              "note": "a std-doc you comment on before code",
+              "children": [
+                {
+                  "label": "JSON schema for interactive blocks",
+                  "decision": "rewrite",
+                  "sublabel": "style-ab, action, ask"
+                },
+                {
+                  "label": "JS-scoping model",
+                  "decision": "rewrite",
+                  "note": "per-instance scope; no global collisions across blocks on a page"
+                },
+                {
+                  "label": "freeze-safety contract",
+                  "decision": "rewrite",
+                  "note": "inline whole, zero network, passes the gate"
+                },
+                {
+                  "label": "the primitive contract itself",
+                  "decision": "keep",
+                  "sublabel": "data → drawn",
+                  "note": "extend to allow an emitted <script>, don't replace"
+                }
+              ]
+            },
+            {
+              "label": "P1 · style-ab — the proof primitive",
+              "decision": "rewrite",
+              "sublabel": "the hardest one",
+              "note": "if this derives + freezes, the category is proven",
+              "children": [
+                {
+                  "label": "block schema: voices + preview doc-fragment",
+                  "decision": "rewrite"
+                },
+                {
+                  "label": "renderer: emit markup + scoped style-lock JS",
+                  "decision": "rewrite",
+                  "children": [
+                    {
+                      "label": "reuse the :root token blocks",
+                      "decision": "keep",
+                      "sublabel": "styles/ exist"
+                    },
+                    {
+                      "label": "the live voice-switch behavior",
+                      "decision": "rewrite",
+                      "note": "ported from style-ab.html's inline script"
+                    }
+                  ]
+                },
+                {
+                  "label": "Python primitive",
+                  "decision": "rewrite"
+                },
+                {
+                  "label": "Go primitive — byte-identical",
+                  "decision": "rewrite",
+                  "sublabel": "double-sited",
+                  "note": "the strangler proof spans both engines"
+                },
+                {
+                  "label": "freeze: inline the scoped JS clean",
+                  "decision": "rewrite"
+                }
+              ]
+            },
+            {
+              "label": "P2 · action + status primitive",
+              "decision": "refactor",
+              "sublabel": "smaller, same contract",
+              "note": "statetrack already exists — extend toward a live button",
+              "children": [
+                {
+                  "label": "button-with-status markup + JS",
+                  "decision": "rewrite"
+                },
+                {
+                  "label": "lean on statetrack for the IDLE→WORKING→COMPLETED states",
+                  "decision": "refactor",
+                  "sublabel": "primitive exists"
+                },
+                {
+                  "label": "bounded actions only (covenant V)",
+                  "decision": "keep",
+                  "note": "actions stay bounded by the doc's subject — not a control panel"
+                }
+              ]
+            },
+            {
+              "label": "P3 · ask / submit primitive",
+              "decision": "refactor",
+              "sublabel": "controls exist",
+              "children": [
+                {
+                  "label": "reuse the structured-control widget",
+                  "decision": "keep",
+                  "sublabel": "radio/select shipped",
+                  "note": "feedback.js already does controls"
+                },
+                {
+                  "label": "wrap it as a derivable primitive",
+                  "decision": "rewrite",
+                  "note": "so source.json can author it, not hand-HTML"
+                }
+              ]
+            },
+            {
+              "label": "P4 · Enrich source.json + re-derive",
+              "decision": "rewrite",
+              "sublabel": "the payoff",
+              "children": [
+                {
+                  "label": "add the interactive blocks to demo/source.json",
+                  "decision": "rewrite"
+                },
+                {
+                  "label": "publish → diff against the rich originals",
+                  "decision": "rewrite",
+                  "sublabel": "byte target"
+                },
+                {
+                  "label": "the rich originals (hello.html, style-ab.html…)",
+                  "decision": "keep",
+                  "sublabel": "the spec",
+                  "note": "recoverable, in the working tree — our byte target"
+                }
+              ]
+            },
+            {
+              "label": "P5 · The conformance gate — lock it forever",
+              "decision": "rewrite",
+              "sublabel": "test again and again",
+              "children": [
+                {
+                  "label": "pytest: publish+inject == originals, byte-for-byte",
+                  "decision": "rewrite"
+                },
+                {
+                  "label": "go test: same assertion in the shipped binary",
+                  "decision": "rewrite",
+                  "note": "internal/core has ZERO tests today"
+                },
+                {
+                  "label": "freeze conformance: 0 external-ref leaks with JS inside",
+                  "decision": "rewrite"
+                },
+                {
+                  "label": "the existing 209 pytest / golden-master proof",
+                  "decision": "keep",
+                  "sublabel": "stays green"
+                }
+              ]
+            },
+            {
+              "label": "X · What we deliberately do NOT do",
+              "decision": "trash",
+              "sublabel": "scope discipline",
+              "children": [
+                {
+                  "label": "turn the doc into a general app",
+                  "decision": "trash",
+                  "note": "covenant V — bounded by subject"
+                },
+                {
+                  "label": "screenshot/pixel-diff gating",
+                  "decision": "trash",
+                  "note": "bytes are the truth; visual diff is heavier and later, if ever"
+                },
+                {
+                  "label": "re-style the atlas / other docs",
+                  "decision": "trash",
+                  "note": "different styles are FINE there — only the soul-download must be JSON→HTML"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "action — a bounded, in-page action with a step pipeline"
+        },
+        {
+          "type": "action",
+          "run_label": "▶ Run the release",
+          "idle_text": "IDLE — nothing has run yet",
+          "done_text": "COMPLETED — shipped to everyone, without you leaving the page ✓",
+          "steps": [
+            {
+              "label": "build",
+              "detail": "compile"
+            },
+            {
+              "label": "test",
+              "detail": "107 checks"
+            },
+            {
+              "label": "gate ⛔",
+              "detail": "no leaks"
+            },
+            {
+              "label": "sign",
+              "detail": "one binary"
+            },
+            {
+              "label": "ship 🚀",
+              "detail": "to everyone"
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "reveal — progressive disclosure — a warm reveal"
+        },
+        {
+          "type": "reveal",
+          "tone": "warm",
+          "anchor": "come-build-thanks",
+          "paras": [
+            {
+              "content": [
+                {
+                  "type": "strong",
+                  "s": "Thank you for playing."
+                },
+                {
+                  "type": "text",
+                  "s": " 🩵"
+                }
+              ]
+            },
+            {
+              "content": [
+                {
+                  "type": "soft",
+                  "s": "Welcome from people who believe love is the attractor state for intelligence — and build to show everyone they belong together."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "ask — an inline question control that writes back to JSON"
+        },
+        {
+          "type": "ask",
+          "id": "git-home",
+          "control": "text",
+          "anchor": "the-palace-githome",
+          "prompt": "When this doc's JSON is published, what git address should be its home?",
+          "placeholder": "git@… or an https URL ending in your-knowledge.git",
+          "hint": "Don't have one yet? No problem — you can pick a home later, and every version will land there automatically, named and timestamped. A palace with a permanent address."
+        },
+        {
+          "type": "prose",
+          "text": "style_ab — live A/B voice switch across the named styles"
+        },
+        {
+          "type": "style_ab",
+          "default": "techno-dark",
+          "voices": [
+            {
+              "id": "parchment-light",
+              "label": "parchment-light",
+              "dot": true,
+              "line": "parchment-light — a business plan. White, serif, calm. Hand it to a stranger and they just nod. You'd call me Editor In Chief.",
+              "preview": [
+                {
+                  "type": "namecard",
+                  "lead": "In this voice, you can call me",
+                  "name": "Editor In Chief",
+                  "sub": "EIC for short, in the hallway."
+                },
+                {
+                  "type": "hero",
+                  "at": "lead",
+                  "text": "Q3 Go-to-Market Plan",
+                  "sub": "three phases from quiet beta to public launch — we prove value with a small design-partner cohort, widen to a waitlist once retention holds, then open the doors."
+                },
+                {
+                  "type": "kicker",
+                  "text": "flow"
+                },
+                {
+                  "type": "flow",
+                  "connector": "arrow",
+                  "steps": [
+                    {
+                      "head": "Phase 1 · Beta",
+                      "sub": "10 design partners"
+                    },
+                    {
+                      "head": "Phase 2 · Waitlist",
+                      "sub": "gate on retention"
+                    },
+                    {
+                      "head": "Phase 3 · Launch",
+                      "variant": "here",
+                      "sub": "public, priced"
+                    }
+                  ]
+                },
+                {
+                  "type": "kicker",
+                  "text": "compare"
+                },
+                {
+                  "type": "decisionmatrix",
+                  "columns": [
+                    "cost",
+                    "support",
+                    "fit"
+                  ],
+                  "rows": [
+                    {
+                      "label": "Incumbent",
+                      "cells": [
+                        {
+                          "text": "·",
+                          "verdict": "neutral"
+                        },
+                        {
+                          "text": "✓",
+                          "verdict": "have"
+                        },
+                        {
+                          "text": "~",
+                          "verdict": "part"
+                        }
+                      ]
+                    },
+                    {
+                      "label": "Challenger",
+                      "cells": [
+                        {
+                          "text": "✓",
+                          "verdict": "have"
+                        },
+                        {
+                          "text": "~",
+                          "verdict": "part"
+                        },
+                        {
+                          "text": "✓",
+                          "verdict": "have"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "kicker",
+                  "text": "decide"
+                },
+                {
+                  "type": "control",
+                  "control": "radio",
+                  "id": "bud-p",
+                  "prompt": "Approve the Phase 3 launch budget?",
+                  "choices": [
+                    {
+                      "value": "approve",
+                      "label": "Approve as proposed"
+                    },
+                    {
+                      "value": "trim",
+                      "label": "Approve with trim"
+                    },
+                    {
+                      "value": "hold",
+                      "label": "Hold for review"
+                    }
+                  ],
+                  "submit": "submit answer"
+                },
+                {
+                  "type": "callout",
+                  "kind": "eic",
+                  "style": "gradient",
+                  "body": "JSON is the compact, precise form an LLM thinks in natively; this page is the expressive form. We derive page-from-JSON because that direction is the easy one. Neither is “truth,” neither is frosting. Fewer tokens, fewer errors, fewer questions."
+                }
+              ]
+            },
+            {
+              "id": "techno-dark",
+              "label": "techno-dark",
+              "dot": true,
+              "line": "techno-dark — a deploy pipeline. Our dialect: dark, glowing, diagrams with teeth. You'd call me ’doc.",
+              "preview": [
+                {
+                  "type": "namecard",
+                  "lead": "In this voice, you can call me",
+                  "name": "’doc",
+                  "sub": "just “’doc” — short for std-doc."
+                },
+                {
+                  "type": "hero",
+                  "at": "lead",
+                  "text": "The Deploy Pipeline",
+                  "sub": "every commit walks the same gauntlet — and one gate has teeth. Code doesn't reach production by trust; it earns each step: built reproducibly, tested green, canaried on one ring, then shipped to the fleet."
+                },
+                {
+                  "type": "kicker",
+                  "text": "flow"
+                },
+                {
+                  "type": "flow",
+                  "connector": "arrow",
+                  "steps": [
+                    {
+                      "head": "build",
+                      "sub": "reproducible · zero crates"
+                    },
+                    {
+                      "head": "test",
+                      "sub": "~107 green"
+                    },
+                    {
+                      "head": "gate ⛔",
+                      "variant": "teeth",
+                      "sub": "no external refs"
+                    },
+                    {
+                      "head": "canary",
+                      "sub": "one ring"
+                    },
+                    {
+                      "head": "ship",
+                      "variant": "here",
+                      "sub": "signed binary"
+                    }
+                  ]
+                },
+                {
+                  "type": "kicker",
+                  "text": "compare"
+                },
+                {
+                  "type": "decisionmatrix",
+                  "columns": [
+                    "portable",
+                    "safe",
+                    "fast"
+                  ],
+                  "rows": [
+                    {
+                      "label": "python + deps",
+                      "cells": [
+                        {
+                          "text": "~",
+                          "verdict": "part"
+                        },
+                        {
+                          "text": "?",
+                          "verdict": "unknown"
+                        },
+                        {
+                          "text": "~",
+                          "verdict": "part"
+                        }
+                      ]
+                    },
+                    {
+                      "label": "signed go binary",
+                      "cells": [
+                        {
+                          "text": "✓",
+                          "verdict": "have"
+                        },
+                        {
+                          "text": "✓",
+                          "verdict": "have"
+                        },
+                        {
+                          "text": "✓",
+                          "verdict": "have"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "kicker",
+                  "text": "decide"
+                },
+                {
+                  "type": "control",
+                  "control": "radio",
+                  "id": "ring-t",
+                  "prompt": "Which ring ships first this weekend?",
+                  "choices": [
+                    {
+                      "value": "canary",
+                      "label": "canary only"
+                    },
+                    {
+                      "value": "canary-fleet",
+                      "label": "canary → fleet"
+                    },
+                    {
+                      "value": "fleet",
+                      "label": "full fleet"
+                    }
+                  ],
+                  "submit": "record decision"
+                },
+                {
+                  "type": "callout",
+                  "kind": "core",
+                  "style": "gradient",
+                  "body": "JSON is the compact, precise form an LLM thinks in natively; this page is the expressive form. We derive page-from-JSON because that direction is the easy one — expanding a spec is computable; squeezing a page back isn't. Neither is “truth,” neither is frosting. Fewer tokens, fewer errors, fewer questions."
+                }
+              ]
+            },
+            {
+              "id": "playful",
+              "label": "playful",
+              "dot": true,
+              "line": "playful — stovetop fudge. Bright, rounded, emoji, a balloon. You'd call me Writer(). 🎈",
+              "preview": [
+                {
+                  "type": "namecard",
+                  "lead": "In this voice, you can call me",
+                  "name": "Writer() 🎈",
+                  "sub": "silent parens among friends · “Writer Paren-Paren” when it's formal · “Writer Open-Paren Close-Paren” when mom's upset"
+                },
+                {
+                  "type": "figure",
+                  "name": "balloon-playful"
+                },
+                {
+                  "type": "hero",
+                  "at": "lead",
+                  "text": "Stovetop Fudge 🥄",
+                  "sub": "five steps, one happy little pan. No candy thermometer, no fear. Melt, stir, pour, chill, devour. The only rule: don't walk away while it's bubbling — fudge waits for no one! ✨"
+                },
+                {
+                  "type": "kicker",
+                  "text": "flow"
+                },
+                {
+                  "type": "flow",
+                  "connector": "arrow",
+                  "steps": [
+                    {
+                      "head": "🔥 melt",
+                      "sub": "butter + sugar"
+                    },
+                    {
+                      "head": "🌀 stir",
+                      "sub": "2 min, no stop"
+                    },
+                    {
+                      "head": "🍫 mix",
+                      "sub": "chocolate in"
+                    },
+                    {
+                      "head": "🧊 chill",
+                      "sub": "2 hrs"
+                    },
+                    {
+                      "head": "😋 eat",
+                      "variant": "here",
+                      "sub": "we want to be here! 🎯"
+                    }
+                  ]
+                },
+                {
+                  "type": "kicker",
+                  "text": "compare"
+                },
+                {
+                  "type": "decisionmatrix",
+                  "columns": [
+                    "sweet",
+                    "crunch",
+                    "fancy"
+                  ],
+                  "rows": [
+                    {
+                      "label": "🥜 nuts",
+                      "cells": [
+                        {
+                          "text": "~",
+                          "verdict": "part"
+                        },
+                        {
+                          "text": "✓",
+                          "verdict": "have"
+                        },
+                        {
+                          "text": "~",
+                          "verdict": "part"
+                        }
+                      ]
+                    },
+                    {
+                      "label": "🧂 sea salt",
+                      "cells": [
+                        {
+                          "text": "?",
+                          "verdict": "unknown"
+                        },
+                        {
+                          "text": "~",
+                          "verdict": "part"
+                        },
+                        {
+                          "text": "✓",
+                          "verdict": "have"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "kicker",
+                  "text": "decide"
+                },
+                {
+                  "type": "control",
+                  "control": "radio",
+                  "id": "sw-pl",
+                  "prompt": "How sweet are we going? 🍭",
+                  "choices": [
+                    {
+                      "value": "little",
+                      "label": "just a little"
+                    },
+                    {
+                      "value": "classic",
+                      "label": "classic"
+                    },
+                    {
+                      "value": "dragon",
+                      "label": "DRAGON-level 🐉"
+                    }
+                  ],
+                  "submit": "let's gooo 🎈"
+                },
+                {
+                  "type": "callout",
+                  "kind": "writer",
+                  "style": "gradient",
+                  "body": "JSON is the compact, precise form an LLM thinks in natively; this page is the expressive form. We derive page-from-JSON because that's the easy direction — and fun is a real voice, not a lesser one. Fewer tokens, fewer errors, fewer questions. 💛"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "blocks-and-lint",
+      "group": "The Pluggable Renderer",
+      "title": "The blocks[] Stream + Assembled Lint",
+      "tagline": "one typed stream; lint ≡ renderer, by construction",
+      "status": "LIVE",
+      "sections": [
+        {
+          "name": "How a node becomes blocks",
+          "icon": "🧱",
+          "tag": "core",
+          "summary": "The core walks a typed blocks[] and dispatches each through the registry. Today's friendly node schema (badges / diagrams / children / sections / evidence) is mapped onto that stream by adapt_node — byte-identical to the former hand-ordered render_node.",
+          "items": [
+            {
+              "name": "adapt_node(node)",
+              "desc": "Maps the friendly schema to blocks in the fixed NODE_BLOCK_ORDER; author-placed body blocks slot between sections and evidence."
+            },
+            {
+              "name": "lint ≡ renderer",
+              "desc": "The lint schema is ASSEMBLED from the installed primitives' validate(), so it can never drift from the renderer. An unknown block type is a lint error, mirroring the render-time error boundary.",
+              "citations": [
+                {
+                  "path": "go/internal/core/blocks.go",
+                  "evidence": "MEASURED",
+                  "note": "adapt_node, render_blocks, lint_blocks, NODE_BLOCK_ORDER"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "security-gate",
+      "group": "The Pluggable Renderer",
+      "title": "The Security Gate — Freeze Means Frozen",
+      "tagline": "a plugin that sneaks in a CDN can never ship a 'frozen' page",
+      "status": "LIVE",
+      "sections": [
+        {
+          "name": "Per-primitive freeze enforcement",
+          "icon": "🛡️",
+          "tag": "P5",
+          "summary": "On --freeze every block's frozen output is scanned for external references. Any leak fails the build LOUDLY, naming the offending primitive type.",
+          "items": [
+            {
+              "name": "EXTERNAL_REF scan",
+              "desc": "Matches http(s)://, protocol-relative //host, and CDN-ish src=// / href=// / url(https:)."
+            },
+            {
+              "name": "Reads freeze(), falls back to render()",
+              "desc": "A primitive that cleans itself up on freeze passes even if its live render references the kit. SecurityGateError names the type.",
+              "citations": [
+                {
+                  "path": "go/internal/gate/",
+                  "evidence": "MEASURED",
+                  "note": "EXTERNAL_REF regex + scan/enforce/enforce_blocks + SecurityGateError"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "d2-and-standalone",
+      "group": "The Pluggable Renderer",
+      "title": "D2 Diagrams + Standalone-Page Mode",
+      "tagline": "adopt the diagram binary behind the contract; render bespoke pages through it",
+      "status": "LIVE",
+      "sections": [
+        {
+          "name": "D2 helper — degrade, never fail",
+          "icon": "📊",
+          "tag": "P4",
+          "summary": "Diagram primitives compile a JSON spec to D2 source and ask this module to render it to SVG. If the d2 binary is absent we DO NOT fail the build.",
+          "items": [
+            {
+              "name": "have_d2() / render_svg()",
+              "desc": "Availability probe + render. The generated D2 source is binary-independent, so the page still carries the diagram's meaning even when d2 is missing."
+            },
+            {
+              "name": "source_block() loud skip",
+              "desc": "Emits a labeled 'diagram source' block plus a loud skip note — mirroring mermaid-cli freeze behavior.",
+              "citations": [
+                {
+                  "path": "go/internal/core/d2.go",
+                  "evidence": "MEASURED",
+                  "note": "have_d2, render_svg, source_block, diagram_card"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Standalone single-page mode",
+          "icon": "📄",
+          "tag": "P6",
+          "summary": "Some artifacts are not doc-tree node pages but one bespoke page (e.g. the hand-authored state-machine.html). A source.json opts in with layout: page + theme + a top-level blocks[].",
+          "items": [
+            {
+              "name": "render_page() + load_theme()",
+              "desc": "Renders one page from a blocks[] stream through the registry, with a minimal bespoke shell and a named theme stylesheet (themes/<name>.css) shipped inline."
+            },
+            {
+              "name": "anchor_attr(block)",
+              "desc": "Primitives read ctx['anchor_attr'](block) to stamp data-cf-change on their own root element — the std-doc anchor convention this page uses.",
+              "citations": [
+                {
+                  "path": "go/internal/core/page.go",
+                  "evidence": "MEASURED",
+                  "note": "load_theme, anchor_attr, make_ctx, render_page"
+                },
+                {
+                  "path": "go/stddoc-lib/themes/",
+                  "evidence": "MEASURED",
+                  "note": "theme stylesheets (citizen-lifecycle, state-machine, etc.)"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "write-your-own",
+      "group": "The Pluggable Renderer",
+      "title": "Write Your Own Plugin — the Whole Contract",
+      "tagline": "implement the seven members; drop a module, register one line, ship — no core edit, no release",
+      "status": "LIVE",
+      "diagrams": [
+        {
+          "caption": "the whole loop",
+          "ascii": "  1. add a template entry to go/stddoc-lib/templates.json  (declarative)\n     OR write a Go render func in go/internal/core/ and call reg.Register()\n  2. use it in a node's blocks[]:  { \"type\": \"note\", \"text\": \"Heads up.\" }\n\n  golden-master guarantees every existing page stays byte-identical;\n  your primitive appears only where a block asks for it."
+        }
+      ],
+      "sections": [
+        {
+          "name": "Step 1 — the minimum (render only)",
+          "icon": "🔧",
+          "tag": "howto",
+          "summary": "A declarative primitive is a template entry in go/stddoc-lib/templates.json — no Go code at all. A code-driven primitive is a Go func registered via reg.Register(type, func, css). Both return content HTML — never an anchor (the core wraps that). Pull helpers from ctx (palette, esc); never import the core.",
+          "items": [
+            {
+              "name": "Declarative (templates.json entry)",
+              "desc": "Add a key to go/stddoc-lib/templates.json with a template string. The engine auto-registers it — no Go edit required. That is a complete, shippable primitive."
+            },
+            {
+              "name": "Author a block",
+              "desc": "In a node's blocks[]:  { \"type\": \"note\", \"text\": \"Heads up.\" } — it renders where the block asks, nowhere else.",
+              "citations": [
+                {
+                  "path": "protocol/primitives.md",
+                  "line": "40-78",
+                  "evidence": "MEASURED",
+                  "note": "the worked note primitive, end to end"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Step 2 — the full seven members",
+          "icon": "📜",
+          "tag": "contract",
+          "summary": "For a code-driven primitive (Go func), here is the full contract. Register three things via reg.Register(); the gate and palette live in the core, not on every primitive.",
+          "items": [
+            {
+              "name": "type : string",
+              "desc": "The registry key / JSON discriminator. The block's `type` selects exactly this handler. Required."
+            },
+            {
+              "name": "RenderFunc(block, ctx) -> (html, error)",
+              "desc": "Inner HTML for one block. Required. The core wraps the anchor; you emit content only (invariant 1). An error you return is caught at the boundary — never propagated."
+            },
+            {
+              "name": "css : string",
+              "desc": "Any CSS your component needs, passed as a string to Register(). The core collects it ONCE and dedups — pass the same string from every call and it appears in the page <style> a single time."
+            },
+            {
+              "name": "freeze via gate",
+              "desc": "Zero-external rewrite for a frozen snapshot is enforced by the gate, not per-primitive. Diagram primitives inline their SVG via the freeze path. Text primitives that emit no external refs pass automatically (invariant 2)."
+            },
+            {
+              "name": "validate (optional)",
+              "desc": "Return human-readable error strings for a malformed block; empty slice = valid. The lint ASSEMBLES every installed primitive's validate(), so the schema can never drift from the renderer.",
+              "citations": [
+                {
+                  "path": "go/internal/registry/registry.go",
+                  "evidence": "MEASURED",
+                  "note": "Register(type, RenderFunc, css) — the three-part contract"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Step 3 — be palette-bound",
+          "icon": "🎨",
+          "tag": "palette",
+          "summary": "If your component shows entity colour, bind it to the one declared palette instead of hard-coding hex. This is the moat — one palette colours every component.",
+          "items": [
+            {
+              "name": "ctx['palette'].var(key)",
+              "desc": "Returns var(--ent-<key>). Use it in your style attribute. Referencing an undeclared entity raises PaletteError loudly — a typo can never silently render colourless (invariant 5)."
+            }
+          ]
+        },
+        {
+          "name": "Step 4 — register + test",
+          "icon": "✅",
+          "tag": "ship",
+          "summary": "Two lines and a test file. The golden-master guarantees you broke nothing.",
+          "items": [
+            {
+              "name": "Register (templates.json or install.go)",
+              "desc": "For a declarative primitive: add a key to go/stddoc-lib/templates.json — the engine picks it up automatically (no Go edit). For a code-driven primitive: call reg.Register(type, fn, css) in go/internal/core/install.go. That is the only place the core learns your type exists."
+            },
+            {
+              "name": "Add a Go test",
+              "desc": "One test per primitive is the convention — pin RenderFunc output and validate rules. Run `cd go && go test ./...`."
+            },
+            {
+              "name": "Golden-master keeps the peace",
+              "desc": "go/internal/core/conformance_test.go holds reference HTML; the strangler proof diffs every existing page byte-for-byte, so a new primitive can never silently change pages that don't use it.",
+              "citations": [
+                {
+                  "path": "go/internal/core/install.go",
+                  "evidence": "MEASURED",
+                  "note": "buildRegistry — the register loop for all 36 primitives"
+                },
+                {
+                  "path": "go/internal/core/conformance_test.go",
+                  "evidence": "MEASURED",
+                  "note": "byte-identical golden-master conformance gate"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "the-test-suite",
+      "group": "Self-Hosting & Proof",
+      "title": "The Test Suite — How We Know It Holds",
+      "tagline": "cd go && go test ./... · byte-identical conformance gate",
+      "status": "LIVE",
+      "sections": [
+        {
+          "name": "What's covered",
+          "icon": "✅",
+          "tag": "proof",
+          "summary": "go/internal/ carries Go test suites — one per major package plus the byte-identical conformance gate that makes the architecture trustworthy.",
+          "items": [
+            {
+              "name": "Per-package tests",
+              "desc": "go/internal/registry, go/internal/palette, go/internal/gate, go/internal/template — each package's render + validate behaviour is pinned."
+            },
+            {
+              "name": "Cross-cutting guarantees",
+              "desc": "registry (dispatch + error boundary), palette (Var + PaletteError), gate (freeze leak fails loud), template (declarative primitive rendering), conformance (byte-identical page output)."
+            },
+            {
+              "name": "Golden-master conformance gate",
+              "desc": "go/internal/core/conformance_test.go holds reference HTML; the strangler proof diffs new renders against them to guarantee existing pages stay byte-identical when primitives are added.",
+              "citations": [
+                {
+                  "path": "go/internal/core/conformance_test.go",
+                  "evidence": "MEASURED",
+                  "note": "byte-identical golden-master gate — run with: cd go && go test ./..."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "this-doc-self-hosts",
+      "group": "Self-Hosting & Proof",
+      "title": "This Document Is the Proof",
+      "tagline": "you are reading std-doc, rendered by std-doc, about std-doc",
+      "status": "LIVE",
+      "sections": [
+        {
+          "name": "The self-hosting claim, made concrete",
+          "icon": "♾️",
+          "tag": "meta",
+          "summary": "This doc is not a description of std-doc — it is an instance of it. Every capability it documents, it also uses.",
+          "items": [
+            {
+              "name": "Authored as a doc-tree",
+              "desc": "Its source of truth is skills/std-doc/self-doc/source.json — the same v2 schema documented in the Data-Derived node."
+            },
+            {
+              "name": "Derived by the tool's own publisher",
+              "desc": "`stddoc publish` (go/cmd/stddoc) turned that JSON into these pages + left-nav + search index. The HTML is a build artifact; editing the JSON and re-publishing regenerates it."
+            },
+            {
+              "name": "Listening right now",
+              "desc": "It was injected + served by the engine and a watcher Monitor is armed. Select any sentence and comment — the agent edits source.json, re-publishes, and the page reloads with a walkthrough. The loop documenting the loop."
+            },
+            {
+              "name": "Grounded, not narrated",
+              "desc": "Every node in the Pluggable Renderer group cites real engine file:line, read this shift — MEASURED, not remembered."
+            }
+          ]
+        }
+      ],
+      "blocks": [
+        {
+          "type": "compare",
+          "left": {
+            "title": "Describe the idiom",
+            "items": [
+              "prose about a 'decision board'",
+              "reader pictures something",
+              "drifts from the real renderer"
+            ]
+          },
+          "right": {
+            "title": "Render the idiom",
+            "items": [
+              "a real decisionmatrix block",
+              "the exact bytes the engine emits",
+              "this page IS the proof"
+            ]
+          }
+        },
+        {
+          "type": "crux",
+          "title": "Should a new idiom land as a core branch or a plugin primitive?",
+          "options": [
+            {
+              "key": "a",
+              "text": "Add a branch inside the core walk"
+            },
+            {
+              "key": "b",
+              "text": "Drop a self-contained primitive module + one registration line"
+            }
+          ],
+          "lean": "b",
+          "yourcall": true
+        },
+        {
+          "type": "control",
+          "control": "radio",
+          "id": "idiom-home",
+          "prompt": "Where should the next idiom live?",
+          "choices": [
+            {
+              "value": "core",
+              "label": "Core walk"
+            },
+            {
+              "value": "primitive",
+              "label": "Primitive module"
+            },
+            {
+              "value": "unsure",
+              "label": "Not sure yet"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,109 @@
+package serve
+
+import (
+	"fmt"
+	"net/http"
+	"os"
+	"os/signal"
+	"path/filepath"
+	"sync"
+	"syscall"
+	"time"
+)
+
+// heartbeatInterval matches watch.py's default cadence (5s).
+const heartbeatInterval = 5 * time.Second
+
+// Run injects the feedback library into dir and serves it: a behavior-compatible
+// replacement for server.py + inject.py + watch.py, in one process, zero Python.
+func Run(dir string, opt Options) error {
+	artifactDir, err := filepath.Abs(dir)
+	if err != nil {
+		return err
+	}
+	if info, serr := os.Stat(artifactDir); serr != nil || !info.IsDir() {
+		return fmt.Errorf("%s does not exist", artifactDir)
+	}
+
+	// Idempotent inject + feedback-dir scaffolding (replaces a separate inject step).
+	if err := Inject(artifactDir, opt.Recursive); err != nil {
+		return err
+	}
+
+	feedbackDir := filepath.Join(artifactDir, "feedback")
+	clientDir := filepath.Join(opt.LibRoot, "lib")
+	if info, serr := os.Stat(clientDir); serr != nil || !info.IsDir() {
+		return fmt.Errorf("client assets dir not found: %s (expected <lib-root>/lib with feedback.js etc.)", clientDir)
+	}
+
+	ln, chosen, err := scanBind(opt.Port, opt.PortScan, opt.StrictPort)
+	if err != nil {
+		if opt.StrictPort {
+			fmt.Printf("[server] FATAL: port %d is unavailable and --strict-port was set (%v).\n", opt.Port, err)
+		} else {
+			fmt.Printf("[server] FATAL: no free port in %d..%d (%v).\n", opt.Port, opt.Port+opt.PortScan, err)
+		}
+		return err
+	}
+	if chosen != opt.Port {
+		fmt.Printf("[server] port %d busy → advanced to free port %d\n", opt.Port, chosen)
+	}
+
+	// Record the actual port so launchers/tools read the truth.
+	if werr := os.WriteFile(filepath.Join(feedbackDir, ".port"), []byte(fmt.Sprintf("%d", chosen)), 0o644); werr != nil {
+		// Non-fatal, mirrors server.py's best-effort write.
+		fmt.Printf("[server] warning: could not write .port: %v\n", werr)
+	}
+
+	srv := &server{
+		artifactDir: artifactDir,
+		feedbackDir: feedbackDir,
+		clientDir:   clientDir,
+		note:        opt.Note,
+		port:        chosen,
+	}
+	srv.touch()
+
+	// Presence heartbeat (folds watch.py into the server).
+	done := make(chan struct{})
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go srv.heartbeat(heartbeatInterval, done, &wg)
+
+	// Auto-shutdown watchdog: parent-death + idle timeout.
+	go srv.watchdog(opt.IdleTimeout, os.Getppid())
+
+	httpSrv := &http.Server{Handler: srv}
+
+	inbox := filepath.Join(feedbackDir, "inbox.jsonl")
+	history := filepath.Join(feedbackDir, "history.json")
+	fmt.Printf("[server] serving %s\n", artifactDir)
+	fmt.Printf("[server] open http://localhost:%d/\n", chosen)
+	fmt.Printf("[server] inbox:   %s\n", inbox)
+	fmt.Printf("[server] history: %s\n", history)
+	fmt.Printf("[server] info:    http://localhost:%d/info\n", chosen)
+	if opt.IdleTimeout > 0 {
+		fmt.Printf("[server] auto-shutdown: parent-death OR %ds idle (no requests). --idle-timeout 0 to disable\n", opt.IdleTimeout)
+	} else {
+		fmt.Printf("[server] auto-shutdown: parent-death only (idle timeout disabled)\n")
+	}
+	fmt.Printf("[server] Ctrl-C to stop\n")
+
+	// Clean shutdown on Ctrl-C / SIGTERM: drop the heartbeat (removes watcher.json)
+	// so the page's presence dot clears promptly.
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-sigCh
+		fmt.Printf("\n[server] stopping\n")
+		close(done)
+		wg.Wait()
+		httpSrv.Close()
+	}()
+
+	err = httpSrv.Serve(ln)
+	if err == http.ErrServerClosed {
+		return nil
+	}
+	return err
+}

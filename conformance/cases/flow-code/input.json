@@ -1,0 +1,75 @@
+{
+  "title": "Flow + Code",
+  "generated_date": "2026-06-15",
+  "groups": [
+    "Showcase"
+  ],
+  "root": {
+    "summary": "Exercises the flow and code primitives for byte-identity."
+  },
+  "nodes": [
+    {
+      "slug": "sequence",
+      "group": "Showcase",
+      "title": "Sequence — the loop",
+      "status": "LIVE",
+      "tagline": "horizontal steps + monospace",
+      "blocks": [
+        {
+          "type": "flow",
+          "connector": "arrow",
+          "steps": [
+            { "n": "01", "head": "you comment", "sub": "each note pins to the words you picked" },
+            { "n": "02", "head": "the gate", "sub": "freeze means frozen", "variant": "teeth" },
+            { "n": "03", "head": "you are here", "variant": "here" },
+            { "n": "04", "head": "shipped", "variant": "done" }
+          ]
+        },
+        {
+          "type": "flow",
+          "connector": "dot",
+          "steps": [
+            { "head": "v1" },
+            { "head": "v2" },
+            { "head": "v3", "sub": "now" }
+          ]
+        },
+        {
+          "type": "flow",
+          "connector": "none",
+          "steps": [
+            { "head": "only" }
+          ]
+        },
+        {
+          "type": "code",
+          "caption": "one command bakes the portable snapshot",
+          "mode": "command",
+          "spans": [
+            { "cls": "keyword", "text": "std-doc freeze " },
+            { "cls": "plain", "text": "source.json published/ " },
+            { "cls": "keyword", "text": "--zip" }
+          ]
+        },
+        {
+          "type": "code",
+          "mode": "filename",
+          "spans": [
+            { "cls": "plain", "text": "come-build" },
+            { "cls": "dim", "text": "·" },
+            { "cls": "value", "text": "v3" },
+            { "cls": "dim", "text": "·" },
+            { "cls": "string", "text": "20260615-2230" },
+            { "cls": "comment", "text": ".json" }
+          ]
+        }
+      ],
+      "sections": [
+        {
+          "name": "Overview",
+          "summary": "the onboarding idioms re-derived"
+        }
+      ]
+    }
+  ]
+}

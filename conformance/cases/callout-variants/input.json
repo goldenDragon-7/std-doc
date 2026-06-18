@@ -1,0 +1,58 @@
+{
+  "title": "Callout Variants",
+  "generated_date": "2026-06-15",
+  "groups": [
+    "Showcase"
+  ],
+  "palette": {
+    "note": { "label": "Note", "color": "#a78bfa" },
+    "eic": { "label": "EIC", "color": "#22d3ee" }
+  },
+  "root": {
+    "summary": "Exercises the callout ghost-dashed + gate variants for byte-identity."
+  },
+  "nodes": [
+    {
+      "slug": "variants",
+      "group": "Showcase",
+      "title": "Callout — ghost-dashed + gate",
+      "status": "LIVE",
+      "tagline": "variant geometry inline; variant-less stays byte-identical",
+      "blocks": [
+        {
+          "type": "callout",
+          "kind": "note",
+          "lead": "A plain aside.",
+          "body": "The default tinted band — no variant."
+        },
+        {
+          "type": "callout",
+          "kind": "note",
+          "variant": "ghost-dashed",
+          "body": "A philosophical aside — dashed all-around, transparent."
+        },
+        {
+          "type": "callout",
+          "kind": "eic",
+          "variant": "gate",
+          "lead": "Freeze means frozen.",
+          "body": "If a diagram can't bake inline, freeze fails loudly."
+        },
+        {
+          "type": "callout",
+          "kind": "note",
+          "lead_content": [
+            { "type": "text", "s": "Press " },
+            { "type": "kbd", "key": "C" },
+            { "type": "text", "s": " to comment." }
+          ],
+          "hint_content": [
+            { "type": "text", "s": "or " },
+            { "type": "kbd", "key": "⌘↵" },
+            { "type": "text", "s": " to send." }
+          ]
+        }
+      ]
+    }
+  ]
+}

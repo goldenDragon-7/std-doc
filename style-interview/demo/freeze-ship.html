@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Freeze &amp; ship</title>
+<style>
+  :root{
+    --bg:#0a0e17; --surface:#141d2e; --surface2:#1b2942; --line:#243149;
+    --fg:#e8eef7; --dim:#9fb0c8; --glow:#22d3ee; --glow-dim:rgba(34,211,238,.14);
+    --green:#34d399; --gold:#fbbf24; --purple:#a78bfa; --red:#f87171;
+    --accent-ink:#04121a;
+  }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{background:radial-gradient(120% 90% at 0% 0%, var(--surface2) 0%, var(--bg) 60%); color:var(--fg);
+    font-family:-apple-system,'Segoe UI',Roboto,sans-serif; line-height:1.6;}
+  .wrap{max-width:960px; margin:0 auto; padding:46px 24px 80px}
+  .kicker{font-size:12px; letter-spacing:.24em; text-transform:uppercase; color:var(--glow)}
+  h1{font-size:33px; font-weight:800; margin:.18em 0 .1em; letter-spacing:-.015em;
+     background:linear-gradient(90deg,var(--fg),var(--glow)); -webkit-background-clip:text; background-clip:text; color:transparent}
+  .tag{color:var(--dim); margin:.1em 0 1.5em; font-size:16px}
+  p{max-width:78ch} .lede{font-size:17px}
+  kbd,code{font-family:ui-monospace,monospace; font-size:12.5px; background:var(--surface2); border:1px solid var(--line); border-radius:5px; padding:1px 6px; color:var(--fg)}
+  .sech{font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--dim); font-weight:700; margin:26px 0 12px}
+
+  .compare{display:flex; gap:14px; flex-wrap:wrap; margin:6px 0}
+  .col{flex:1; min-width:240px; border-radius:14px; padding:18px 20px; border:1px solid var(--line); background:var(--surface)}
+  .col h3{margin:.1em 0 .5em; font-size:15px}
+  .col.live h3{color:var(--glow)} .col.frozen h3{color:var(--green)}
+  .col ul{margin:.4em 0 0; padding-left:18px; color:var(--dim); font-size:14px} .col li{margin:.3em 0}
+  .col .pill{font-family:ui-monospace,monospace; font-size:11px; padding:2px 8px; border-radius:999px; border:1px solid currentColor}
+  .col.live .pill{color:var(--glow)} .col.frozen .pill{color:var(--green)}
+
+  .gate{margin:24px 0 6px; padding:16px 20px; border-radius:13px; background:linear-gradient(90deg,rgba(248,113,113,.12),transparent); border-left:3px solid var(--red)}
+  .gate b{color:var(--red)}
+  .cmd{margin:18px 0; padding:14px 16px; border-radius:11px; background:var(--surface2); border:1px solid var(--line); font-family:ui-monospace,monospace; font-size:13px; color:var(--fg); overflow-x:auto}
+  .cmd .c{color:var(--glow)} .cmd .d{color:var(--dim)}
+
+  .why{margin-top:28px; padding:16px 20px; border-radius:13px; max-width:78ch; font-size:14.5px;
+    background:linear-gradient(90deg,var(--glow-dim),transparent); border-left:3px solid var(--glow); color:var(--dim)}
+  .why b{font-weight:800; color:var(--fg)}
+  .pgnav{margin-top:32px; font-size:13px; color:var(--dim)} .pgnav a{color:var(--glow); text-decoration:none}
+</style>
+  <script src="/lib/style-lock.js"></script>
+  <link rel="stylesheet" href="/lib/style-lock.css">
+  <link rel="stylesheet" href="/lib/feedback.css">
+</head>
+<body>
+<div class="wrap">
+  <div class="kicker">std-doc · style-interview · page 4 of 7</div>
+  <h1>Freeze &amp; ship</h1>
+  <div class="tag">turn the conversation into a thing you can hand to anyone</div>
+
+  <p class="lede">While you're working, a living doc is <em>alive</em> — the 💬 panel listens, comments flow in and replies flow out. But the moment comes when it's done and you want to <em>send</em> it. Freezing is that moment: it bakes the whole page into one self-contained file with nothing left to phone home — no server, no internet, no dependencies. A frozen doc opens by double-click, forever, on a laptop in a cave.</p>
+
+  <div class="sech">live vs frozen</div>
+  <div class="compare" data-cf-change="ch-freeze-compare">
+    <div class="col live">
+      <span class="pill">◉ LIVE</span>
+      <h3>while you build</h3>
+      <ul>
+        <li>a local server is serving the page</li>
+        <li>the 💬 panel listens; comments land in an inbox</li>
+        <li>it answers and re-renders from the JSON</li>
+        <li>diagrams may render via a helper on the machine</li>
+      </ul>
+    </div>
+    <div class="col frozen">
+      <span class="pill">❄ FROZEN</span>
+      <h3>when you ship</h3>
+      <ul>
+        <li>one HTML file — every asset inlined, every diagram baked to SVG</li>
+        <li>no server, no network, no dependency; opens over <code>file://</code></li>
+        <li>the comment widget is stripped — it's a finished artifact, not a draft</li>
+        <li>travels as a file or a <code>.zip</code>; identical on every machine</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="gate" data-cf-change="ch-freeze-gate">
+    <b>Freeze means frozen.</b> The security gate refuses to ship a "frozen" doc that secretly still reaches out — no external script, no CDN font, no remote image. If a diagram can't be baked to inline SVG, freeze <em>fails loudly</em> rather than shipping something that breaks in the cave. A gift you give away has to work in the recipient's hands, not just yours.
+  </div>
+
+  <div class="cmd"><span class="d"># one command bakes the portable snapshot + a .zip</span><br><span class="c">std-doc freeze</span> source.json published/ <span class="c">--zip</span></div>
+
+  <div class="why"><b>Why freezing is the same thesis:</b> the cheapest doc to <em>receive</em> is one that asks nothing of the receiver — no install, no account, no trust in a server staying up. Freeze collapses "here's how to run my doc" into "here's my doc." <b>Fewer steps, fewer failures, fewer questions</b> — for the person on the other end, who never has to meet your toolchain to read what you made.</p>
+
+  <div class="pgnav">
+    ← <a href="style-ab.html">page 3 · pick your voice</a> &nbsp;·&nbsp; next → <a href="knowledge-palace.html">page 5 · the Knowledge Palace</a>
+  </div>
+</div>
+  <script src="/lib/feedback.js" defer></script>
+</body>
+</html>

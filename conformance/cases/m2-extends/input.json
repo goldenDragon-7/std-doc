@@ -1,0 +1,65 @@
+{
+  "title": "M2 Extends",
+  "generated_date": "2026-06-15",
+  "groups": [
+    "Showcase"
+  ],
+  "palette": {
+    "alpha": { "label": "Alpha", "color": "#22d3ee" },
+    "beta": { "label": "Beta", "color": "#34d399" }
+  },
+  "root": {
+    "summary": "Exercises the M2 extends + ported primitives for byte-identity."
+  },
+  "nodes": [
+    {
+      "slug": "extends",
+      "group": "Showcase",
+      "title": "Extends — knobs + ports",
+      "status": "LIVE",
+      "tagline": "callout knobs, compare accent/pill, dm verdicts, namecard, ports",
+      "blocks": [
+        { "type": "kicker", "text": "captain · 2026-06-15 · MDT" },
+        { "type": "gradient-band", "text": "the headline", "sub": "atmosphere, no image" },
+        { "type": "namecard", "lead": "You can call me", "name": "'doc", "sub": "short for std-doc" },
+        { "type": "panel", "variant": "tint", "lead": "depth", "body": "accent-tinted shadow" },
+        { "type": "callout", "kind": "alpha", "lead": "plain", "body": "default 10% tint (byte-identical path)" },
+        { "type": "callout", "kind": "beta", "style": "gradient", "pin": "heads up", "lead": "gradient lead", "body": "gradient bg", "hint": "a dim sub-line" },
+        { "type": "callout", "kind": "alpha", "style": "dashed", "body": "dashed variant" },
+        { "type": "callout", "kind": "beta", "style": "solid", "body": "solid variant" },
+        {
+          "type": "compare",
+          "left": { "title": "LIVE", "accent": "alpha", "pill": "running", "items": ["talks back", "needs a server"] },
+          "right": { "title": "FROZEN", "accent": "beta", "pill": "portable", "items": ["self-contained", "reaches out to nothing"] }
+        },
+        {
+          "type": "compare",
+          "left": { "title": "Today", "items": ["a", "b"] },
+          "right": { "title": "After", "items": ["c"] }
+        },
+        {
+          "type": "decisionmatrix",
+          "columns": ["A", "B"],
+          "rows": [
+            { "label": "Latency", "cells": [ { "text": "fast", "verdict": "have" }, { "text": "slow", "verdict": "miss" } ] },
+            { "label": "Cost", "cells": [ { "text": "?", "verdict": "unknown" }, { "text": "·", "verdict": "neutral" } ] }
+          ]
+        },
+        { "type": "control", "control": "text", "id": "what-name", "prompt": "What should it call you?" },
+        { "type": "callout", "kind": "alpha", "style": "solid", "pin": "how-to", "lead": "howto = composition", "body": "callout(style=solid) header, then a code block below — no new primitive needed." },
+        {
+          "type": "code",
+          "caption": "the composed how-to step",
+          "mode": "snippet",
+          "spans": [
+            { "cls": "keyword", "text": "stddoc publish " },
+            { "cls": "plain", "text": "source.json published/" }
+          ]
+        }
+      ],
+      "sections": [
+        { "name": "Overview", "summary": "every M2 feature, once" }
+      ]
+    }
+  ]
+}

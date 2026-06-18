@@ -1,0 +1,45 @@
+{
+  "title": "Golden Doc",
+  "generated_date": "2026-01-01",
+  "root": {
+    "summary": "Golden master fixture."
+  },
+  "nodes": [
+    {
+      "slug": "the-binary",
+      "title": "The Binary",
+      "status": "LIVE",
+      "tagline": "one branch, two sections",
+      "sections": [
+        {
+          "name": "First Section",
+          "summary": "section one",
+          "items": [
+            {
+              "name": "item-one",
+              "desc": "the first item"
+            }
+          ]
+        },
+        {
+          "name": "Second Section",
+          "summary": "section two"
+        }
+      ],
+      "children": [
+        {
+          "slug": "the-leaf",
+          "title": "The Leaf",
+          "status": "WIP",
+          "tagline": "a leaf node",
+          "sections": [
+            {
+              "name": "Leaf Section",
+              "summary": "leaf"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

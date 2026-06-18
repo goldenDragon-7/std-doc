@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hello, Living Document</title>
+<style>
+  /* ── CANONICAL PALETTE — do not invent new hues ── */
+  :root{
+    --bg:#0a0e17; --surface:#111827; --surface2:#1a2236; --border:#1e293b;
+    --glow:#22d3ee; --amber:#f59e0b; --green:#10b981; --red:#ef4444;
+    --purple:#a78bfa; --lavender:#c4b5fd; --gold:#fbbf24; --blue:#3b82f6;
+    --text:#f1f5f9; --text-2:#cbd5e1; --text-dim:#94a3b8; --text-faint:#64748b;
+    --mono:'SF Mono','Cascadia Code','Fira Code',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--text); font-family:var(--mono);
+    line-height:1.6; font-size:15px;
+    background-image:radial-gradient(900px 380px at 50% -120px, rgba(34,211,238,.10), transparent 70%);
+  }
+  .wrap{max-width:1000px; margin:0 auto; padding:72px 28px 120px}
+  h1{font-size:26px; letter-spacing:.2px; margin:0 0 6px}
+  .sub{color:var(--text-dim); margin:0 0 36px; max-width:78ch}
+  h2{font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--amber);
+     margin:42px 0 16px; display:flex; align-items:center; gap:10px}
+  h2::before{content:""; width:22px; height:2px; background:var(--amber); display:inline-block}
+  p{max-width:78ch; color:var(--text-2)}
+  code{color:var(--glow); background:var(--surface2); padding:1px 6px; border-radius:4px; font-size:.92em}
+  .divider{height:1px; margin:40px 0;
+    background:linear-gradient(90deg, var(--glow), transparent 60%)}
+  .banner{display:inline-block; font-size:11px; letter-spacing:1px; text-transform:uppercase;
+    border:1px solid var(--purple); color:var(--lavender); border-radius:999px;
+    padding:4px 12px; margin-bottom:24px}
+  /* descent */
+  .descent{border:1px solid var(--border); border-radius:10px; overflow:hidden; max-width:680px}
+  .layer{padding:13px 16px; border-bottom:1px solid var(--border); background:var(--surface)}
+  .layer:last-child{border-bottom:0}
+  .layer .tag{font-size:10px; letter-spacing:1px; text-transform:uppercase; padding:2px 7px;
+    border-radius:4px; margin-left:8px}
+  .tag.net{background:rgba(167,139,250,.15); color:var(--lavender)}
+  .tag.reuse{background:rgba(16,185,129,.15); color:var(--green)}
+  .layer.here{background:rgba(16,185,129,.08); border-left:3px solid var(--green)}
+  .conscript{color:var(--text-faint); font-size:12px; padding:5px 16px; background:var(--bg)}
+  /* matrix */
+  table.matrix{border-collapse:collapse; margin-top:8px}
+  table.matrix th, table.matrix td{border:1px solid var(--border); padding:9px 14px; text-align:center; font-size:13px}
+  table.matrix th{color:var(--text-dim); font-weight:normal}
+  .v-a{background:rgba(34,211,238,.16); color:var(--glow)}
+  .v-b{background:rgba(251,191,36,.14); color:var(--gold)}
+  .v-c{background:rgba(196,181,253,.14); color:var(--lavender)}
+  .v-d{background:var(--surface); color:var(--text-faint)}
+  .call{border-left:3px solid var(--lavender); background:rgba(167,139,250,.06);
+    padding:12px 16px; border-radius:0 8px 8px 0; max-width:78ch; margin-top:10px}
+  .you{color:var(--lavender); font-weight:600}
+  .foot{margin-top:56px; color:var(--text-faint); font-style:italic; font-size:13px}
+</style>
+  <link rel="stylesheet" href="/lib/feedback.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="banner">◀ this doc is PROPOSED · the server is RUNNING</div>
+  <h1>Hello, Living Document</h1>
+  <p class="sub">A one-page demonstration of the form: a document you can
+    <em>talk to</em>. Select any sentence, leave a comment — the author edits the
+    page back in place and it reloads with a walkthrough. This is the cheap path,
+    not the exception.</p>
+
+  <h2>The one-sentence ask</h2>
+  <p>Make every document a conversation surface by default — so the reader answers
+    its open questions <em>in the page</em>, instead of in a separate chat thread
+    they have to reconstruct later.</p>
+
+  <div class="divider"></div>
+
+  <h2>Layer 0 — the endpoint, rendered</h2>
+  <p>The artifact the reader looks at is <em>this page, listening</em>. Its hard
+    properties each name a prerequisite below:</p>
+  <div class="descent">
+    <div class="layer">A page the reader can comment on <span class="tag net">net-new</span></div>
+    <div class="conscript">↑ cannot listen without</div>
+    <div class="layer">a client widget + a local inbox <span class="tag reuse">reuse</span></div>
+    <div class="conscript">↑ cannot serve without</div>
+    <div class="layer">a stdlib HTTP server <span class="tag reuse">reuse</span></div>
+    <div class="conscript">↑ cannot exist without</div>
+    <div class="layer here">HERE — a static HTML file you already wrote <span class="tag reuse">we stand here</span></div>
+  </div>
+
+  <div class="divider"></div>
+
+  <h2>The heart — read the shape, not the cells</h2>
+  <table class="matrix">
+    <tr><th></th><th>static doc</th><th>living doc</th></tr>
+    <tr><th>reader answers in-place</th><td class="v-d">no</td><td class="v-a">yes</td></tr>
+    <tr><th>context preserved</th><td class="v-d">no</td><td class="v-a">yes</td></tr>
+    <tr><th>author edits back</th><td class="v-d">no</td><td class="v-b">yes</td></tr>
+  </table>
+  <p>The whole right column lights up — the value clusters in one corner. The
+    living form dominates wherever the reader has something to say.</p>
+
+  <div class="divider"></div>
+
+  <h2>The call ◀ your call</h2>
+  <div class="call">
+    <p>Should a living document be the <span class="you">default</span> for every
+      doc, with a flat static wall the exception that needs a reason? My lean:
+      <span class="you">yes</span> — but this is yours to decide. Select this
+      paragraph and tell me, and I'll lock it into the page.</p>
+  </div>
+
+  <p class="foot">The proof is the unwind itself — every layer above conscripted the
+    one below, until it reached ground you already stand on. 💬</p>
+
+</div>
+  <script src="/lib/feedback.js" defer></script>
+</body>
+</html>

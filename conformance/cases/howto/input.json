@@ -1,0 +1,31 @@
+{
+  "title": "HowTo",
+  "generated_date": "2026-06-15",
+  "groups": [
+    "Showcase"
+  ],
+  "root": {
+    "summary": "Exercises the howto primitive (labelled ordered steps) for byte-identity."
+  },
+  "nodes": [
+    {
+      "slug": "contribute",
+      "group": "Showcase",
+      "title": "HowTo — add a voice",
+      "status": "LIVE",
+      "tagline": "label prefix + title + ordered steps",
+      "blocks": [
+        {
+          "type": "howto",
+          "label": "a voice →",
+          "title": "add it to the Hall of Styles",
+          "steps": [
+            "Drop a named :root token block into styles/ — a voice is one small block.",
+            "Override as few or as many tokens as the look needs.",
+            "Open a pull request. Reviewed, merged, and the whole library gains it at once."
+          ]
+        }
+      ]
+    }
+  ]
+}

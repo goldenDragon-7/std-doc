@@ -1,0 +1,40 @@
+{
+  "title": "Style AB Conformance",
+  "generated_date": "2026-01-01",
+  "root": {
+    "summary": "style_ab conformance fixture."
+  },
+  "nodes": [
+    {
+      "slug": "pick-a-voice",
+      "title": "Pick a Voice",
+      "status": "LIVE",
+      "tagline": "choose once, generate free",
+      "blocks": [
+        {
+          "type": "style_ab",
+          "default": "techno-dark",
+          "voices": [
+            {
+              "id": "techno-dark",
+              "label": "techno-dark",
+              "dot": true,
+              "line": "techno-dark — dark, glowing, teeth.",
+              "preview": [
+                {"type": "namecard", "name": "'doc"}
+              ]
+            },
+            {
+              "id": "parchment-light",
+              "label": "parchment-light",
+              "line": "parchment-light — warm, scholarly.",
+              "preview": [
+                {"type": "namecard", "name": "Editor In Chief"}
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

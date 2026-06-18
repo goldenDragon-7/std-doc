@@ -1,0 +1,45 @@
+{
+  "title": "Pager Tour",
+  "nav": "pager",
+  "generated_date": "2026-06-11",
+  "accent": "glow",
+  "root": {
+    "summary": "A short guided tour, rendered in pager mode.",
+    "facets": { "pages": "3", "mode": "pager" }
+  },
+  "nodes": [
+    {
+      "slug": "say-hi",
+      "title": "1 · Say hi",
+      "group": "Begin",
+      "accent": "purple",
+      "tagline": "the opener",
+      "blocks": [
+        { "type": "hero", "at": "lead", "text": "Hello from the first page.", "sub": "A calm editorial opener." }
+      ],
+      "sections": [
+        { "name": "the point", "summary": "one small idea, stated plainly" }
+      ]
+    },
+    {
+      "slug": "do-things",
+      "title": "2 · Do things",
+      "group": "Begin",
+      "accent": "rose",
+      "sky": "right",
+      "tagline": "it acts",
+      "sections": [
+        { "name": "what it does", "summary": "the page can carry a real control" }
+      ]
+    },
+    {
+      "slug": "the-end",
+      "title": "3 · The end",
+      "group": "Close",
+      "tagline": "the send-off",
+      "sections": [
+        { "name": "goodbye", "summary": "and a loop back to the start" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "title": "Two-Level Doc",
+  "generated_date": "2026-06-11",
+  "root": {
+    "summary": "A nested doc."
+  },
+  "nodes": [
+    {
+      "slug": "root-a",
+      "title": "Root A",
+      "tagline": "branch a",
+      "children": [
+        {
+          "slug": "child-a1",
+          "title": "Child A1",
+          "status": "LIVE",
+          "sections": [
+            {
+              "name": "S1",
+              "summary": "s1"
+            }
+          ]
+        },
+        {
+          "slug": "child-a2",
+          "title": "Child A2",
+          "status": "PARTIAL"
+        }
+      ]
+    },
+    {
+      "slug": "root-b",
+      "title": "Root B",
+      "tagline": "branch b",
+      "children": [
+        {
+          "slug": "child-b1",
+          "title": "Child B1"
+        }
+      ]
+    }
+  ]
+}

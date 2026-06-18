@@ -1,0 +1,60 @@
+{
+  "title": "Flat Doc",
+  "generated_date": "2026-06-11",
+  "groups": [
+    "Core",
+    "Extras"
+  ],
+  "root": {
+    "summary": "A flat legacy doc.",
+    "facets": {
+      "Mission": "Stay simple."
+    }
+  },
+  "nodes": [
+    {
+      "slug": "alpha",
+      "group": "Core",
+      "title": "Alpha — the first",
+      "status": "LIVE",
+      "tagline": "first node",
+      "sections": [
+        {
+          "name": "Overview",
+          "summary": "what alpha is",
+          "items": [
+            {
+              "name": "a-one",
+              "desc": "item one",
+              "citations": [
+                {
+                  "path": "src/a.go",
+                  "line": "1-3",
+                  "evidence": "MEASURED",
+                  "note": "ok"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Details",
+          "summary": "more alpha"
+        }
+      ]
+    },
+    {
+      "slug": "beta",
+      "group": "Extras",
+      "title": "Beta — the second",
+      "status": "WIP",
+      "tagline": "second node",
+      "sections": [
+        {
+          "name": "Notes",
+          "summary": "beta notes"
+        }
+      ]
+    }
+  ]
+}

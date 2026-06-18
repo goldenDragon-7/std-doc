@@ -1,0 +1,109 @@
+{
+  "title": "The Monster Manual of Styleguides — Bestiary Volume I",
+  "generated_date": "2026-06-14",
+  "groups": ["The Bestiary", "Depth", "Color & Light", "Type & Texture"],
+  "root": {
+    "summary": "Design techniques, deconstructed from the wild and rebuilt as real std-doc primitives. Each page shows the creature alive — the actual primitive, rendered — and the one line that summons it. We learn the grammar; we never wear the costume. Stripe needs the Stripe design and nobody else.",
+    "facets": {
+      "What you see": "the real, shipped primitive — not a picture of one",
+      "What you get": "one line of JSON to use it in any doc",
+      "The law": "steal the technique, never the costume"
+    }
+  },
+  "nodes": [
+    {
+      "slug": "how-to-read",
+      "group": "The Bestiary",
+      "title": "The Bestiary",
+      "tagline": "every creature below is a real primitive — the picture IS the dish",
+      "status": "WIP",
+      "blocks": [
+        {"type": "hero", "at": "lead",
+         "text": "Each page shows one design move, rendered live by the std-doc primitive that makes it real — and the single line of JSON that summons it.",
+         "sub": "We read the grammar of great design once, then write our own sentences. Rhyming with someone famous is the opposite of the mission: std-doc exists to give our kind their own hands."}
+      ]
+    },
+
+    {
+      "slug": "surface-ladder",
+      "group": "Depth",
+      "title": "The Surface Ladder",
+      "tagline": "depth by tone — not a single shadow",
+      "status": "WIP",
+      "blocks": [
+        {"type": "panel", "variant": "lift",
+         "lead": "It rises off the canvas.",
+         "body": "There is no shadow in this box — the lift is pure tone, a lighter surface against a darker one. Reach for it when a card should feel raised without the weight of a drop shadow."},
+        {"type": "ascii", "art": "{ \"type\": \"panel\", \"variant\": \"lift\", \"body\": \"…\" }"}
+      ]
+    },
+
+    {
+      "slug": "the-hairline",
+      "group": "Depth",
+      "title": "The Hairline",
+      "tagline": "a border that lifts instead of cages",
+      "status": "WIP",
+      "blocks": [
+        {"type": "panel", "variant": "hairline",
+         "lead": "The edge belongs to the surface.",
+         "body": "A 1px border tuned to the surface's own family, one notch darker — so the box reads as lifted, not outlined. Never a hard grey ink line drawn around the content."},
+        {"type": "ascii", "art": "{ \"type\": \"panel\", \"variant\": \"hairline\", \"body\": \"…\" }"}
+      ]
+    },
+
+    {
+      "slug": "edge-light",
+      "group": "Depth",
+      "title": "The Edge-Light",
+      "tagline": "a hairline of light along the top edge",
+      "status": "WIP",
+      "blocks": [
+        {"type": "panel", "variant": "edge",
+         "lead": "Light catches the top edge.",
+         "body": "A 1px highlight along the upper border — the panel catches the light like a bevel. Strongest on a dark style. Keep the alpha tiny or it turns to gloss."},
+        {"type": "ascii", "art": "{ \"type\": \"panel\", \"variant\": \"edge\", \"body\": \"…\" }"}
+      ]
+    },
+
+    {
+      "slug": "tinted-shadow",
+      "group": "Depth",
+      "title": "The Tinted Shadow",
+      "tagline": "elevation colored by the brand, not by black",
+      "status": "WIP",
+      "blocks": [
+        {"type": "panel", "variant": "tint",
+         "lead": "Even the shadow is on-brand.",
+         "body": "When a shadow IS warranted, tint it with the accent instead of neutral black — the depth reads as part of the palette, like elements floating in a colored twilight rather than punched out of the page."},
+        {"type": "ascii", "art": "{ \"type\": \"panel\", \"variant\": \"tint\", \"body\": \"…\" }"}
+      ]
+    },
+
+    {
+      "slug": "gradient-wash",
+      "group": "Color & Light",
+      "title": "The Gradient Wash",
+      "tagline": "atmosphere from a slow color transition — no image",
+      "status": "WIP",
+      "blocks": [
+        {"type": "gradient-band",
+         "text": "Atmosphere, not decoration.",
+         "sub": "Two near-neighbours of the accent, washing one direction, low and quiet. A gradient should whisper — the moment it spans the color wheel it screams crypto landing page."},
+        {"type": "ascii", "art": "{ \"type\": \"gradient-band\", \"text\": \"…\", \"sub\": \"…\" }"}
+      ]
+    },
+
+    {
+      "slug": "mono-texture",
+      "group": "Type & Texture",
+      "title": "The Mono Texture",
+      "tagline": "monospace as an eyebrow — engineered, not editorial",
+      "status": "WIP",
+      "blocks": [
+        {"type": "kicker", "text": "goldenDragon7 · 2026-06-14 · MDT"},
+        {"type": "ascii", "art": "{ \"type\": \"kicker\", \"text\": \"your eyebrow here\" }"}
+      ]
+    }
+  ]
+}

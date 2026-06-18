@@ -1,0 +1,6 @@
+/* parchment-light — white/serif/serious, passing-the-veil-safe. */
+:root{--bg:#faf8f3;--surface:#ffffff;--surface2:#f1ece1;--border:#d9d2c4;
+ --glow:#1d6fb8;--glow-dim:rgba(29,111,184,.12);--amber:#b97309;--green:#1f7a4d;
+ --red:#b3261e;--purple:#5b4b9c;--lavender:#6d5fae;--gold:#9a6b00;
+ --text:#1f2328;--text-2:#3a3f45;--text-dim:#5c636b;--text-faint:#8a909a;
+ --mono:'SF Mono',ui-monospace,monospace;--sans:Georgia,'Times New Roman',serif}

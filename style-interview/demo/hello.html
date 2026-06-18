@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hello — say something to this page</title>
+<style>
+  :root{
+    --bg:#0a0e17; --surface:#141d2e; --surface2:#1b2942; --line:#243149;
+    --fg:#e8eef7; --dim:#9fb0c8; --glow:#22d3ee; --glow-dim:rgba(34,211,238,.14);
+    --green:#34d399; --gold:#fbbf24; --purple:#a78bfa;
+    --accent-ink:#04121a;   /* dark text reads on the cyan accent */
+  }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{
+    background:radial-gradient(120% 90% at 0% 0%, var(--surface2) 0%, var(--bg) 60%);
+    color:var(--fg); font-family:-apple-system,'Segoe UI',Roboto,sans-serif; line-height:1.6;
+  }
+  .wrap{max-width:960px; margin:0 auto; padding:46px 24px 80px}
+  .kicker{font-size:12px; letter-spacing:.24em; text-transform:uppercase; color:var(--glow)}
+  h1{font-size:34px; font-weight:800; margin:.18em 0 .1em; letter-spacing:-.015em;
+     background:linear-gradient(90deg,var(--fg),var(--glow)); -webkit-background-clip:text; background-clip:text; color:transparent}
+  .tag{color:var(--dim); margin:.1em 0 1.6em; font-size:16px}
+
+  p{max-width:78ch}
+  .lede{font-size:17px}
+
+  /* the try-me target */
+  .tryme{
+    margin:26px 0; padding:18px 22px; border-radius:14px;
+    background:linear-gradient(90deg, var(--glow-dim), transparent);
+    border:1px solid var(--line); border-left:3px solid var(--glow);
+  }
+  .tryme .pin{font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:var(--glow); font-weight:700; margin-bottom:7px; display:flex; align-items:center; gap:7px}
+  .tryme .target{font-size:18px; font-weight:600; color:var(--fg)}
+  .tryme .hint{color:var(--dim); font-size:13.5px; margin-top:9px}
+
+  /* the loop, three beats */
+  .loop{display:flex; gap:0; flex-wrap:wrap; margin:30px 0 8px; align-items:stretch}
+  .beat{flex:1; min-width:150px; padding:14px 16px; border-radius:12px; background:var(--surface); border:1px solid var(--line)}
+  .beat .n{font-family:ui-monospace,monospace; font-size:12px; color:var(--glow); font-weight:700}
+  .beat .h{font-weight:700; margin:.2em 0 .15em}
+  .beat .s{font-size:13.5px; color:var(--dim)}
+  .arrow{display:flex; align-items:center; padding:0 8px; color:var(--dim); font-weight:700}
+
+  .foot{margin-top:34px; padding:16px 20px; border-radius:13px; border:1px dashed var(--line); color:var(--dim); font-size:14px}
+  .foot b{color:var(--fg)}
+  .pgnav{margin-top:30px; font-size:13px; color:var(--dim)}
+  .pgnav a{color:var(--glow); text-decoration:none}
+  kbd{font-family:ui-monospace,monospace; font-size:12px; background:var(--surface2); border:1px solid var(--line); border-bottom-width:2px; border-radius:5px; padding:1px 6px; color:var(--fg)}
+  .wink{color:var(--purple)}
+</style>
+  <script src="/lib/style-lock.js"></script>
+  <link rel="stylesheet" href="/lib/style-lock.css">
+  <link rel="stylesheet" href="/lib/feedback.css">
+</head>
+<body>
+<div class="wrap">
+  <div class="kicker">std-doc · style-interview · page 1 of 7</div>
+  <h1>Say something to this page</h1>
+  <div class="tag">it can hear you — and it answers</div>
+
+  <p class="lede">Most documents are a one-way street: someone writes, you read, the end. This one is a <em>conversation</em>. You can grab any sentence, tell it what you think, and the document responds right where you pointed — then it reloads and walks you through exactly what changed. No email, no chat window. The document <em>is</em> the conversation.</p>
+
+  <div class="tryme" data-cf-change="ch-kbd-shortcut ch-panel-harmonized">
+    <div class="pin">👇 try it on this sentence right now</div>
+    <div class="target" id="target">Select this whole line with your cursor, and a little 💬 will appear — click it <em>(or just press <kbd>C</kbd>)</em>, type “make this gold,” and send.</div>
+    <div class="hint">Drag to highlight the text → a floating 💬 shows up <em>(or hit <kbd>C</kbd> with text selected)</em> → write your note → it drops into the panel. That's the whole gesture. You just talked to a document.</div>
+  </div>
+
+  <p>That one move — <b>select → 💬 → add</b> — sends your note immediately. You can mark up as many spots as you like and send them together — and that's the moment that matters: a tiny <b>monitor</b> receives your whole batch at once. Here's the full loop:</p>
+
+  <div class="loop" data-cf-change="ch-loop-steps ch-loop-impersonal ch-submit-shortcut">
+    <div class="beat"><div class="n">01</div><div class="h">you comment</div><div class="s">each note pins to the exact words you picked and waits in your <em>Pending</em> batch — nothing has been sent</div></div>
+    <div class="arrow">→</div>
+    <div class="beat"><div class="n">02</div><div class="h">you submit</div><div class="s">you hit submit <em>(or <kbd>⌘↵</kbd>)</em> — a monitor has been listening this whole time, and it receives your batch the instant it lands</div></div>
+    <div class="arrow">→</div>
+    <div class="beat"><div class="n">03</div><div class="h">it changes</div><div class="s">updates are made to the <b>JSON</b> — the canonical source — and the page re-renders from it</div></div>
+    <div class="arrow">→</div>
+    <div class="beat"><div class="n">04</div><div class="h">it walks you</div><div class="s">the page reloads, keeps your scroll, and tours you through exactly what moved</div></div>
+  </div>
+
+  <p>When replies pile up, there's a <b>tour</b> — a little guided walk through every change since you last looked, so you never have to hunt for what's new. Look for it in the 💬 panel once your first batch is answered.</p>
+
+  <div class="foot" data-cf-change="ch-no-spoiler ch-awareness">
+    <b>Why does a document answering you feel like that?</b> Because it's the thing you didn't let yourself want. <span class="wink">Hold onto that feeling — we'll come back to it.</span> For now: just try the gesture above. ☝️
+  </div>
+
+  <div class="pgnav">
+    next → <a href="action-button.html">page 2 · a document that <em>does</em> things</a> &nbsp;·&nbsp; or jump to <a href="style-ab.html">page 3 · pick your voice</a>
+  </div>
+</div>
+  <script src="/lib/feedback.js" defer></script>
+</body>
+</html>

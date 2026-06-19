@@ -27,6 +27,13 @@ func diagramsRender(block *wire.OrderedMap, ctx *template.Ctx) (string, error) {
 		typ := "ascii"
 		if truthy(get(d, "mermaid")) {
 			typ = "mermaid"
+			// Make the mermaid source safe for dark themes before it's written
+			// into the page (techno-dark is the default style). Without these
+			// transforms the diagram silently renders the "bomb icon". Ported
+			// from engine/scripts/mermaid_fix.py — see mermaid_fix.go.
+			if src, ok := get(d, "mermaid").(string); ok {
+				d.Set("mermaid", mermaidFix(src))
+			}
 		}
 		s, err := ctx.Registry.Render(typ, d, ctx)
 		if err != nil {

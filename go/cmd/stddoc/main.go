@@ -3,6 +3,7 @@
 // self-contained, and shells out to nothing at runtime.
 //
 //	stddoc publish  <source.json> <out-dir> [--style <name>]
+//	stddoc lint     <source.json>
 //	stddoc freeze   <dir>
 //	stddoc serve    <dir>
 //	stddoc roll     <source.json> --slug <slug>
@@ -30,7 +31,7 @@ func main() {
 
 func run(args []string) error {
 	if len(args) == 0 {
-		return fmt.Errorf("usage: stddoc <publish|freeze|serve|roll|graduate> ...")
+		return fmt.Errorf("usage: stddoc <publish|lint|freeze|serve|roll|graduate> ...")
 	}
 	cmd, rest := args[0], args[1:]
 	switch cmd {
@@ -39,6 +40,8 @@ func run(args []string) error {
 		return nil
 	case "publish":
 		return cmdPublish(rest)
+	case "lint":
+		return cmdLint(rest)
 	case "freeze":
 		return cmdFreeze(rest)
 	case "serve":

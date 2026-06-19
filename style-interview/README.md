@@ -24,7 +24,7 @@ re-publish; never hand-edit the generated HTML.
 
 # serve it (injects the comment widget + heartbeat, picks a free port)
 ./stddoc serve style-interview/demo/published
-#   → ✅ LIVE.  open http://localhost:5050/index.html
+#   → ✅ LIVE.  open http://localhost:33333/index.html
 ```
 
 Open the printed `http://` URL, start at page 1 (`say-something.html`), and read

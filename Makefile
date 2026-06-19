@@ -29,7 +29,7 @@ PLATFORMS := darwin/arm64 darwin/amd64 linux/amd64 linux/arm64 windows/amd64
 
 # Internal-only paths pruned from the public source bundle (make dist).
 DIST_EXCLUDE := briefs _audit_out prd HANDOFF.md CLAUDE.md COMING-ATTRACTIONS.md \
-                go/LETTER-to-the-next-maker.md go/probably_trash \
+                .claude go/LETTER-to-the-next-maker.md go/probably_trash \
                 style-interview/demo/_review-spec style-interview/demo/pager-preview \
                 style-interview/demo/published-pager conformance/cases/prd-python-prep
 DIST_NAME    := std-doc-$(VERSION)

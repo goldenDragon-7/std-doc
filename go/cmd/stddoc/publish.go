@@ -16,6 +16,7 @@ import (
 //	stddoc publish <source.json> <out-dir> [--style <name>] [--plugins <dir>]
 func cmdPublish(args []string) error {
 	var src, out, style, plugins string
+	noLint := false
 	rest := []string{}
 	for i := 0; i < len(args); i++ {
 		switch args[i] {
@@ -31,12 +32,14 @@ func cmdPublish(args []string) error {
 			}
 			plugins = args[i+1]
 			i++
+		case "--no-lint":
+			noLint = true
 		default:
 			rest = append(rest, args[i])
 		}
 	}
 	if len(rest) < 2 {
-		return fmt.Errorf("usage: stddoc publish <source.json> <out-dir> [--style <name>] [--plugins <dir>]")
+		return fmt.Errorf("usage: stddoc publish <source.json> <out-dir> [--style <name>] [--plugins <dir>] [--no-lint]")
 	}
 	src, out = rest[0], rest[1]
 
@@ -63,6 +66,20 @@ func cmdPublish(args []string) error {
 	doc, err := wire.ParseOrderedJSON(data)
 	if err != nil {
 		return fmt.Errorf("parse %s: %w", src, err)
+	}
+
+	// Lint-or-die (default-on): a malformed source.json aborts publish loudly
+	// rather than rendering a broken page silently — mirrors Python publish.py's
+	// lint_or_die. --no-lint opts out for deliberate WIP iteration.
+	if !noLint {
+		findings, lerr := core.Lint(doc, lib)
+		if lerr != nil {
+			return lerr
+		}
+		if nErr := core.CountErrors(findings); nErr > 0 {
+			reportFindings(findings)
+			return fmt.Errorf("publish aborted: %s has %d lint error(s) (use --no-lint to override)", src, nErr)
+		}
 	}
 
 	var pages map[string]string

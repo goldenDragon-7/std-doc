@@ -60,7 +60,7 @@ New here? Just say *"introduce yourself"* — it'll open with **Meet std-doc**.
 
 ## Where to go next
 
-- **`style-interview/`** — the onboarding tutorial. Five short pages that teach the
+- **`style-interview/`** — the onboarding tutorial. Seven short pages that teach the
   voice by *being* the thing they describe. Start here; it's the warmest door.
 - **`SKILL.md`** — the full how-to: the four moves, the reply protocol, the detail.
 - **`self-doc/`** — std-doc documented as a std-doc. It self-hosts; read it served.

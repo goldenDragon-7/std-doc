@@ -44,7 +44,7 @@ a walkthrough of what changed.
 |---|---|
 | `stddoc publish <source.json> <out>` | Expand a canonical JSON doc-tree into rich HTML pages |
 | `stddoc serve <dir>` | Inject the comment widget + serve + heartbeat, in one process |
-| `stddoc freeze <dir> <out>` | Bake a portable snapshot that reaches out to nothing |
+| `stddoc freeze <dir>` | Verify in place that the doc reaches out to nothing (the renderer already emits inline SVG/CSS/JS) |
 | `stddoc roll <source.json>` | Version the canonical JSON into a git home |
 | `stddoc graduate` | Shed a comment round and keep the doc live |
 

@@ -278,9 +278,10 @@ shape + reply: **`protocol/responding.md`**; worked example:
 
 ## Gotchas (these will bite)
 
-- **`--idle-timeout 0` is mandatory** for a doc meant to sit and wait. The
-  server's default is auto-shutdown after 600s of no requests — a doc you set up
-  before the reader opens it will quietly die in 10 minutes. `setup.sh` sets it.
+- **`serve` never idles out by default.** The Go server's `--idle-timeout`
+  defaults to `0` (never auto-shuts-down), so a doc you set up before the reader
+  opens it stays live. Pass `--idle-timeout N` only if you *want* it to exit
+  after N idle seconds; `setup.sh` keeps the never-idle default.
 - **macOS has no `setsid`.** Don't reach for it. Start the server with
   `run_in_background` (in an agent session) or via `setup.sh` — never a start that
   depends on `setsid`.
@@ -328,10 +329,10 @@ in `history.json`, the inbox starts fresh. **JSON is the artifact that travels t
 the git home, never the derived HTML** (Covenant I). Every version is a room; the
 git home is the archive of rooms.
 
-`wake` un-archives a sealed doc first, re-injects the feedback tags, and prints
-the serve + Monitor commands to re-arm. Keep a `PROPOSED vs RUNNING` banner
-distinct from the liveness stamp — `◉ LIVE` means "the server is up," not "the
-system this doc describes is live."
+To bring an archived doc back, re-`publish` from its versioned `source.json` and
+`serve` the result — the JSON is canon, so the page rebuilds from it. Keep a
+`PROPOSED vs RUNNING` banner distinct from the liveness stamp — `◉ LIVE` means
+"the server is up," not "the system this doc describes is live."
 
 ## Files in this skill
 

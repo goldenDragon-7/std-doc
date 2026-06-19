@@ -16,21 +16,59 @@ import (
 // RenderFunc draws one block of a given type.
 type RenderFunc func(block *wire.OrderedMap, ctx *template.Ctx) (string, error)
 
-// Registry maps a block type to its render func and static CSS.
+// Finding is one lint result. Level is "error" (aborts publish) or "warn"
+// (reported, never aborts). Slug scopes the finding to the offending node;
+// Message is human-readable. Mirrors the Python Finding namedtuple.
+type Finding struct {
+	Level   string
+	Slug    string
+	Message string
+}
+
+// ValidateFunc is the OPTIONAL per-primitive structural check. It returns
+// findings for a malformed block; a nil/empty slice means the block is valid.
+// A primitive that registers no validator is simply not validated — exactly
+// the contract self-doc documents ("validate (optional)").
+type ValidateFunc func(block *wire.OrderedMap) []Finding
+
+// Registry maps a block type to its render func, static CSS, and optional
+// validator.
 type Registry struct {
-	funcs map[string]RenderFunc
-	css   map[string]string
+	funcs      map[string]RenderFunc
+	css        map[string]string
+	validators map[string]ValidateFunc
 }
 
 // New returns an empty registry.
 func New() *Registry {
-	return &Registry{funcs: map[string]RenderFunc{}, css: map[string]string{}}
+	return &Registry{
+		funcs:      map[string]RenderFunc{},
+		css:        map[string]string{},
+		validators: map[string]ValidateFunc{},
+	}
 }
 
 // Register installs a render func (and its CSS, possibly "") under a type.
 func (r *Registry) Register(typ string, fn RenderFunc, css string) {
 	r.funcs[typ] = fn
 	r.css[typ] = css
+}
+
+// RegisterValidator installs an optional validator for a type. Calling it more
+// than once replaces the prior validator. Wholly optional: a type with no
+// validator is never validated.
+func (r *Registry) RegisterValidator(typ string, fn ValidateFunc) {
+	r.validators[typ] = fn
+}
+
+// Validate dispatches to a type's validator, returning its findings. Returns nil
+// when the type has no validator installed (not-validated, never an error).
+func (r *Registry) Validate(typ string, block *wire.OrderedMap) []Finding {
+	fn, ok := r.validators[typ]
+	if !ok {
+		return nil
+	}
+	return fn(block)
 }
 
 // Has reports whether a type is registered.

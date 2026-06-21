@@ -77,3 +77,10 @@ func mermaidFix(content string) string {
 	content = darkClassdefs(content)
 	return content
 }
+
+// MermaidFix is the exported entry point for the same three dark-theme source
+// transforms, so the freeze package can apply them before shelling out to mmdc
+// (matching Python freeze.py, which imported mermaid_fix.fix before rendering).
+func MermaidFix(content string) string {
+	return mermaidFix(content)
+}

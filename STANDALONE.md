@@ -44,12 +44,16 @@ a walkthrough of what changed.
 |---|---|
 | `stddoc publish <source.json> <out>` | Expand a canonical JSON doc-tree into rich HTML pages |
 | `stddoc serve <dir>` | Inject the comment widget + serve + heartbeat, in one process |
-| `stddoc freeze <dir>` | Verify in place that the doc reaches out to nothing (the renderer already emits inline SVG/CSS/JS) |
+| `stddoc freeze <dir> [title]` | Bake to a portable snapshot: render diagrams to inline SVG, strip the served-only widget/CDN tags, write a sibling `frozen/` dir + `<slug>_frozen_<ts>.zip`, and self-check that every page reaches out to nothing |
 | `stddoc roll <source.json>` | Version the canonical JSON into a git home |
 | `stddoc graduate` | Shed a comment round and keep the doc live |
 
 JSON is the thing you keep in git; HTML is derived from it. Edit the JSON and
 re-publish — never patch the generated HTML by hand.
+
+`publish` only renders; `serve` wires the comment widget. Open the **serve URL**,
+not the published HTML directly — a published dir isn't comment-ready until
+`serve` injects the widget.
 
 ---
 

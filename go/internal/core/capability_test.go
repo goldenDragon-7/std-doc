@@ -104,6 +104,9 @@ func TestCapability_DocsDoNotLie(t *testing.T) {
 		{"shelve", "retired lifecycle verb — superseded by roll/graduate"},
 		{"seal →", "retired lifecycle transition (seal → archive)"},
 		{"600s", "inverted idle-timeout claim — Go default is 0 (never idles)"},
+		{"SecurityGateError", "Python-era gate type — Go gate exports Scan/Enforce/HasMermaid only (Enforce returns a plain fmt.Errorf)"},
+		{"enforce_blocks", "Python-era gate function — absent from the Go gate (two-pass Scan + Enforce)"},
+		{"EXTERNAL_REF", "Python-era gate regex name — the Go gate uses reDep + reInlineHTTP (two-pass Scan)"},
 	}
 	for _, d := range docs {
 		raw, err := os.ReadFile(filepath.Join(root, d))

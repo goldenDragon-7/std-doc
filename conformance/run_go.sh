@@ -30,11 +30,16 @@ for dir in "$CASES"/*/; do
     echo "✗ $case — publish errored:"; sed 's/^/    /' "$err"
     fail=$((fail + 1)); rm -rf "$out"; rm -f "$err"; continue
   fi
-  if diff -r "$out" "$expected" >/dev/null 2>&1; then
+  # Scope the diff to the goldened pages: search-index.{js,json} are legitimate
+  # publish sidecars (data derived from the doc, presence-guarded by
+  # search_capability_test.go) but are not byte-goldened here — same scope as the
+  # Go TestConformanceCases_ByteIdentical, which only compares expected/ HTML.
+  DIFF_X=(-x 'search-index.js' -x 'search-index.json')
+  if diff -r "${DIFF_X[@]}" "$out" "$expected" >/dev/null 2>&1; then
     echo "✓ $case"
   else
     echo "✗ $case — diff vs expected/:"
-    diff -r "$expected" "$out" | sed 's/^/    /' | head -40
+    diff -r "${DIFF_X[@]}" "$expected" "$out" | sed 's/^/    /' | head -40
     fail=$((fail + 1))
   fi
   rm -rf "$out"; rm -f "$err"

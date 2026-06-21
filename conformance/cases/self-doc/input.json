@@ -1051,7 +1051,7 @@
             },
             {
               "name": "2 · Freeze = zero external refs",
-              "desc": "freeze() output must contain no http(s)://, protocol-relative //host, or CDN src/href. The gate scans it and fails the build naming your type."
+              "desc": "freeze() output must contain no http(s)://, protocol-relative //host, or CDN src/href. The gate scans it (attributes/CSS + inline scripts) and fails the build naming the offending page."
             },
             {
               "name": "3 · stdlib only",
@@ -2315,22 +2315,26 @@
           "name": "Per-primitive freeze enforcement",
           "icon": "🛡️",
           "tag": "P5",
-          "summary": "On --freeze every block's frozen output is scanned for external references. Any leak fails the build LOUDLY, naming the offending primitive type.",
+          "summary": "On --freeze every page's frozen output is scanned for external references. Any leak fails the build LOUDLY, naming the offending page.",
           "items": [
             {
-              "name": "EXTERNAL_REF scan",
-              "desc": "Matches http(s)://, protocol-relative //host, and CDN-ish src=// / href=// / url(https:)."
+              "name": "Pass 1 — attribute & CSS scan",
+              "desc": "Flags src=/href= values that are absolute (https:) or root-relative (/), and CSS url(https://…) references. The // is required, so prose that merely mentions url(https:) is not a leak."
             },
             {
-              "name": "Reads freeze(), falls back to render()",
-              "desc": "A primitive that cleans itself up on freeze passes even if its live render references the kit. SecurityGateError names the type.",
+              "name": "Pass 2 — inline-script exfil scan",
+              "desc": "Inside <script>…</script> blocks, flags a value-shaped http(s):// URL (the fetch()/.src=/location= shape) so an inline exfiltration can't slip past the attribute scan. The W3C SVG namespace (www.w3.org) is excluded.",
               "citations": [
                 {
-                  "path": "go/internal/gate/",
+                  "path": "go/internal/gate/gate.go",
                   "evidence": "MEASURED",
-                  "note": "EXTERNAL_REF regex + scan/enforce/enforce_blocks + SecurityGateError"
+                  "note": "two-pass Scan + Enforce (attribute/CSS pass + inline-script exfil pass)"
                 }
               ]
+            },
+            {
+              "name": "Scan finds, Enforce names the page",
+              "desc": "The two-pass Scan returns the leaks; Enforce raises a plain 'freeze blocked' error naming every offending page (not a typed exception)."
             }
           ]
         }
@@ -2569,7 +2573,7 @@
             },
             {
               "name": "Derived by the tool's own publisher",
-              "desc": "`stddoc publish` (go/cmd/stddoc) turned that JSON into these pages + left-nav + search index. The HTML is a build artifact; editing the JSON and re-publishing regenerates it."
+              "desc": "`stddoc publish` (go/cmd/stddoc) turned that JSON into these pages + left-nav + search index. The HTML is a build artifact; editing the JSON and re-publishing regenerates it. publish only renders — `stddoc serve` injects the comment widget, so open the serve URL, not the published HTML directly."
             },
             {
               "name": "Listening right now",

@@ -83,6 +83,7 @@ func cmdPublish(args []string) error {
 	}
 
 	var pages map[string]string
+	docTree := false
 	if v, _ := doc.Get("layout"); v == "page" {
 		page, name, perr := core.RenderStandalone(doc, lib)
 		if perr != nil {
@@ -94,6 +95,7 @@ func cmdPublish(args []string) error {
 		if err != nil {
 			return err
 		}
+		docTree = true
 	}
 
 	if err := os.MkdirAll(out, 0o755); err != nil {
@@ -101,6 +103,26 @@ func cmdPublish(args []string) error {
 	}
 	for name, html := range pages {
 		if err := os.WriteFile(filepath.Join(out, name), []byte(html), 0o644); err != nil {
+			return err
+		}
+	}
+
+	// Full-text search index (PRD P0-2): every doc-tree page emits
+	// <script src='search-index.js'> and renders a #cf-search box, so publish
+	// MUST emit the index or search 404s and returns zero hits. Shipped as .js
+	// (sets window.CF_SEARCH_INDEX; loads over file://, freeze carries it) AND
+	// as .json for external consumers. Standalone pages don't carry the index.
+	if docTree {
+		idx := core.SearchIndex(doc)
+		j, err := core.MarshalSearchIndex(idx)
+		if err != nil {
+			return err
+		}
+		if err := os.WriteFile(filepath.Join(out, "search-index.js"),
+			append(append([]byte("window.CF_SEARCH_INDEX="), j...), ';'), 0o644); err != nil {
+			return err
+		}
+		if err := os.WriteFile(filepath.Join(out, "search-index.json"), j, 0o644); err != nil {
 			return err
 		}
 	}

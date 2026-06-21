@@ -61,6 +61,10 @@ stddoc serve   published                         # inject widget + serve + prese
 stddoc freeze  published                          # portable server-free snapshot + .zip
 ```
 
+`publish` only renders the pages — `serve` injects the comment widget. A published
+dir is not comment-ready until `serve` runs, so open the **serve URL**, not the
+published HTML directly.
+
 Contract: **`protocol/doctree-schema.md`**; worked tree:
 **`examples/data-derived-example/source.json`**. **Multi-page note:** all pages
 share one `feedback/` dir, so when you reply set the change's `page` (see

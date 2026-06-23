@@ -51,7 +51,7 @@
   const WATCHER_URL = window.__cfWatcherUrl || "feedback/watcher.json";
   const WATCHER_FRESH_MS = 15000;   // a heartbeat older than this = cold
   const POLL_INTERVAL_MS = 4000;
-  const OUTER_HTML_MAX = 600;
+
   const TEXT_SNIPPET_MAX = 220;
 
   // Selectors that we consider "commentable" — i.e. you can click them in
@@ -203,7 +203,6 @@
       tag: el.tagName.toLowerCase(),
       id: el.id || null,
       text_snippet: (el.textContent || "").replace(/\s+/g, " ").trim().slice(0, TEXT_SNIPPET_MAX),
-      outer_html: truncate(el.outerHTML, OUTER_HTML_MAX),
     };
   }
 

@@ -754,11 +754,30 @@
   // The ONE network path to the inbox. Both the panel batch and the first-class
   // whisper widget POST through here → FEEDBACK_URL → feedback/inbox.jsonl.
   // There is deliberately no second inbox or parallel endpoint.
+  // Commenter identity for provenance: captured once, persisted locally, and
+  // stamped onto the batch + every comment. The inbox server passes the field
+  // straight through, so author travels with the feedback. Paired with the
+  // server-side source_ip stamp, this gives both a declared and an observed
+  // signal of who wrote each comment.
+  const CF_AUTHOR_KEY = "stddoc_author_v1";
+  function cfAuthor() {
+    let a = null;
+    try { a = localStorage.getItem(CF_AUTHOR_KEY); } catch (e) {}
+    if (!a) {
+      a = (window.prompt("Who's commenting? Enter your name — it's stamped on your feedback so edits carry correct provenance.") || "").trim();
+      if (a) { try { localStorage.setItem(CF_AUTHOR_KEY, a); } catch (e) {} }
+    }
+    return a || "unknown";
+  }
+
   async function sendComments(snapshot) {
     const commentIds = snapshot.map(c => c.id);
+    const who = cfAuthor();
+    snapshot.forEach(c => { if (c && typeof c === "object" && !c.author) c.author = who; });
     const batch = {
       submitted_at: new Date().toISOString(),
       page_url: location.pathname,
+      author: who,
       comments: snapshot,
     };
     const resp = await fetch(FEEDBACK_URL, {
@@ -1142,7 +1161,7 @@
           you.className = "cf-bubble cf-you";
           const who = document.createElement("div");
           who.className = "cf-bubble-who";
-          who.textContent = "you";
+          who.textContent = c.author || "you";
           const txt = document.createElement("div");
           txt.className = "cf-bubble-text";
           if (c.type === "control") {

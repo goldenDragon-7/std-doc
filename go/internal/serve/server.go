@@ -202,6 +202,22 @@ func (s *server) serveStatic(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// clientIP returns the best-effort source IP of a request for provenance: the
+// first X-Forwarded-For hop when present (proxied setups), else the RemoteAddr
+// host. Never returns an error — provenance is advisory, not load-bearing.
+func clientIP(r *http.Request) string {
+	if xff := r.Header.Get("X-Forwarded-For"); xff != "" {
+		if i := strings.IndexByte(xff, ','); i >= 0 {
+			return strings.TrimSpace(xff[:i])
+		}
+		return strings.TrimSpace(xff)
+	}
+	if host, _, err := net.SplitHostPort(r.RemoteAddr); err == nil {
+		return host
+	}
+	return r.RemoteAddr
+}
+
 func (s *server) doPost(w http.ResponseWriter, r *http.Request) {
 	p := r.URL.Path
 	switch p {
@@ -214,6 +230,9 @@ func (s *server) doPost(w http.ResponseWriter, r *http.Request) {
 		now := time.Now()
 		data["received_at"] = float64(now.UnixNano()) / 1e9
 		data["received_iso"] = now.Format("2006-01-02T15:04:05")
+		// Corroborating provenance signal: stamp the source IP server-side, so a
+		// client-declared `author` can be cross-checked against where it came from.
+		data["source_ip"] = clientIP(r)
 		line, _ := json.Marshal(data)
 		inbox := filepath.Join(s.feedbackDir, "inbox.jsonl")
 		f, err := os.OpenFile(inbox, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)

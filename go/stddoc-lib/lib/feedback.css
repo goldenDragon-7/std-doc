@@ -186,6 +186,38 @@
 .cf-tab:hover { color: var(--fg, #1a1a1a); }
 .cf-tab.cf-tab-active { color: var(--glow, #b14000); border-bottom-color: var(--glow, #b14000); font-weight: 600; }
 
+/* Identity row — who you're signing comments as. Quiet by default; the input
+   reads as a signature line, not a form field. */
+.cf-identity {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--line, #eee);
+  background: var(--surface, #fdfcf8);
+}
+.cf-identity-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--dim, #666);
+  white-space: nowrap;
+}
+.cf-identity-input {
+  flex: 1;
+  min-width: 0;
+  padding: 4px 6px;
+  font-size: 13px;
+  color: var(--glow, #b14000);
+  background: transparent;
+  border: none;
+  border-bottom: 1px dashed var(--line, #ddd);
+}
+.cf-identity-input:focus {
+  outline: none;
+  border-bottom-color: var(--glow, #b14000);
+}
+
 /* Tab panes are flex columns so the list scrolls in the middle while
    panel-actions stay pinned to the bottom of the panel. */
 .cf-tab-pane {

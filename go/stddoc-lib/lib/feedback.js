@@ -75,6 +75,7 @@
     // Queue + submitted-batch (persisted to localStorage via saveLS/loadLS).
     pending: [],                 // comments queued but not yet POSTed
     lastSubmittedBatch: null,    // { comment_ids, submitted_at, pending_snapshot } — survives reloads
+    author: "",                  // optional reader display name; stamped on each comment ("" → "you")
 
     // History + polling.
     history: [],                 // parsed feedback/history.json
@@ -136,6 +137,7 @@
     const cur = loadLS();
     cur.pending = S.pending;
     cur.lastSubmittedBatch = S.lastSubmittedBatch;
+    cur.author = S.author;
     localStorage.setItem(LS_KEY, JSON.stringify(cur));
   }
 
@@ -245,6 +247,12 @@
       '  <div class="cf-tabs">',
       '    <button data-tab="pending" class="cf-tab cf-tab-active" title="Pending (P)">Pending <span class="cf-kbd-hint">P</span></button>',
       '    <button data-tab="history" class="cf-tab" title="History (H)">History <span class="cf-kbd-hint">H</span></button>',
+      '  </div>',
+      // Optional identity — stamped on every comment so a multi-author doc can
+      // say WHO in History instead of a wall of "you". Blank → today's "you".
+      '  <div class="cf-identity">',
+      '    <label for="cf-author-input" class="cf-identity-label">signed as</label>',
+      '    <input id="cf-author-input" class="cf-identity-input" type="text" placeholder="you" maxlength="40" autocomplete="name" spellcheck="false">',
       '  </div>',
       '  <div id="cf-tab-pending" class="cf-tab-pane cf-tab-pane-active">',
       '    <div id="cf-pending-list" class="cf-list"></div>',
@@ -756,9 +764,14 @@
   // There is deliberately no second inbox or parallel endpoint.
   async function sendComments(snapshot) {
     const commentIds = snapshot.map(c => c.id);
+    // Stamp the reader's chosen name onto each comment (if set, and not already
+    // stamped). Carried verbatim through the inbox into history.json, where the
+    // History thread shows it in place of "you". No name → field stays absent.
+    if (S.author) snapshot.forEach((c) => { if (!c.author) c.author = S.author; });
     const batch = {
       submitted_at: new Date().toISOString(),
       page_url: location.pathname,
+      author: S.author || undefined,
       comments: snapshot,
     };
     const resp = await fetch(FEEDBACK_URL, {
@@ -1142,7 +1155,9 @@
           you.className = "cf-bubble cf-you";
           const who = document.createElement("div");
           who.className = "cf-bubble-who";
-          who.textContent = "you";
+          // Multi-author docs: show WHO commented when the comment carries a
+          // name; otherwise keep the single-author "you".
+          who.textContent = c.author || "you";
           const txt = document.createElement("div");
           txt.className = "cf-bubble-text";
           if (c.type === "control") {
@@ -1535,6 +1550,14 @@
     const ls = loadLS();
     S.pending = ls.pending || [];
     S.lastSubmittedBatch = ls.lastSubmittedBatch || null;
+    S.author = ls.author || "";
+    const authorInput = $("cf-author-input");
+    if (authorInput) {
+      authorInput.value = S.author;
+      const syncAuthor = () => { S.author = authorInput.value.trim(); saveLS(); };
+      authorInput.addEventListener("input", syncAuthor);
+      authorInput.addEventListener("blur", syncAuthor);
+    }
     syncTitle();
     renderPending();
     const shouldAutoTour = sessionStorage.getItem("cf-auto-tour") === "1";

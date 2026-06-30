@@ -140,7 +140,8 @@ valid JSON array.
     {
       "id": "c-1780675305538-psqe",
       "comment": "the thing they said (echoed back)",
-      "quote": "the text they selected"
+      "quote": "the text they selected",
+      "author": "Dana"
     }
   ],
   "changes": [
@@ -158,6 +159,10 @@ valid JSON array.
 
 - **`in_response_to`** must contain the comment's `id` — that is how the page
   knows the "processing…" banner can clear.
+- **`author`** (optional) — if the reader signed their comment (it carries an
+  `author` in the inbox), **copy it through** onto the echoed comment. The
+  History thread shows it in place of "you", so a multi-author doc says *who*
+  said what. Omit it and the bubble falls back to "you" exactly as before.
 - **`anchor`** must resolve to a node in the page — either a `data-cf-change`
   you placed, or (preferred for data-derived docs) a renderer-stable
   `data-cf-anchor` / `id` from the table above (e.g. `n=the-binary§1`).

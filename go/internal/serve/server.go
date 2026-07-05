@@ -3,6 +3,7 @@ package serve
 import (
 	"encoding/json"
 	"fmt"
+	"hash/fnv"
 	"mime"
 	"net"
 	"net/http"
@@ -20,9 +21,30 @@ import (
 // --strict-port). 33333 is the default std-doc serving floor.
 const MinPort = 33333
 
+// PortSpread is the width of the stable-default port band above MinPort.
+// A doc served with NO explicit --port gets a default derived from a hash of
+// its absolute directory (see DefaultPortFor): MinPort..MinPort+PortSpread-1.
+// This spreads concurrent docs across the band instead of dogpiling 33333,
+// and makes each doc's port STABLE — the same doc returns to the same port,
+// so "which port is my doc on?" is computable, not a launch-order race.
+// Auto-advance (scanBind) remains the collision safety net on top of this.
+const PortSpread = 200
+
+// DefaultPortFor derives a stable default serving port for a doc directory
+// when the caller gave no explicit --port. It hashes the absolute directory
+// path into the MinPort..MinPort+PortSpread-1 band. Deterministic: the same
+// directory always yields the same port (discoverable), while different
+// directories spread across the band (collision-rare). This is only the
+// PREFERRED port — scanBind still advances past it if it happens to be busy.
+func DefaultPortFor(absDir string) int {
+	h := fnv.New32a()
+	_, _ = h.Write([]byte(absDir))
+	return MinPort + int(h.Sum32()%PortSpread)
+}
+
 // Options configures the serve command.
 type Options struct {
-	Port        int    // preferred port (default MinPort = 33333; never below)
+	Port        int    // preferred port; 0 = auto (stable per-doc default, see DefaultPortFor). Never serves below MinPort.
 	StrictPort  bool   // bind exactly Port or fail; no auto-advance
 	PortScan    int    // how many ports above Port to try (default 50)
 	IdleTimeout int    // exit after this many idle seconds (0 = disabled)

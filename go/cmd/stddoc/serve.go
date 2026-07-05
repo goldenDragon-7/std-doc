@@ -15,7 +15,7 @@ import (
 //	             [--idle-timeout S] [--recursive] [--note TEXT] [--plugins DIR]
 func cmdServe(args []string) error {
 	opt := serve.Options{
-		Port:     serve.MinPort, // SIP floor (33333); std-doc never serves below this
+		Port:     0, // 0 = auto: pick a stable per-doc default (see serve.DefaultPortFor); an explicit --port overrides
 		PortScan: 50,
 		// A living document's whole job is to wait for a human (§V: "a room you
 		// can walk back into"). Idling out after N seconds of no browser betrays

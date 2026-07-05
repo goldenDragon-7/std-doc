@@ -212,3 +212,70 @@ func mustGet(t *testing.T, url, want string) string {
 	}
 	return string(body)
 }
+
+// TestDefaultPortForStableAndInBand proves the stable per-doc default port:
+// deterministic per directory, always within the SIP band, and spreading
+// different directories across the band. This is the root fix for the
+// "everything dogpiles 33333 and nobody can find their doc's port" bug.
+func TestDefaultPortForStableAndInBand(t *testing.T) {
+	// deterministic: same dir → same port, twice
+	if DefaultPortFor("/tmp/docs/alpha") != DefaultPortFor("/tmp/docs/alpha") {
+		t.Fatal("DefaultPortFor not deterministic for the same directory")
+	}
+	// in-band: MinPort .. MinPort+PortSpread-1, always
+	for _, d := range []string{"/a", "/tmp/docs/alpha", "/Users/x/y/z/published", "", "/服务/文档"} {
+		p := DefaultPortFor(d)
+		if p < MinPort || p >= MinPort+PortSpread {
+			t.Fatalf("DefaultPortFor(%q)=%d out of band [%d,%d)", d, p, MinPort, MinPort+PortSpread)
+		}
+	}
+	// spread: a handful of distinct dirs should not all collapse to one port
+	seen := map[int]bool{}
+	for i := 0; i < 20; i++ {
+		seen[DefaultPortFor(fmt.Sprintf("/tmp/docs/doc-%d/published", i))] = true
+	}
+	if len(seen) < 10 {
+		t.Fatalf("stable defaults clustered too hard: only %d distinct ports for 20 dirs", len(seen))
+	}
+}
+
+// TestScanBindAdvancesPastBusy proves the collision safety net: with a port
+// already held, a non-strict scan advances to the next free one and serves
+// there — never silently loses the bind.
+func TestScanBindAdvancesPastBusy(t *testing.T) {
+	// Occupy a starting port at/above the floor.
+	occ, occPort, err := scanBind(MinPort, 200, false)
+	if err != nil {
+		t.Fatalf("could not grab an initial port: %v", err)
+	}
+	defer occ.Close()
+
+	// A second bind starting at the SAME occupied port must advance past it.
+	ln, chosen, err := scanBind(occPort, 200, false)
+	if err != nil {
+		t.Fatalf("scanBind failed to advance past busy port %d: %v", occPort, err)
+	}
+	defer ln.Close()
+	if chosen == occPort {
+		t.Fatalf("scanBind returned the busy port %d instead of advancing", occPort)
+	}
+	if chosen < MinPort {
+		t.Fatalf("scanBind chose %d below SIP floor %d", chosen, MinPort)
+	}
+}
+
+// TestScanBindStrictFailsOnBusy proves strict mode is LOUD: a busy port under
+// --strict-port is an error, not a silent auto-advance.
+func TestScanBindStrictFailsOnBusy(t *testing.T) {
+	occ, occPort, err := scanBind(MinPort, 200, false)
+	if err != nil {
+		t.Fatalf("could not grab an initial port: %v", err)
+	}
+	defer occ.Close()
+
+	ln, _, err := scanBind(occPort, 0, true)
+	if err == nil {
+		ln.Close()
+		t.Fatalf("strict scanBind on busy port %d should have failed loudly", occPort)
+	}
+}

@@ -46,7 +46,12 @@ resolve_stddoc() {
 STDDOC="$(resolve_stddoc)"
 
 DIR="${1:-}"
-PORT="${2:-33333}"   # SIP floor — std-doc serves on 33333 or higher (never below)
+# Port is OPTIONAL. If the caller gives one ($2) we honor it exactly. If not,
+# we let `stddoc serve` pick a STABLE per-doc default (a hash of the doc path
+# into the 333xx band) — so concurrent docs spread out instead of dogpiling
+# 33333, and the same doc reliably returns to the same port. We learn the
+# ACTUAL bound port from feedback/.port after launch, never by assuming it.
+USER_PORT="${2:-}"
 
 if [[ -z "$DIR" ]]; then
   echo "usage: ./setup.sh <doc-dir> [port]" >&2
@@ -58,30 +63,39 @@ if [[ ! -d "$DIR" ]]; then
 fi
 DIR="$(cd "$DIR" && pwd)"
 
+mkdir -p "$DIR/feedback"
+
 # free / reuse the port if something is already holding it.
-# Reuse if THIS dir is already being served on the requested port; otherwise
-# launch and let the server FORCE-CHECK the port (it auto-advances to the next
-# free one if $PORT is busy — no more stomping on 33333/33334).
+# Reuse if THIS dir is already being served. We don't know the port up front
+# (the server picks a stable per-doc default), so we check the port this doc
+# used last time — its own feedback/.port — not a hardcoded 33333.
+PORT=""
+CHECK_PORT="${USER_PORT:-$(cat "$DIR/feedback/.port" 2>/dev/null || true)}"
 EXISTS=0
-if lsof -ti:"$PORT" >/dev/null 2>&1; then
-  echo "▶ port $PORT busy — checking /info ..."
-  if curl -s --max-time 2 "http://localhost:$PORT/info" | grep -q "$DIR"; then
-    echo "  already serving THIS dir; reusing :$PORT."
+if [[ -n "$CHECK_PORT" ]] && lsof -ti:"$CHECK_PORT" >/dev/null 2>&1; then
+  echo "▶ port $CHECK_PORT busy — checking /info ..."
+  if curl -s --max-time 2 "http://localhost:$CHECK_PORT/info" | grep -q "$DIR"; then
+    echo "  already serving THIS dir; reusing :$CHECK_PORT."
+    PORT="$CHECK_PORT"
     EXISTS=1
   else
-    echo "  :$PORT held by something else — the server will advance to a free port."
+    echo "  :$CHECK_PORT held by something else — the server will pick a free port."
   fi
 fi
 
-mkdir -p "$DIR/feedback"
 if [[ "$EXISTS" != "1" ]]; then
   # The server picks the real port and writes it to feedback/.port. Clear any
   # stale marker first so we read THIS launch's port, not a previous run's.
   rm -f "$DIR/feedback/.port"
-  echo "▶ injecting + serving $DIR (preferred :$PORT, auto-advances if busy; idle-timeout disabled) ..."
-  # macOS-safe background start: no setsid. nohup + & + disown so the server
-  # outlives this script but still dies with the launching session.
-  "$STDDOC" serve "$DIR" --port "$PORT" --idle-timeout 0 \
+  if [[ -n "$USER_PORT" ]]; then
+    echo "▶ injecting + serving $DIR (requested :$USER_PORT, auto-advances if busy; idle-timeout disabled) ..."
+  else
+    echo "▶ injecting + serving $DIR (stable per-doc default port, auto-advances if busy; idle-timeout disabled) ..."
+  fi
+  # macOS-safe background start: no setsid. & so the server outlives this
+  # script but still dies with the launching session. Pass --port only when
+  # the caller asked for one; otherwise let the binary pick the stable default.
+  "$STDDOC" serve "$DIR" ${USER_PORT:+--port "$USER_PORT"} --idle-timeout 0 \
     >"$DIR/feedback/server.log" 2>&1 &
   SERVER_PID=$!
   # learn the ACTUAL port the server bound (it writes feedback/.port) — never

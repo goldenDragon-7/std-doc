@@ -36,17 +36,26 @@ func Run(dir string, opt Options) error {
 		return fmt.Errorf("client assets dir not found: %s (expected <lib-root>/lib with feedback.js etc.)", clientDir)
 	}
 
-	ln, chosen, err := scanBind(opt.Port, opt.PortScan, opt.StrictPort)
+	// Port 0 = no explicit --port: pick a STABLE per-doc default from the doc
+	// path so concurrent docs spread across the band instead of dogpiling
+	// 33333, and so the same doc reliably returns to the same port.
+	start := opt.Port
+	if start == 0 {
+		start = DefaultPortFor(artifactDir)
+		fmt.Printf("[server] no --port given; stable default for this doc is %d\n", start)
+	}
+
+	ln, chosen, err := scanBind(start, opt.PortScan, opt.StrictPort)
 	if err != nil {
 		if opt.StrictPort {
-			fmt.Printf("[server] FATAL: port %d is unavailable and --strict-port was set (%v).\n", opt.Port, err)
+			fmt.Printf("[server] FATAL: port %d is unavailable and --strict-port was set (%v).\n", start, err)
 		} else {
-			fmt.Printf("[server] FATAL: no free port in %d..%d (%v).\n", opt.Port, opt.Port+opt.PortScan, err)
+			fmt.Printf("[server] FATAL: no free port in %d..%d (%v).\n", start, start+opt.PortScan, err)
 		}
 		return err
 	}
-	if chosen != opt.Port {
-		fmt.Printf("[server] port %d busy → advanced to free port %d\n", opt.Port, chosen)
+	if chosen != start {
+		fmt.Printf("[server] port %d busy → advanced to free port %d\n", start, chosen)
 	}
 
 	// Record the actual port so launchers/tools read the truth.

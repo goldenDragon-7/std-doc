@@ -1,0 +1,35 @@
+{
+  "title": "Diagram routing — one node, best engine per type",
+  "generated_date": "2026-07-17",
+  "palette": {
+    "core": { "label": "Structural", "color": "#22d3ee" },
+    "quant": { "label": "Quantitative", "color": "#a78bfa" }
+  },
+  "nodes": [
+    {
+      "slug": "routing", "group": "Core", "title": "The diagram primitive routes by type",
+      "tagline": "declare what it is; the library picks how to draw it", "status": "LIVE",
+      "sections": [
+        {
+          "name": "Two diagrams, two engines, one primitive",
+          "icon": "🧭",
+          "summary": "A class diagram is structural — it routes to D2 and renders in-process, so it freezes with zero tooling. A gantt is quantitative (its meaning lives in POSITION on a time axis) — it routes to Mermaid. The 'render:' chip on each card names the engine the standard chose. See protocol/diagrams.md for the full best-engine-per-type table."
+        }
+      ],
+      "blocks": [
+        {
+          "type": "diagram",
+          "dtype": "class",
+          "label": "class model — structural → D2 (in-process, freezes browser-free)",
+          "d2": "User: {\n  shape: class\n  id: int\n  name: string\n}\nOrder: {\n  shape: class\n  id: int\n  user_id: int\n  total: money\n}\nUser -> Order: places"
+        },
+        {
+          "type": "diagram",
+          "dtype": "gantt",
+          "label": "release timeline — quantitative → Mermaid (position on a time axis)",
+          "mermaid": "gantt\n  title Ship the diagram primitive\n  dateFormat YYYY-MM-DD\n  section Build\n  routing table + primitive :2026-07-17, 2d\n  section Ship\n  PR + merge :2026-07-19, 1d"
+        }
+      ]
+    }
+  ]
+}

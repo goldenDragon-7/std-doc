@@ -6,9 +6,10 @@
 # that invariant.
 #
 #   make build     local binary at go/stddoc (current platform)
-#   make release   cross-compiled .tar.gz artifacts for the 3 launch platforms
-#   make verify    conformance 7/7 + a smoke publish against a real artifact
-#   make sign      codesign + notarize the darwin binaries (needs David's creds)
+#   make release   cross-compiled .tar.gz artifacts for the launch platforms
+#   make verify    conformance gate + a smoke publish against a real artifact
+#   make dist      pruned public source bundle (git archive HEAD, minus internals)
+#   make sign      codesign + notarize the darwin binaries (needs signing creds)
 #   make clean     remove build outputs
 
 GO        ?= go
@@ -28,7 +29,7 @@ PLATFORMS := darwin/arm64 darwin/amd64 linux/amd64 linux/arm64 windows/amd64
 .PHONY: build release verify sign clean version dist
 
 # Internal-only paths pruned from the public source bundle (make dist).
-DIST_EXCLUDE := briefs _audit_out prd HANDOFF.md CLAUDE.md COMING-ATTRACTIONS.md \
+DIST_EXCLUDE := briefs _audit_out prd HANDOFF.md CLAUDE.md COMING-ATTRACTIONS.md RELEASE.md Makefile.internal \
                 .claude go/LETTER-to-the-next-maker.md go/probably_trash \
                 style-interview/demo/_review-spec style-interview/demo/pager-preview \
                 style-interview/demo/published-pager conformance/cases/prd-python-prep
@@ -102,3 +103,8 @@ sign:
 clean:
 	rm -rf $(DIST)
 	rm -f $(MODULE_DIR)/stddoc
+
+# Maintainer-only targets (golden-master mirroring, etc.). Pruned from the public
+# bundle via DIST_EXCLUDE; `-include` makes its absence a silent no-op, so a clean
+# public checkout builds/verifies/releases without it.
+-include Makefile.internal

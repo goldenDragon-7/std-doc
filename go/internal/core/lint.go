@@ -45,7 +45,14 @@ func warnf(slug, format string, a ...any) registry.Finding {
 // returning every finding (possibly none). It NEVER renders — lint must not
 // change output — and never mutates the doc.
 func Lint(doc *wire.OrderedMap, lib *library.Library) ([]registry.Finding, error) {
-	reg, err := buildRegistry(lib)
+	// A `layout: page` doc is composed of page atoms (lanes/swim/track/heading/…)
+	// and publishes through the page registry (core.RenderStandalone). Lint it
+	// with that same registry, or its page-atom blocks read as "unknown type".
+	build := buildRegistry
+	if doc != nil && str(doc, "layout") == "page" {
+		build = buildPageRegistry
+	}
+	reg, err := build(lib)
 	if err != nil {
 		return nil, err
 	}
@@ -84,6 +91,20 @@ func lintDoc(doc *wire.OrderedMap, reg *registry.Registry) []registry.Finding {
 	}
 	if str(doc, "title") == "" {
 		out = append(out, errf("<doc>", "missing required key: title"))
+	}
+	// A `layout: page` doc is a single standalone page composed of `blocks`, not
+	// a doc-tree of `nodes` (it publishes via core.RenderStandalone, not
+	// core.Publish). It has no nodes/parent/children topology, so validate its
+	// page shape and return — otherwise lint wrongly demands `nodes` and aborts
+	// `stddoc publish` on a perfectly valid page doc (the page-atoms-demo trap).
+	if str(doc, "layout") == "page" {
+		if _, has := doc.Get("blocks"); !has {
+			out = append(out, errf("<doc>", "layout:page doc missing required key: blocks (must be a list)"))
+			return out
+		}
+		// Reuse the per-primitive block validator over the page's top-level
+		// blocks[] (same dispatch a node's blocks get).
+		return append(out, lintBlocks(doc, "<page>", reg)...)
 	}
 	nodesV, _ := doc.Get("nodes")
 	nodes, ok := nodesV.([]any)

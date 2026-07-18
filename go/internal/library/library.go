@@ -25,15 +25,16 @@ const DefaultStyle = "techno-dark"
 // assets package exactly so consumers (template.LoadTemplates, json.Unmarshal)
 // are fed identical bytes.
 type Library struct {
-	TemplatesJSON    []byte            // templates.json — raw
-	PageAtomsJSON    []byte            // page_atoms.json — raw
-	PrimitiveCSSJSON []byte            // primitive_css.json — raw
-	BodyCSS          string            // body.css — raw
-	SearchJS         string            // search.js — raw
-	NavScrollJS      string            // nav_scroll.js — raw
-	Styles           map[string]string // styles/*.css — trimmed, keyed by basename w/o .css
-	Themes           map[string]string // themes/*.css — raw, keyed by basename w/o .css
-	Root             string            // the directory this library was loaded from — for self-diagnosing errors
+	TemplatesJSON      []byte            // templates.json — raw
+	PageAtomsJSON      []byte            // page_atoms.json — raw
+	PrimitiveCSSJSON   []byte            // primitive_css.json — raw
+	DiagramEnginesJSON []byte            // diagram_engines.json — raw; OPTIONAL (nil if absent, so older library trees still load)
+	BodyCSS            string            // body.css — raw
+	SearchJS           string            // search.js — raw
+	NavScrollJS        string            // nav_scroll.js — raw
+	Styles             map[string]string // styles/*.css — trimmed, keyed by basename w/o .css
+	Themes             map[string]string // themes/*.css — raw, keyed by basename w/o .css
+	Root               string            // the directory this library was loaded from — for self-diagnosing errors
 }
 
 // Style returns the :root token block for a named style, trimmed exactly as the
@@ -71,6 +72,14 @@ func Load(root string) (*Library, error) {
 	}
 	if lib.PrimitiveCSSJSON, err = readBytes(root, "primitive_css.json"); err != nil {
 		return nil, err
+	}
+	// diagram_engines.json — OPTIONAL. The best-engine-per-type routing table
+	// (the diagram team's vetted standard). Absent in older library trees; a
+	// nil value simply means the diagram primitive falls back to its built-in
+	// default routing, so a missing file must never fail Load (backward-compat +
+	// the byte-identical strangler proof for pre-existing pages).
+	if b, rerr := os.ReadFile(filepath.Join(root, "diagram_engines.json")); rerr == nil {
+		lib.DiagramEnginesJSON = b
 	}
 	if lib.BodyCSS, err = readString(root, "body.css"); err != nil {
 		return nil, err

@@ -835,12 +835,12 @@
             },
             {
               "name": "The LIBRARY",
-              "desc": "36 first-party primitives — 30 template-driven (data → HTML by a declarative template in go/stddoc-lib/templates.json) plus 6 code-driven (sections, diagrams, statetrack, swimlane, tree, evidence). Each turns one typed block into HTML and nothing more.",
+              "desc": "37 first-party primitives — 30 template-driven (data → HTML by a declarative template in go/stddoc-lib/templates.json) plus 7 code-driven (sections, diagrams, diagram, statetrack, swimlane, tree, evidence). Each turns one typed block into HTML and nothing more.",
               "citations": [
                 {
                   "path": "go/internal/core/install.go",
                   "evidence": "MEASURED",
-                  "note": "buildRegistry installs all 36: the 30 template-driven (auto-registered from templates.json) + 6 code-driven, each Register(type, renderFunc, css)"
+                  "note": "buildRegistry installs all 37: the 30 template-driven (auto-registered from templates.json) + 7 code-driven, each Register(type, renderFunc, css)"
                 }
               ]
             },
@@ -1159,15 +1159,15 @@
     {
       "slug": "the-primitive-library",
       "group": "The Pluggable Renderer",
-      "title": "The Primitive Library — All 36",
+      "title": "The Primitive Library — All 37",
       "tagline": "every first-party visual, by family",
       "status": "LIVE",
       "sections": [
         {
-          "name": "All 36, rendered — the catalog IS the demo",
+          "name": "All 37, rendered — the catalog IS the demo",
           "icon": "🧩",
           "tag": "showroom",
-          "summary": "No cryptic list. The table below is the complete catalog of all 36 first-party primitives — and it is itself rendered by the table primitive, with each name tinted by the palette engine. The chips, the band, and the diagrams beneath it are likewise produced live by the Go registry dispatching chip, callout, swimlane and statetrack blocks as you loaded this page. (The core renders author-placed blocks after a node's sections — Move 0 ordering — so the showroom sits here, directly below this one line, not buried under a long prose list.)"
+          "summary": "No cryptic list. The table below is the complete catalog of all 37 first-party primitives — and it is itself rendered by the table primitive, with each name tinted by the palette engine. The chips, the band, and the diagrams beneath it are likewise produced live by the Go registry dispatching chip, callout, swimlane, statetrack and diagram blocks as you loaded this page. (The core renders author-placed blocks after a node's sections — Move 0 ordering — so the showroom sits here, directly below this one line, not buried under a long prose list.)"
         }
       ],
       "blocks": [
@@ -1310,6 +1310,14 @@
                   },
                   "statetrack",
                   "a state machine: D2 with Mermaid fallback"
+                ],
+                [
+                  {
+                    "text": "diagram",
+                    "ent": "diagram"
+                  },
+                  "diagram",
+                  "raw-source diagram, routed to the best engine per type (D2=size, Mermaid=position)"
                 ]
               ]
             },
@@ -1420,6 +1428,12 @@
           ]
         },
         {
+          "type": "diagram",
+          "dtype": "sequence",
+          "label": "diagram primitive — best-engine routing (structural → D2, rendered in-process, freezes browser-free)",
+          "d2": "shape: sequence_diagram\nReader: Reader\nDoc: Living Doc\nPurr: Purr\nReader -> Doc: select a sentence + comment\nDoc -> Purr: inbox.jsonl\nPurr -> Doc: edit JSON, re-publish\nDoc -> Reader: reload + walkthrough"
+        },
+        {
           "type": "threeaxes",
           "axes": [
             {
@@ -1460,7 +1474,7 @@
           "type": "callout",
           "kind": "core",
           "lead": "The rest of the library — every remaining primitive, rendered live.",
-          "body": "Everything below this line was produced by the engine as you loaded the page: each block is the very primitive it documents. No screenshots. This is the rest of the 36, the ones the catalog above names — now shown, not just listed."
+          "body": "Everything below this line was produced by the engine as you loaded the page: each block is the very primitive it documents. No screenshots. This is the rest of the 37, the ones the catalog above names — now shown, not just listed."
         },
         {
           "type": "prose",
@@ -2319,7 +2333,7 @@
           "items": [
             {
               "name": "Pass 1 — attribute & CSS scan",
-              "desc": "Flags src=/href= values that are absolute (https:) or root-relative (/), and CSS url(https://…) references. The // is required, so prose that merely mentions url(https:) is not a leak."
+              "desc": "Flags src=/href= values that are absolute (https:) or root-relative (/), and CSS url() references to a remote https origin. The // is required, so prose that merely mentions the url(https:) form is not a leak."
             },
             {
               "name": "Pass 2 — inline-script exfil scan",
@@ -2505,7 +2519,7 @@
                 {
                   "path": "go/internal/core/install.go",
                   "evidence": "MEASURED",
-                  "note": "buildRegistry — the register loop for all 36 primitives"
+                  "note": "buildRegistry — the register loop for all 37 primitives"
                 },
                 {
                   "path": "go/internal/core/conformance_test.go",

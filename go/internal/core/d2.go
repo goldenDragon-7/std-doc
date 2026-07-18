@@ -32,6 +32,18 @@ var d2VersionRe = regexp.MustCompile(`data-d2-version="[^"]*"`)
 // the build (mirrors d2.render_svg's None). Theme 0 matches the reference's
 // `d2 --theme 0`.
 func renderD2SVG(src string) string {
+	// Theme 0 (NeutralDefault) is the byte-identical oracle path used by the
+	// built-in structured primitives (swimlane, statetrack) — do not change it.
+	return renderD2SVGThemed(src, d2themescatalog.NeutralDefault.ID)
+}
+
+// renderD2SVGThemed is renderD2SVG parameterized by theme ID — the additive
+// entry point for the diagram primitive, which routes structural types through
+// D2 on a DARK theme (DarkMauve, ID 200 — the diagram team's vetted default) so
+// they match the vetted quality on the dark default page. Still fully
+// in-process (no external tool) and freeze-safe. renderD2SVG delegates here
+// with theme 0, so the conformance oracle is preserved byte-for-byte.
+func renderD2SVGThemed(src string, themeID int64) string {
 	defer func() { _ = recover() }()
 	ruler, err := textmeasure.NewRuler()
 	if err != nil || ruler == nil {
@@ -44,7 +56,7 @@ func renderD2SVG(src string) string {
 		Ruler:          ruler,
 		LayoutResolver: func(string) (d2graph.LayoutGraph, error) { return layout, nil },
 	}
-	theme := d2themescatalog.NeutralDefault.ID
+	theme := themeID
 	renderOpts := &d2svg.RenderOpts{ThemeID: &theme}
 	// Inject a discard logger so d2's "missing slog.Logger" WARN + stack trace
 	// never reaches our stderr; this is a render detail, not an error path.

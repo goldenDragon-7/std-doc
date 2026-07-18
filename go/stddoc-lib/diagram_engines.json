@@ -1,0 +1,38 @@
+{
+  "_doc": "Best-engine-per-type routing standard for diagram primitives. Vetted by the diagram team (knowledge-pack, 22 diagrams / 22 render-clean / 22 PASS / 0 collisions, festidious-diagram-grader, 2026-07-15). THE LAW: D2 encodes a quantity as SIZE (width/height/stroke) — structural, relational, flow, size-encoded families live here, and render IN-PROCESS (pure Go, always browser-free, even at freeze). Mermaid encodes a quantity as POSITION (x/y/radius/angle computed by a layout engine) — the ~5 quantitative/positional/temporal types are genuinely better in Mermaid. A Mermaid diagram freezes to an inline SVG (the frozen artifact reaches out to nothing), but producing that bake requires mmdc/npx present AT FREEZE TIME. An author may always override with an explicit engine; absent that, dtype routes here.",
+  "default_engine": "d2",
+  "engines": {
+    "d2": {
+      "freeze": "in-process",
+      "browser_free_freeze": true,
+      "note": "pure-Go d2lib, zero external tooling even at freeze time; the always-safe engine"
+    },
+    "mermaid": {
+      "freeze": "mmdc",
+      "browser_free_freeze": true,
+      "note": "frozen artifact is inline SVG (browser-free); requires mmdc or npx present at freeze time, else freeze fails loudly (Covenant IV)"
+    }
+  },
+  "types": {
+    "sequence":         { "engine": "d2",      "family": "structural",   "why": "lifelines + fragments; D2 bakes dark theme, containers, zero collisions" },
+    "class":            { "engine": "d2",      "family": "structural",   "why": "correct UML; use the dark 2-region compartment card to dodge sql_table theme-lock" },
+    "erd":              { "engine": "d2",      "family": "structural",   "why": "sql_table gives column-anchored FK edges + crow's-foot; add layout-engine:elk for 90 deg routing" },
+    "c4-architecture":  { "engine": "d2",      "family": "structural",   "why": "containers + local icons (data: URIs, freeze-safe); direction:down to fold the void" },
+    "network-topology": { "engine": "d2",      "family": "structural",   "why": "containers/boundaries group cleanly on dark" },
+    "state-machine":    { "engine": "d2",      "family": "structural",   "why": "native states + transitions; the built-in statetrack primitive builds this from data" },
+    "dfd":              { "engine": "d2",      "family": "structural",   "why": "processes/stores/flows; full-bleed dark bg + direction:down for legible aspect" },
+    "tree":             { "engine": "d2",      "family": "structural",   "why": "hierarchy; the built-in tree primitive builds this from data" },
+    "swimlane":         { "engine": "d2",      "family": "structural",   "why": "lane bands + ordered steps; the built-in swimlane primitive builds this from data" },
+    "block":            { "engine": "d2",      "family": "structural",   "why": "grid layout folds a chain into rows (2448x174 -> 824x492), crops the void" },
+    "requirement":      { "engine": "d2",      "family": "structural",   "why": "on-theme dark cards, clean edges" },
+    "venn":             { "engine": "d2",      "family": "structural",   "why": "set-overlap disposition model; surfaces the center region" },
+    "mindmap":          { "engine": "d2",      "family": "structural",   "why": "clean vertical tree, zero overlaps — Mermaid's mindmap is dark-on-dark broken; DO NOT route to Mermaid" },
+    "packet":           { "engine": "d2",      "family": "structural",   "why": "bit-grid via nested-container column spans (same span move as gantt); readable on dark" },
+    "stacked-bands":    { "engine": "d2",      "family": "structural",   "why": "cross-band flow, on-theme" },
+    "gantt":            { "engine": "mermaid", "family": "quantitative", "opaque_bg": true,  "why": "true continuous time axis; D2 degrades to a day-matrix. Bar width = duration is POSITION, not SIZE" },
+    "quadrant":         { "engine": "mermaid", "family": "quantitative", "opaque_bg": true,  "why": "true 2-D scatter on continuous x/y; widen viewBox so right-edge labels don't clip" },
+    "journey":          { "engine": "mermaid", "family": "quantitative", "opaque_bg": false, "why": "satisfaction curve (score-as-height) + faces; D2's score boxes are an acceptable fallback" },
+    "sankey":           { "engine": "mermaid", "family": "quantitative", "opaque_bg": false, "why": "area-conserving proportional ribbons; D2 loses proportionality. Give it vertical height so ribbons separate" },
+    "gitgraph":         { "engine": "mermaid", "family": "quantitative", "opaque_bg": false, "why": "true native git graph (time-axis + branch lanes); D2's custom render is an acceptable fallback" }
+  }
+}

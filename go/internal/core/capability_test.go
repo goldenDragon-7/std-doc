@@ -41,6 +41,30 @@ func TestCapability_OwnDocLintsClean(t *testing.T) {
 	}
 }
 
+// CAPABILITY: a `layout: page` doc lints (and thus publishes) cleanly — it is
+// validated as a page of blocks, NOT wrongly held to the doc-tree `nodes`
+// requirement. Guards the fix for the page-atoms-demo trap (a valid page doc
+// that `stddoc publish` used to abort on). Uses the real shipped example so a
+// regression in either the lint branch or the example goes red.
+func TestCapability_LayoutPageDocLintsClean(t *testing.T) {
+	lib := loadLib(t)
+	raw, err := os.ReadFile(filepath.Join(repoRoot(t), "examples", "page-atoms-demo", "source.json"))
+	if err != nil {
+		t.Fatalf("read page-atoms-demo: %v", err)
+	}
+	doc, err := wire.ParseOrderedJSON(raw)
+	if err != nil {
+		t.Fatalf("parse page-atoms-demo: %v", err)
+	}
+	fs, err := Lint(doc, lib)
+	if err != nil {
+		t.Fatalf("Lint: %v", err)
+	}
+	if n := CountErrors(fs); n != 0 {
+		t.Fatalf("a layout:page doc must lint clean (no false 'missing nodes'), got %d error(s): %v", n, fs)
+	}
+}
+
 // CAPABILITY: lint FAILS LOUD (PRD P0) — a malformed doc yields >=1 error.
 // This guards the lint/validate capability the Python→Go port had dropped.
 func TestCapability_LintFailsLoud(t *testing.T) {

@@ -28,11 +28,14 @@ import (
 //
 //	{ "type": "diagram",
 //	  "dtype":   "class",          // semantic type — routed via diagram_engines.json
-//	  "engine":  "auto",           // optional override: "d2" | "mermaid" | "auto" (default)
+//	  "engine":  "auto",           // optional override: "d2" | "mermaid" | "flint" | "auto"
 //	  "label":   "My class model", // optional; defaults to dtype
 //	  "theme":   200,              // optional D2 theme ID override (default DarkMauve=200)
 //	  "d2":      "<d2 source>",     // source used when the D2 route is chosen
-//	  "mermaid": "<mermaid source>" }// source used when the Mermaid route is chosen
+//	  "mermaid": "<mermaid source>",// source used when the Mermaid route is chosen
+//	  "flint":   "<pre-rendered svg>",// freeze-clean Vega-Lite SVG for the Flint route (engine #3, Slice 0)
+//	  "chart":   "boxplot",          // OR name a chart from the library catalog (flint/*.svg) — beats pasting
+//	  "spec":    { … } }             // OR a live Flint spec baked to SVG via Node (Slice 1; needs the bake toolchain)
 
 // darkD2ThemeID is the diagram team's vetted default dark theme for structural
 // diagrams (DarkMauve, ID 200) — so a routed D2 diagram matches the vetted
@@ -78,14 +81,14 @@ func loadDiagramEngineTable(raw []byte) *diagramEngineTable {
 
 // route decides which engine renders a diagram of dtype, honoring an explicit
 // override, then the routing table, then the table default. The returned engine
-// is always "d2" or "mermaid".
+// is "d2", "mermaid", or "flint".
 func (t *diagramEngineTable) route(dtype, override string) string {
 	switch override {
-	case "d2", "mermaid":
+	case "d2", "mermaid", "flint":
 		return override
 	}
 	if rule, ok := t.Types[strings.ToLower(strings.TrimSpace(dtype))]; ok {
-		if rule.Engine == "d2" || rule.Engine == "mermaid" {
+		if rule.Engine == "d2" || rule.Engine == "mermaid" || rule.Engine == "flint" {
 			return rule.Engine
 		}
 	}
@@ -95,8 +98,30 @@ func (t *diagramEngineTable) route(dtype, override string) string {
 	return "d2"
 }
 
-// diagramRenderWith returns a RenderFunc closed over the parsed routing table.
-func diagramRenderWith(table *diagramEngineTable) func(*wire.OrderedMap, *template.Ctx) (string, error) {
+// flintLookup finds a pre-rendered chart SVG in the library catalog, tolerating
+// the hyphen/underscore split between authored dtypes (bar-chart) and the SVG
+// file basenames (bar_chart). Returns "" when absent.
+func flintLookup(catalog map[string]string, name string) string {
+	if catalog == nil || name == "" {
+		return ""
+	}
+	name = strings.ToLower(strings.TrimSpace(name))
+	if svg, ok := catalog[name]; ok {
+		return svg
+	}
+	if svg, ok := catalog[strings.ReplaceAll(name, "-", "_")]; ok {
+		return svg
+	}
+	if svg, ok := catalog[strings.ReplaceAll(name, "_", "-")]; ok {
+		return svg
+	}
+	return ""
+}
+
+// diagramRenderWith returns a RenderFunc closed over the parsed routing table,
+// the Flint chart catalog (engine #3, Slice 0 — pre-rendered freeze-clean SVGs),
+// and the live Flint baker (Slice 1 — spec→SVG via Node; nil when unavailable).
+func diagramRenderWith(table *diagramEngineTable, flintCatalog map[string]string, flintBake func([]byte) (string, error)) func(*wire.OrderedMap, *template.Ctx) (string, error) {
 	return func(block *wire.OrderedMap, ctx *template.Ctx) (string, error) {
 		dtype := strings.TrimSpace(str(block, "dtype"))
 		label := getOr(block, "label", "")
@@ -125,6 +150,53 @@ func diagramRenderWith(table *diagramEngineTable) func(*wire.OrderedMap, *templa
 		}
 
 		switch engine {
+		case "flint":
+			// Slice 0 (engine #3, zero-dep form): Flint charts are authored as
+			// Vega-Lite specs and pre-rendered to a freeze-clean inline SVG (all
+			// 34 knowledge-pack charts MEASURED 0 external refs). std-doc embeds
+			// that supplied SVG DIRECTLY — no Node/JS bake in the core binary, so
+			// the whole quantitative/statistical family is embeddable today while
+			// the live spec→SVG render (a Node dependency) stays a deferred call.
+			// Source order: author-supplied markup (`flint`/`svg`/`source`) wins;
+			// then a live `spec` bake (Slice 1); then NAME a chart from the library
+			// catalog via `chart`/dtype (Slice 0 — zero-dep). Naming beats pasting.
+			fsvg := strings.TrimSpace(str(block, "flint"))
+			if fsvg == "" {
+				fsvg = strings.TrimSpace(str(block, "svg"))
+			}
+			if fsvg == "" {
+				fsvg = generic
+			}
+			// Live bake: a `spec` (Flint chart intent) is rendered to SVG via Node
+			// (Slice 1). Only reached when no pre-rendered markup was supplied, so
+			// the zero-dep paths never touch Node. A bake failure degrades LOUDLY
+			// with the reason — never a silent blank.
+			if fsvg == "" && flintBake != nil {
+				if specV, ok := block.Get("spec"); ok && specV != nil {
+					// wire.MarshalCompact serializes the ordered spec faithfully;
+					// encoding/json would emit "{}" for a *wire.OrderedMap.
+					raw, merr := wire.MarshalCompact(specV)
+					if merr == nil && len(raw) > 2 {
+						svg, berr := flintBake(raw)
+						if berr != nil {
+							return diagramDegraded(label, "flint", "live bake: "+berr.Error()), nil
+						}
+						return diagramCardWithChip(svg, label, "flint"), nil
+					}
+				}
+			}
+			if fsvg == "" {
+				if chart := strings.TrimSpace(str(block, "chart")); chart != "" {
+					fsvg = flintLookup(flintCatalog, chart)
+				}
+			}
+			if fsvg == "" {
+				fsvg = flintLookup(flintCatalog, dtype)
+			}
+			if fsvg == "" {
+				return diagramDegraded(label, "flint", "no flint SVG: supply `flint`/`svg` markup or a `chart`/`dtype` in the library catalog"), nil
+			}
+			return diagramCardWithChip(fsvg, label, "flint"), nil
 		case "mermaid":
 			src := mmsrc
 			if src == "" {

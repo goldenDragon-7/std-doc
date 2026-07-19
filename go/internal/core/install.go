@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"sort"
 
+	"stddoc/internal/flintbake"
 	"stddoc/internal/library"
 	"stddoc/internal/registry"
 	"stddoc/internal/template"
@@ -53,7 +54,7 @@ func buildRegistry(lib *library.Library) (*registry.Registry, error) {
 	// diagram — raw-source diagram with best-engine-per-type routing (the
 	// diagram team's vetted standard, shipped as data in diagram_engines.json).
 	// Purely additive; complements the structured swimlane/tree/statetrack.
-	reg.Register("diagram", diagramRenderWith(loadDiagramEngineTable(lib.DiagramEnginesJSON)), cssMap["diagram"])
+	reg.Register("diagram", diagramRenderWith(loadDiagramEngineTable(lib.DiagramEnginesJSON), lib.FlintSVGs, flintbake.Renderer(lib.Root)), cssMap["diagram"])
 	reg.Register("evidence", func(block *wire.OrderedMap, ctx *template.Ctx) (string, error) {
 		return ctx.RenderEvidence(block), nil
 	}, cssMap["evidence"])

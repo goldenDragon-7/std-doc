@@ -1,0 +1,12 @@
+{
+  "name": "stddoc-flint-bake",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Live Flint bake for std-doc (engine #3, Slice 1): a Flint chart spec -> Vega-Lite -> inline SVG, in pure Node (no browser). Optional: only needed to render Flint charts FROM a spec at publish time. The Slice-0 embed path (name a chart -> pre-baked catalog SVG) needs no Node at all.",
+  "dependencies": {
+    "flint-chart": "file:./vendor/flint-chart",
+    "vega": "^5.30.0",
+    "vega-lite": "^5.21.0"
+  }
+}

@@ -11,6 +11,11 @@
       "freeze": "mmdc",
       "browser_free_freeze": true,
       "note": "frozen artifact is inline SVG (browser-free); requires mmdc or npx present at freeze time, else freeze fails loudly (Covenant IV)"
+    },
+    "flint": {
+      "freeze": "embed-prerendered",
+      "browser_free_freeze": true,
+      "note": "engine #3 (Slice 0): microsoft/flint-chart draws the quantitative/statistical family (34 types) that neither D2 nor Mermaid does. Author supplies a pre-rendered, freeze-clean Vega-Lite SVG (all 34 knowledge-pack charts MEASURED 0 external refs); std-doc embeds it with ZERO Node/JS bake in the core binary. Live spec->SVG rendering (a Node dependency) is the deferred Slice 1."
     }
   },
   "types": {
@@ -33,6 +38,40 @@
     "quadrant":         { "engine": "mermaid", "family": "quantitative", "opaque_bg": true,  "why": "true 2-D scatter on continuous x/y; widen viewBox so right-edge labels don't clip" },
     "journey":          { "engine": "mermaid", "family": "quantitative", "opaque_bg": false, "why": "satisfaction curve (score-as-height) + faces; D2's score boxes are an acceptable fallback" },
     "sankey":           { "engine": "mermaid", "family": "quantitative", "opaque_bg": false, "why": "area-conserving proportional ribbons; D2 loses proportionality. Give it vertical height so ribbons separate" },
-    "gitgraph":         { "engine": "mermaid", "family": "quantitative", "opaque_bg": false, "why": "true native git graph (time-axis + branch lanes); D2's custom render is an acceptable fallback" }
+    "gitgraph":         { "engine": "mermaid", "family": "quantitative", "opaque_bg": false, "why": "true native git graph (time-axis + branch lanes); D2's custom render is an acceptable fallback" },
+    "histogram":        { "engine": "flint",   "family": "quantitative", "opaque_bg": true,  "why": "binned frequency distribution — count-as-height is POSITION on a continuous axis; neither D2 nor Mermaid draws it. Flint's Vega-Lite backend owns the statistical family (engine #3, Slice 0)" },
+    "scatter-plot":         { "engine": "flint",   "family": "quantitative", "opaque_bg": true,  "why": "position-encoded points on continuous axes; Flint/Vega-Lite owns the statistical family neither D2 nor Mermaid draws" },
+    "regression":           { "engine": "flint",   "family": "quantitative", "opaque_bg": true,  "why": "position-encoded points on continuous axes; Flint/Vega-Lite owns the statistical family neither D2 nor Mermaid draws" },
+    "connected-scatter-plot":{ "engine": "flint",   "family": "quantitative", "opaque_bg": true,  "why": "position-encoded points on continuous axes; Flint/Vega-Lite owns the statistical family neither D2 nor Mermaid draws" },
+    "ranged-dot-plot":      { "engine": "flint",   "family": "quantitative", "opaque_bg": true,  "why": "position-encoded points on continuous axes; Flint/Vega-Lite owns the statistical family neither D2 nor Mermaid draws" },
+    "strip-plot":           { "engine": "flint",   "family": "quantitative", "opaque_bg": true,  "why": "position-encoded points on continuous axes; Flint/Vega-Lite owns the statistical family neither D2 nor Mermaid draws" },
+    "bar-chart":            { "engine": "flint",   "family": "quantitative", "opaque_bg": true,  "why": "magnitude bars on a value axis (length is POSITION); Flint's data-bound bars" },
+    "grouped-bar-chart":    { "engine": "flint",   "family": "quantitative", "opaque_bg": true,  "why": "magnitude bars on a value axis (length is POSITION); Flint's data-bound bars" },
+    "stacked-bar-chart":    { "engine": "flint",   "family": "quantitative", "opaque_bg": true,  "why": "magnitude bars on a value axis (length is POSITION); Flint's data-bound bars" },
+    "lollipop-chart":       { "engine": "flint",   "family": "quantitative", "opaque_bg": true,  "why": "magnitude bars on a value axis (length is POSITION); Flint's data-bound bars" },
+    "waterfall-chart":      { "engine": "flint",   "family": "quantitative", "opaque_bg": true,  "why": "magnitude bars on a value axis (length is POSITION); Flint's data-bound bars" },
+    "gantt-chart":          { "engine": "flint",   "family": "quantitative", "opaque_bg": true,  "why": "magnitude bars on a value axis (length is POSITION); Flint's data-bound bars" },
+    "bullet-chart":         { "engine": "flint",   "family": "quantitative", "opaque_bg": true,  "why": "magnitude bars on a value axis (length is POSITION); Flint's data-bound bars" },
+    "density-plot":         { "engine": "flint",   "family": "quantitative", "opaque_bg": true,  "why": "shape of a distribution (bins/density/quantiles); a true statistical chart" },
+    "ecdf-plot":            { "engine": "flint",   "family": "quantitative", "opaque_bg": true,  "why": "shape of a distribution (bins/density/quantiles); a true statistical chart" },
+    "violin-plot":          { "engine": "flint",   "family": "quantitative", "opaque_bg": true,  "why": "shape of a distribution (bins/density/quantiles); a true statistical chart" },
+    "boxplot":              { "engine": "flint",   "family": "quantitative", "opaque_bg": true,  "why": "shape of a distribution (bins/density/quantiles); a true statistical chart" },
+    "pyramid-chart":        { "engine": "flint",   "family": "quantitative", "opaque_bg": true,  "why": "shape of a distribution (bins/density/quantiles); a true statistical chart" },
+    "candlestick-chart":    { "engine": "flint",   "family": "quantitative", "opaque_bg": true,  "why": "shape of a distribution (bins/density/quantiles); a true statistical chart" },
+    "line-chart":           { "engine": "flint",   "family": "quantitative", "opaque_bg": true,  "why": "value-over-axis trend (POSITION); continuous data series" },
+    "sparkline":            { "engine": "flint",   "family": "quantitative", "opaque_bg": true,  "why": "value-over-axis trend (POSITION); continuous data series" },
+    "bump-chart":           { "engine": "flint",   "family": "quantitative", "opaque_bg": true,  "why": "value-over-axis trend (POSITION); continuous data series" },
+    "slope-chart":          { "engine": "flint",   "family": "quantitative", "opaque_bg": true,  "why": "value-over-axis trend (POSITION); continuous data series" },
+    "area-chart":           { "engine": "flint",   "family": "quantitative", "opaque_bg": true,  "why": "value-over-axis trend (POSITION); continuous data series" },
+    "streamgraph":          { "engine": "flint",   "family": "quantitative", "opaque_bg": true,  "why": "value-over-axis trend (POSITION); continuous data series" },
+    "range-area-chart":     { "engine": "flint",   "family": "quantitative", "opaque_bg": true,  "why": "value-over-axis trend (POSITION); continuous data series" },
+    "pie-chart":            { "engine": "flint",   "family": "quantitative", "opaque_bg": true,  "why": "proportional/polar encoding; Flint draws the true data chart" },
+    "rose-chart":           { "engine": "flint",   "family": "quantitative", "opaque_bg": true,  "why": "proportional/polar encoding; Flint draws the true data chart" },
+    "radar-chart":          { "engine": "flint",   "family": "quantitative", "opaque_bg": true,  "why": "proportional/polar encoding; Flint draws the true data chart" },
+    "heatmap":              { "engine": "flint",   "family": "quantitative", "opaque_bg": true,  "why": "matrix / geographic value encoding; Flint's heatmap/choropleth family" },
+    "bar-table":            { "engine": "flint",   "family": "quantitative", "opaque_bg": true,  "why": "matrix / geographic value encoding; Flint's heatmap/choropleth family" },
+    "kpi-card":             { "engine": "flint",   "family": "quantitative", "opaque_bg": true,  "why": "matrix / geographic value encoding; Flint's heatmap/choropleth family" },
+    "map":                  { "engine": "flint",   "family": "quantitative", "opaque_bg": true,  "why": "matrix / geographic value encoding; Flint's heatmap/choropleth family" },
+    "choropleth":           { "engine": "flint",   "family": "quantitative", "opaque_bg": true,  "why": "matrix / geographic value encoding; Flint's heatmap/choropleth family" }
   }
 }

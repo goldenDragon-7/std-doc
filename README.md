@@ -7,8 +7,20 @@ the reader *answer back*. They select a sentence, leave a comment, and the page
 reloads having changed, walking them through exactly what's different. No chat
 window, no round-trip, no app to log into. **The document is the conversation.**
 
-It's one binary. No Python, no Node, no network, no dependencies to audit. You
-download it, point it at a folder of pages, and it serves them live.
+It's one Go binary — no runtime to install, no network, and the **frozen page
+reaches out to nothing**, ever. The engine is stdlib-only, and its D2 diagrams
+render **in-process** with zero external tooling.
+
+Two things are honestly optional, and only at *authoring* time: **Mermaid** and
+**live Flint** charts bake through a small JavaScript toolchain when you publish
+or freeze (mermaid's `mmdc`; Node + Vega-Lite for Flint). The reader who views or
+freezes the page never needs them — and there's a **zero-dependency path for the
+whole chart family**: name a Flint chart and the binary embeds a pre-rendered,
+freeze-clean SVG, no Node in sight. Honest map, not a tidy one: pure-Go in-process
+(D2) for structure; an optional JS bake (Mermaid, live Flint) when you want it;
+and a no-toolchain embed for the 34-chart quantitative family either way.
+
+You download it, point it at a folder of pages, and it serves them live.
 
 ---
 

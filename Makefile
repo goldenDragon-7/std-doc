@@ -55,6 +55,7 @@ release: clean
 	  ( cd $(MODULE_DIR) && GOOS=$$os GOARCH=$$arch CGO_ENABLED=0 \
 	      $(GO) build -ldflags "$(LDFLAGS)" -o ../$$stage/stddoc$$ext ./cmd/stddoc ); \
 	  cp -R $(LIB_DIR) $$stage/stddoc-lib; \
+	  rm -rf $$stage/stddoc-lib/flint/bake/node_modules $$stage/stddoc-lib/flint/bake/package-lock.json; \
 	  find $$stage -name '._*' -delete; \
 	  ( cd $(DIST) && COPYFILE_DISABLE=1 tar -czf $$name.tar.gz $$name ); \
 	  rm -rf $$stage; \

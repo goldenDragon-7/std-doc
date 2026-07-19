@@ -1,0 +1,25 @@
+{
+  "title": "Flint — the quantitative gallery (engine #3)",
+  "generated_date": "2026-07-18",
+  "palette": { "quant": { "label": "Quantitative", "color": "#a78bfa" } },
+  "nodes": [
+    {
+      "slug": "gallery", "group": "Core",
+      "title": "One chart per family — named, not pasted",
+      "tagline": "dtype names a chart; the library embeds its freeze-clean SVG",
+      "status": "LIVE",
+      "sections": [
+        { "name": "Six families, zero pasted SVG", "icon": "📊",
+          "summary": "Each card below is authored with only a dtype — no SVG in the source. std-doc looks the chart up in the library catalog (stddoc-lib/flint/) and embeds its pre-rendered, freeze-clean Vega-Lite SVG. This is the whole quantitative/statistical family D2 and Mermaid can't draw, available by NAME. All freeze browser-free (0 external refs)." }
+      ],
+      "blocks": [
+        { "type": "diagram", "dtype": "scatter-plot", "label": "Points — scatter plot" },
+        { "type": "diagram", "dtype": "bar-chart", "label": "Bars — bar chart" },
+        { "type": "diagram", "dtype": "boxplot", "label": "Distributions — boxplot" },
+        { "type": "diagram", "dtype": "line-chart", "label": "Lines & Areas — line chart" },
+        { "type": "diagram", "dtype": "pie-chart", "label": "Circular — pie chart" },
+        { "type": "diagram", "dtype": "heatmap", "label": "Tables & Maps — heatmap" }
+      ]
+    }
+  ]
+}

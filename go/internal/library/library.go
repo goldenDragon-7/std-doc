@@ -34,6 +34,7 @@ type Library struct {
 	NavScrollJS        string            // nav_scroll.js — raw
 	Styles             map[string]string // styles/*.css — trimmed, keyed by basename w/o .css
 	Themes             map[string]string // themes/*.css — raw, keyed by basename w/o .css
+	FlintSVGs          map[string]string // flint/*.svg — pre-rendered freeze-clean Vega-Lite charts, keyed by basename w/o .svg (underscores); OPTIONAL (engine #3, Slice 0 catalog)
 	Root               string            // the directory this library was loaded from — for self-diagnosing errors
 }
 
@@ -58,9 +59,10 @@ func (l *Library) Theme(name string) string {
 // the path, never a silent fallback.
 func Load(root string) (*Library, error) {
 	lib := &Library{
-		Root:   root,
-		Styles: map[string]string{},
-		Themes: map[string]string{},
+		Root:      root,
+		Styles:    map[string]string{},
+		Themes:    map[string]string{},
+		FlintSVGs: map[string]string{},
 	}
 
 	var err error
@@ -130,6 +132,30 @@ func Load(root string) (*Library, error) {
 		}
 	} else if !os.IsNotExist(terr) {
 		return nil, fmt.Errorf("library: reading themes dir %s: %w", themesDir, terr)
+	}
+
+	// flint/*.svg — the pre-rendered Vega-Lite chart catalog (engine #3, Slice 0),
+	// keyed by basename w/o .svg. OPTIONAL: absent in older library trees, so a
+	// missing dir must never fail Load. The diagram primitive embeds a named
+	// chart's SVG directly, so an author can `dtype: histogram` instead of pasting
+	// markup. Each SVG is freeze-clean (0 external refs) by construction.
+	flintDir := filepath.Join(root, "flint")
+	flintFiles, ferr := os.ReadDir(flintDir)
+	if ferr == nil {
+		for _, f := range flintFiles {
+			// Same dotfile guard as styles/themes (AppleDouble "._*.svg" cruft).
+			if f.IsDir() || strings.HasPrefix(f.Name(), ".") || !strings.HasSuffix(f.Name(), ".svg") {
+				continue
+			}
+			b, rerr := os.ReadFile(filepath.Join(flintDir, f.Name()))
+			if rerr != nil {
+				return nil, fmt.Errorf("library: reading flint svg %s: %w", f.Name(), rerr)
+			}
+			key := strings.TrimSuffix(f.Name(), ".svg")
+			lib.FlintSVGs[key] = string(b)
+		}
+	} else if !os.IsNotExist(ferr) {
+		return nil, fmt.Errorf("library: reading flint dir %s: %w", flintDir, ferr)
 	}
 
 	return lib, nil

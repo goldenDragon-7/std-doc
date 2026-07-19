@@ -99,6 +99,56 @@ dossier; the load-bearing bits):
   The gate greps the frozen SVG for external refs and fails loudly at anything
   that isn't the w3.org namespace.
 
+## Engine #3 — Flint (the quantitative/statistical family)
+
+`microsoft/flint-chart` draws the ~34 **position-encoded data charts** that neither
+D2 (SIZE) nor Mermaid draws well — scatter/regression, bars, distributions
+(histogram · boxplot · violin · density), lines & areas, circular (pie · radar ·
+rose), heatmap/choropleth. Flint authors a chart as a **Vega-Lite JSON spec**.
+
+**Slice 0 (shipped): embed a pre-rendered SVG — zero new bake dependency.** A
+Flint chart is rendered to a **freeze-clean inline SVG** (all 34 MEASURED at 0
+external refs); std-doc embeds it directly, so the whole family is embeddable
+**today**, purely additive, with **no Node/JS toolchain in the core binary** —
+the frozen artifact reaches out to nothing.
+
+The 34 vetted charts ship as a **library catalog** (`stddoc-lib/flint/*.svg`), so
+you **NAME** a chart with `dtype` instead of pasting SVG. All 34 route to Flint in
+`diagram_engines.json` — the six families are Points (scatter · regression ·
+connected-scatter · ranged-dot · strip), Bars (bar · grouped-bar · stacked-bar ·
+lollipop · waterfall · gantt-chart · bullet), Distributions (histogram · density ·
+ecdf · violin · boxplot · pyramid · candlestick), Lines & Areas (line · sparkline ·
+bump · slope · area · streamgraph · range-area), Circular (pie · rose · radar), and
+Tables & Maps (heatmap · bar-table · kpi-card · map · choropleth).
+
+```json
+{ "type": "diagram", "dtype": "boxplot", "label": "value distribution" }
+```
+
+The dtype is looked up in the catalog (`boxplot` → `flint/boxplot.svg`;
+hyphen/underscore tolerant). To supply your own instead, pass a pre-rendered SVG on
+`flint` (or `svg`/`source`), or name one with `chart`. A `render: flint` chip names
+the engine; a missing chart degrades loudly, never silently.
+
+**Slice 1 (shipped): live spec→SVG.** Give a block a Flint `spec` (the chart
+intent — `{data, semantic_types, chart_spec}`) and std-doc bakes it to an inline
+SVG at publish time via the vendored, MIT-licensed pipeline
+(`stddoc-lib/flint/bake/render.mjs`: flint-chart `assembleVegaLite` → vega-lite →
+vega `toSVG`), in **pure Node — no browser**. The result inlines everything and
+reaches out to nothing, so the frozen artifact stays soul-clean.
+
+```json
+{ "type": "diagram", "dtype": "histogram", "engine": "flint",
+  "spec": { "data": { "values": [ … ] }, "semantic_types": { … }, "chart_spec": { … } } }
+```
+
+This is the **honest dependency**: live Flint needs Node.js + the bake deps
+(`npm install` in `stddoc-lib/flint/bake/`, which pulls Vega/Vega-Lite). It is a
+Mermaid-class bake dependency — the reader who views or freezes the page never
+needs it, and a bake failure **degrades loudly** (never a silent blank), pointing
+back to the zero-dep catalog path. Precedence in the flint route: author-supplied
+`flint`/`svg` markup → live `spec` bake → catalog by `chart`/dtype.
+
 ## Structured primitives are still first-class
 
 Three diagram types are so common that std-doc builds their D2 source **from

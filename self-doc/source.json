@@ -124,7 +124,7 @@
       "diagrams": [
         {
           "caption": "setup.sh does inject + serve in one step",
-          "ascii": "  setup.sh <your-doc-dir> [port]\n     |\n     └─ stddoc serve  → injects the feedback widget into every *.html (idempotent)\n                         creates feedback/inbox.jsonl + feedback/history.json\n                         picks a free port (33333+), serves with idle-timeout 0\n                         writes watcher.json heartbeat\n                         prints  http://localhost:PORT   ◄── open THIS, not file://"
+          "ascii": "  setup.sh <your-doc-dir> [port]\n     |\n     └─ stddoc serve  → injects the feedback widget into every *.html (idempotent)\n                         creates feedback/inbox.jsonl + feedback/history.json\n                         picks a free port (33333+), lives 24h past the last touch\n                         writes watcher.json heartbeat\n                         prints  http://localhost:PORT   ◄── open THIS, not file://"
         }
       ],
       "sections": [
@@ -136,7 +136,7 @@
           "items": [
             {
               "name": "setup.sh",
-              "desc": "Runs inject + serve, picks a free port (33333+), starts with --idle-timeout 0, and prints the URL.",
+              "desc": "Runs inject + serve, picks a free port (33333+), prints the URL, and RETURNS — the server keeps serving after it exits, for 24h past the last touch. If the server fails to come up, setup.sh says so loudly instead of printing a URL that nothing answers.",
               "citations": [
                 {
                   "path": "setup.sh",
@@ -761,16 +761,16 @@
           "summary": "The server is tiny and stdlib-only — which means a few sharp edges.",
           "items": [
             {
-              "name": "serve never idles out by default",
-              "desc": "The Go server's --idle-timeout defaults to 0 = never auto-shuts-down, so a doc you set up before the reader opens it stays live (macOS orphan-survival, no setsid needed). Pass --idle-timeout N only if you WANT it to exit after N idle seconds."
+              "name": "A doc's life is measured in touches, not in shells",
+              "desc": "serve stays up for 24 HOURS after the last touch — a page load OR an edit to the served files. An open tab polls, so a reader keeps it alive for free; so does an author editing with no tab open. --idle-timeout N sets a different window; --idle-timeout 0 means never exit."
             },
             {
-              "name": "macOS has no setsid",
-              "desc": "Start the server with run_in_background or via setup.sh — never a start that depends on setsid."
+              "name": "The server outlives the thing that started it — on purpose",
+              "desc": "It used to run a parent-death watchdog by DEFAULT, so setup.sh, `nohup … &`, and an agent's run_in_background all killed the doc ~5s after launching it, usually before the reader had clicked the link. Parentage says nothing about whether anyone wants the document. If you DO want a doc that dies with the session that made it, ask for it: --exit-with-parent."
             },
             {
-              "name": "Per-doc nohup dies on parent exit",
-              "desc": "Fine for an ad-hoc doc (dies with your session, by design). For something long-lived, run it under a persistent service."
+              "name": "macOS has no setsid — and you no longer need it",
+              "desc": "A plain `&` or run_in_background is enough, now that the server doesn't kill itself when it is orphaned. Don't reach for setsid; it isn't there."
             }
           ]
         },

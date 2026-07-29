@@ -72,6 +72,7 @@ func Run(dir string, opt Options) error {
 		port:        chosen,
 	}
 	srv.touch()
+	srv.pollContent() // establish the content-mtime baseline before the watchdog runs
 
 	// Presence heartbeat (folded into the server).
 	done := make(chan struct{})
@@ -79,8 +80,9 @@ func Run(dir string, opt Options) error {
 	wg.Add(1)
 	go srv.heartbeat(heartbeatInterval, done, &wg)
 
-	// Auto-shutdown watchdog: parent-death + idle timeout.
-	go srv.watchdog(opt.IdleTimeout, os.Getppid())
+	// Auto-shutdown watchdog: untouched-for-too-long, and parent death only if
+	// the caller explicitly asked to be tied to it.
+	go srv.watchdog(opt.IdleTimeout, os.Getppid(), opt.ExitWithParent)
 
 	httpSrv := &http.Server{Handler: srv}
 
@@ -91,10 +93,15 @@ func Run(dir string, opt Options) error {
 	fmt.Printf("[server] inbox:   %s\n", inbox)
 	fmt.Printf("[server] history: %s\n", history)
 	fmt.Printf("[server] info:    http://localhost:%d/info\n", chosen)
-	if opt.IdleTimeout > 0 {
-		fmt.Printf("[server] auto-shutdown: parent-death OR %ds idle (no requests). --idle-timeout 0 to disable\n", opt.IdleTimeout)
-	} else {
-		fmt.Printf("[server] auto-shutdown: parent-death only (idle timeout disabled)\n")
+	switch {
+	case opt.IdleTimeout > 0 && opt.ExitWithParent:
+		fmt.Printf("[server] auto-shutdown: untouched for %s, OR when the launching process exits (--exit-with-parent)\n", humanDuration(opt.IdleTimeout))
+	case opt.IdleTimeout > 0:
+		fmt.Printf("[server] auto-shutdown: untouched for %s (a page load or an edit resets the clock). Survives this shell.\n", humanDuration(opt.IdleTimeout))
+	case opt.ExitWithParent:
+		fmt.Printf("[server] auto-shutdown: when the launching process exits (--exit-with-parent)\n")
+	default:
+		fmt.Printf("[server] auto-shutdown: never (--idle-timeout 0). Stop it with Ctrl-C or `kill %d`.\n", os.Getpid())
 	}
 	fmt.Printf("[server] Ctrl-C to stop\n")
 
@@ -107,6 +114,7 @@ func Run(dir string, opt Options) error {
 		fmt.Printf("\n[server] stopping\n")
 		close(done)
 		wg.Wait()
+		srv.cleanup() // don't leave .port pointing at a port we no longer hold
 		httpSrv.Close()
 	}()
 

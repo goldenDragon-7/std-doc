@@ -236,8 +236,8 @@ func TestCapability_DiagramFlintLiveBakeDegradesLoud(t *testing.T) {
 // Uses the version-controlled example so the spec is known-good.
 func TestCapability_DiagramFlintLiveBakeRendersFromSpec(t *testing.T) {
 	lib := loadLib(t)
-	if !flintbake.Available(lib.Root) {
-		t.Skip("optional live-Flint toolchain absent (node + npm install in stddoc-lib/flint/bake) — Slice-0 embed needs none")
+	if why := flintbake.Unavailable(lib.Root); why != "" {
+		t.Skipf("live-Flint bake unavailable: %s (optional — the Slice-0 embed path needs none of it)", why)
 	}
 	raw, err := os.ReadFile(filepath.Join(repoRoot(t), "examples", "flint-live", "source.json"))
 	if err != nil {

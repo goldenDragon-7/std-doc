@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"hash/fnv"
+	"io/fs"
 	"mime"
 	"net"
 	"net/http"
@@ -14,6 +15,17 @@ import (
 	"sync/atomic"
 	"time"
 )
+
+// DefaultIdleTimeout is how long a document stays alive after the last time
+// anyone touched it — a page load or an edit to its files. 24 hours: long
+// enough that a doc you set up in the morning is still there when the reader
+// finally opens it that evening, short enough that a laptop doesn't slowly
+// silt up with servers for documents everyone has forgotten.
+const DefaultIdleTimeout = 24 * 60 * 60
+
+// watchdogInterval is how often the watchdog checks for touches. It also
+// bounds how long a doomed server lingers past its deadline.
+const watchdogInterval = 5 * time.Second
 
 // MinPort is the SIP floor: std-doc never serves below this. Ports under
 // 33333 collide with macOS System Integrity Protection / reserved ranges and
@@ -47,10 +59,25 @@ type Options struct {
 	Port        int    // preferred port; 0 = auto (stable per-doc default, see DefaultPortFor). Never serves below MinPort.
 	StrictPort  bool   // bind exactly Port or fail; no auto-advance
 	PortScan    int    // how many ports above Port to try (default 50)
-	IdleTimeout int    // exit after this many idle seconds (0 = disabled)
+	IdleTimeout int    // exit after this many seconds untouched (0 = never exit). Default DefaultIdleTimeout.
 	Recursive   bool   // recurse subdirs when injecting
 	Note        string // free-text presence tag written into watcher.json
 	LibRoot     string // resolved default-library root; /lib/* served from <LibRoot>/lib
+
+	// ExitWithParent ties the server's life to the process that launched it.
+	//
+	// OFF by default, and that default is load-bearing. It used to be ON and
+	// unconditional, which made every documented launch path self-destruct:
+	// setup.sh, `nohup … &`, and an agent's run_in_background all put a
+	// TRANSIENT wrapper shell in the parent slot, and that shell exits the
+	// instant it has done its job. The server read its own orphaning as "my
+	// reader left" and killed itself ~5s later — usually before the human had
+	// clicked the link setup.sh had just printed. Parentage says nothing about
+	// whether anyone wants the document; being touched does. See IdleTimeout.
+	//
+	// Turn this ON only for a deliberately ephemeral doc that SHOULD die with
+	// the session that made it.
+	ExitWithParent bool
 }
 
 // server holds the per-process state shared across handlers and watchdogs.
@@ -61,9 +88,15 @@ type server struct {
 	note        string
 	port        int
 
-	lastActivity atomic.Int64 // unix-nano of the last response; powers idle timeout
+	lastActivity    atomic.Int64 // unix-nano of the last touch; powers the idle timeout
+	lastContent     atomic.Int64 // unix-nano of the newest mtime seen under artifactDir
+	lastContentPoll atomic.Int64 // unix-nano of the last tree walk; rate-limits pollContent
 }
 
+// touch records "someone wants this document, now". Two things count, and both
+// are real signals where parentage was not: a request answered (a reader has
+// the page open — the page polls, so an open tab keeps touching), and a change
+// to the served files (the author edited the doc, even with no tab open).
 func (s *server) touch() { s.lastActivity.Store(time.Now().UnixNano()) }
 
 func (s *server) idleSeconds() float64 {
@@ -336,22 +369,148 @@ func (s *server) heartbeat(interval time.Duration, done <-chan struct{}, wg *syn
 	}
 }
 
-// watchdog terminates the process when (a) our parent exits — we get reparented
-// to PID 1 — or (b) no client has hit us for idleTimeout seconds. Mirrors
-// a parent-death watchdog. os.Exit because a dev server has no graceful-close upside.
-func (s *server) watchdog(idleTimeout int, initialPPID int) {
-	watchParent := initialPPID != 1
+// watchdog terminates the process once the document has gone UNTOUCHED for
+// idleTimeout seconds — a touch being a request answered or an edit to the
+// served files. It no longer treats being orphaned as a reason to die unless
+// the caller explicitly opted in (Options.ExitWithParent): the parent is a
+// throwaway wrapper shell in every documented launch path, so its exit carried
+// no information about the reader and killed docs nobody had opened yet.
+//
+// os.Exit because a dev server has no graceful-close upside — but we clean up
+// .port on the way out so nothing is left pointing at a port we no longer hold.
+func (s *server) watchdog(idleTimeout int, initialPPID int, watchParent bool) {
+	// A process already orphaned at startup has no parent left to outlive.
+	watchParent = watchParent && initialPPID != 1
 	for {
-		time.Sleep(5 * time.Second)
-		reason := ""
-		if watchParent && os.Getppid() == 1 {
-			reason = "parent process exited"
-		} else if idleTimeout > 0 && s.idleSeconds() > float64(idleTimeout) {
-			reason = fmt.Sprintf("idle for >%ds with no clients", idleTimeout)
-		}
+		time.Sleep(watchdogInterval)
+		s.pollContent()
+		reason := s.exitReason(idleTimeout, watchParent, os.Getppid() == 1)
 		if reason != "" {
 			fmt.Printf("[server] %s; shutting down\n", reason)
+			s.cleanup()
 			os.Exit(0)
 		}
+	}
+}
+
+// exitReason is the watchdog's whole shutdown policy, as a pure function so it
+// can be tested without waiting out real clocks. Empty string means keep going.
+//
+// Note what is NOT here: being orphaned, on its own, is not a reason to die.
+// That check only applies when the caller opted into it.
+func (s *server) exitReason(idleTimeout int, watchParent, orphaned bool) string {
+	if watchParent && orphaned {
+		return "parent process exited (--exit-with-parent)"
+	}
+	if idleTimeout > 0 && s.idleSeconds() > float64(idleTimeout) {
+		return fmt.Sprintf("untouched for >%s (no page loads, no edits)", humanDuration(idleTimeout))
+	}
+	return ""
+}
+
+// contentPollInterval is how often pollContent actually walks the tree. The
+// watchdog ticks every 5s, but re-walking a document directory that often, for
+// the entire life of the server, is pure waste: the only consumer of this
+// signal is a 24-hour deadline, so observing edits to within a minute is far
+// more precision than anyone needs. Cheap for a 30-page doc, and still cheap
+// for a large one.
+const contentPollInterval = time.Minute
+
+// maxWalkEntries bounds a single scan. A served directory is a document, not a
+// filesystem, so anything past this is a sign we've been pointed at something
+// we shouldn't be recursing — stop rather than burn the CPU every minute.
+const maxWalkEntries = 20000
+
+// pollContent touches the server when anything under the served tree has been
+// modified since we last looked. This is what makes "the author edited the doc"
+// count as life even when no browser tab is open.
+//
+// Rate-limited to contentPollInterval; call it as often as you like.
+func (s *server) pollContent() {
+	now := time.Now()
+	if last := s.lastContentPoll.Load(); last != 0 &&
+		now.Sub(time.Unix(0, last)) < contentPollInterval {
+		return
+	}
+	s.lastContentPoll.Store(now.UnixNano())
+	s.scanContent()
+}
+
+// scanContent is pollContent without the rate limit — the actual comparison of
+// the tree's newest mtime against what we saw last time.
+func (s *server) scanContent() {
+	newest := newestMTime(s.artifactDir)
+	if newest == 0 {
+		return
+	}
+	if prev := s.lastContent.Load(); newest > prev {
+		s.lastContent.Store(newest)
+		if prev != 0 { // the first observation establishes a baseline, it isn't a change
+			s.touch()
+		}
+	}
+}
+
+// newestMTime returns the newest modification time (unix-nano) under root, or 0
+// if it cannot be read. Errors are swallowed deliberately: a liveness heuristic
+// must never be able to take the server down.
+//
+// Skips dot-directories and node_modules — they are never the document, and
+// they are exactly what makes a naive walk expensive.
+func newestMTime(root string) int64 {
+	var newest int64
+	var seen int
+	_ = filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return nil //nolint:nilerr // an unreadable entry is not a reason to stop
+		}
+		if d.IsDir() {
+			name := d.Name()
+			if path != root && (name == "node_modules" || strings.HasPrefix(name, ".")) {
+				return fs.SkipDir
+			}
+			return nil
+		}
+		if seen++; seen > maxWalkEntries {
+			return fs.SkipAll
+		}
+		info, ierr := d.Info()
+		if ierr != nil {
+			return nil
+		}
+		if t := info.ModTime().UnixNano(); t > newest {
+			newest = t
+		}
+		return nil
+	})
+	return newest
+}
+
+// cleanup removes the .port marker so no launcher, agent, or human is left
+// holding a URL for a port this process no longer serves. Best-effort.
+func (s *server) cleanup() {
+	if s.feedbackDir == "" {
+		return
+	}
+	_ = os.Remove(filepath.Join(s.feedbackDir, ".port"))
+}
+
+// humanDuration renders a second count the way a person would say it.
+func humanDuration(seconds int) string {
+	switch {
+	case seconds%3600 == 0 && seconds >= 3600:
+		if h := seconds / 3600; h == 1 {
+			return "1 hour"
+		} else {
+			return fmt.Sprintf("%d hours", h)
+		}
+	case seconds%60 == 0 && seconds >= 60:
+		if m := seconds / 60; m == 1 {
+			return "1 minute"
+		} else {
+			return fmt.Sprintf("%d minutes", m)
+		}
+	default:
+		return fmt.Sprintf("%ds", seconds)
 	}
 }

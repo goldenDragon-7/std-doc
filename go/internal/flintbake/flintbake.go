@@ -65,13 +65,41 @@ func Renderer(libRoot string) func([]byte) (string, error) {
 	}
 }
 
-// Available reports whether the live bake could run from libRoot right now
-// (script present AND node on PATH). Used by tests to skip when the optional
-// toolchain is absent, and callable by tooling that wants to pre-flight.
+// Available reports whether the live bake could run from libRoot right now.
+// Used by tests to skip when the optional toolchain is absent, and callable by
+// tooling that wants to pre-flight.
+//
+// It requires all THREE legs, and the third one is the one that bit us: the
+// vendored deps under bake/node_modules are untracked, so a FRESH CLONE has the
+// script and has node, but has nothing to import. Checking only the first two
+// made Available() answer "yes" on a machine where the bake could not possibly
+// run — so the test didn't skip, it FAILED, and "the suite is green" quietly
+// became a property of whoever had once run `npm install` rather than of the
+// repository. Same class of lie twice over; this is where it stops.
+//
+// Note the scope: only the LIVE bake (a chart spec → SVG) needs Node at all.
+// The Slice-0 embed path — name a chart, get its pre-baked catalog SVG — needs
+// none of this and is always available.
 func Available(libRoot string) bool {
-	if _, err := os.Stat(filepath.Join(libRoot, "flint", "bake", "render.mjs")); err != nil {
-		return false
+	return Unavailable(libRoot) == ""
+}
+
+// Unavailable returns a human-readable reason the live bake cannot run, or ""
+// when it can. Tests skip WITH this reason, so a skipped run says exactly what
+// is missing and how to fix it instead of looking like a pass.
+func Unavailable(libRoot string) string {
+	bakeDir := filepath.Join(libRoot, "flint", "bake")
+
+	if _, err := os.Stat(filepath.Join(bakeDir, "render.mjs")); err != nil {
+		return fmt.Sprintf("live Flint bake script not found at %s", filepath.Join(bakeDir, "render.mjs"))
 	}
-	_, err := exec.LookPath("node")
-	return err == nil
+	if _, err := exec.LookPath("node"); err != nil {
+		return "node is not on PATH (the live Flint bake shells out to Node; the embed path does not)"
+	}
+	// The deps are untracked, so their absence is the normal state of a fresh
+	// clone — not a broken checkout.
+	if _, err := os.Stat(filepath.Join(bakeDir, "node_modules", "vega-lite")); err != nil {
+		return fmt.Sprintf("live Flint bake deps not installed — run: (cd %s && npm install)", bakeDir)
+	}
+	return ""
 }

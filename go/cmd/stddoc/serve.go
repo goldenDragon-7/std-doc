@@ -12,18 +12,24 @@ import (
 // heartbeat together.
 //
 //	stddoc serve <dir> [--port N] [--strict-port] [--port-scan N]
-//	             [--idle-timeout S] [--recursive] [--note TEXT] [--plugins DIR]
+//	             [--idle-timeout S] [--exit-with-parent] [--recursive]
+//	             [--note TEXT] [--plugins DIR]
 func cmdServe(args []string) error {
 	opt := serve.Options{
 		Port:     0, // 0 = auto: pick a stable per-doc default (see serve.DefaultPortFor); an explicit --port overrides
 		PortScan: 50,
 		// A living document's whole job is to wait for a human (§V: "a room you
-		// can walk back into"). Idling out after N seconds of no browser betrays
-		// that — the reader steps away for lunch and the doc they were talking to
-		// is dead when they return. So serving NEVER idles out by default; the
-		// parent-death watchdog (run.go) is the orphan-guard that still cleans up
-		// when the launching session exits. Pass --idle-timeout N to opt back in.
-		IdleTimeout: 0,
+		// can walk back into"). So the clock that ends a doc's life measures the
+		// one thing that matters — how long since anyone TOUCHED it, where a
+		// touch is a page load or an edit to the doc's files. The reader going
+		// to lunch doesn't kill it; a day of nobody caring does.
+		//
+		// This replaces a parent-death watchdog that ran by default and made
+		// every documented launch path self-destruct within ~5 seconds, because
+		// the parent in each of them is a wrapper shell that exits immediately.
+		// Pass --exit-with-parent to opt back into that behaviour deliberately;
+		// pass --idle-timeout 0 to never exit at all.
+		IdleTimeout: serve.DefaultIdleTimeout,
 	}
 	var dir, plugins string
 	rest := []string{}
@@ -75,6 +81,8 @@ func cmdServe(args []string) error {
 			plugins = v
 		case "--strict-port":
 			opt.StrictPort = true
+		case "--exit-with-parent":
+			opt.ExitWithParent = true
 		case "--recursive", "-r":
 			opt.Recursive = true
 		default:
@@ -82,7 +90,7 @@ func cmdServe(args []string) error {
 		}
 	}
 	if len(rest) < 1 {
-		return fmt.Errorf("usage: stddoc serve <dir> [--port N] [--strict-port] [--port-scan N] [--idle-timeout S] [--recursive] [--note TEXT] [--plugins DIR]")
+		return fmt.Errorf("usage: stddoc serve <dir> [--port N] [--strict-port] [--port-scan N] [--idle-timeout S] [--exit-with-parent] [--recursive] [--note TEXT] [--plugins DIR]")
 	}
 	dir = rest[0]
 

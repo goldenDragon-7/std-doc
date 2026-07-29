@@ -3,7 +3,7 @@
 # setup.sh — wake a static HTML doc into a live conversation surface.
 #
 # Usage:   ./setup.sh <doc-dir> [port]
-# Example: ./setup.sh examples/hello-living-doc        # serves on :33333, never idles out
+# Example: ./setup.sh examples/hello-living-doc        # serves on :33333, lives 24h past the last touch
 #          ./setup.sh examples/hello-living-doc 5070
 #
 # One binary, zero Python. `stddoc serve` does all three jobs that used to
@@ -17,33 +17,51 @@
 # happen inside the session (see protocol/responding.md). The Monitor
 # command to tail the inbox is printed at the end.
 #
-# macOS-safe: there is no `setsid` here. The native server has a parent-death
-# watchdog (it shuts down when reparented to PID 1), so we must NOT exit while
-# it runs — we launch it, read its real port, print the banner, then `wait` on
-# it. That keeps THIS script as its parent: the server outlives nothing extra,
-# and dies with the agent session that launched ./setup.sh (by design). Run
-# this script in the background of your session if you want your prompt back.
+# macOS-safe: there is no `setsid` here, and none is needed. We launch the
+# server, read its real port, print the banner, and EXIT — the server is
+# reparented to init and keeps serving, because its life is measured by whether
+# anyone touches the doc (a page load or an edit), not by whether this script is
+# still running. It stays up 24h past the last touch.
+#
+# This used to be the bug: the server ran a parent-death watchdog by default, so
+# this script's own exit killed it ~5s after printing "LIVE" — every user hit it.
+# If you want a doc that dies with your session, pass --exit-with-parent through
+# to `stddoc serve` deliberately.
 # ════════════════════════════════════════════════════════════════════
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # ── resolve the stddoc binary ───────────────────────────────────────
-# Prefer $STDDOC if set, then one already on PATH, then the repo build
-# at go/stddoc (building it on demand if it isn't there yet).
+# Order: explicit $STDDOC, then THIS REPO'S BUILD, then PATH.
+#
+# The repo build deliberately beats a `stddoc` already on PATH. It used to be
+# the other way round, and that silently invalidated test results: you change
+# the source, run setup.sh, watch it pass — and you were exercising the stale
+# binary installed in ~/.local/bin, not your change. It fooled me exactly once,
+# and only a stray log line gave it away. A harness that can test something
+# other than the code under change is worse than no harness.
+#
+# If you genuinely want the installed one, ask for it: STDDOC_USE_PATH=1.
+# Either way we PRINT the resolved path on every run — a test that doesn't say
+# what it tested is not evidence.
 resolve_stddoc() {
   if [[ -n "${STDDOC:-}" && -x "${STDDOC:-}" ]]; then echo "$STDDOC"; return; fi
-  if command -v stddoc >/dev/null 2>&1; then command -v stddoc; return; fi
+  if [[ "${STDDOC_USE_PATH:-}" == "1" ]] && command -v stddoc >/dev/null 2>&1; then
+    command -v stddoc; return
+  fi
   if [[ -x "$HERE/go/stddoc" ]]; then echo "$HERE/go/stddoc"; return; fi
   if [[ -d "$HERE/go" ]]; then
-    echo "▶ no stddoc binary found — building $HERE/go/stddoc ..." >&2
+    echo "▶ no stddoc binary in this repo — building $HERE/go/stddoc ..." >&2
     ( cd "$HERE/go" && go build -o stddoc ./cmd/stddoc ) >&2
     echo "$HERE/go/stddoc"; return
   fi
-  echo "error: no stddoc binary (set \$STDDOC, put it on PATH, or keep go/)" >&2
+  if command -v stddoc >/dev/null 2>&1; then command -v stddoc; return; fi
+  echo "error: no stddoc binary (set \$STDDOC, keep go/, or put one on PATH)" >&2
   exit 1
 }
 STDDOC="$(resolve_stddoc)"
+echo "▶ stddoc binary: $STDDOC"
 
 DIR="${1:-}"
 # Port is OPTIONAL. If the caller gives one ($2) we honor it exactly. If not,
@@ -88,14 +106,20 @@ if [[ "$EXISTS" != "1" ]]; then
   # stale marker first so we read THIS launch's port, not a previous run's.
   rm -f "$DIR/feedback/.port"
   if [[ -n "$USER_PORT" ]]; then
-    echo "▶ injecting + serving $DIR (requested :$USER_PORT, auto-advances if busy; idle-timeout disabled) ..."
+    echo "▶ injecting + serving $DIR (requested :$USER_PORT, auto-advances if busy; lives 24h past the last touch) ..."
   else
-    echo "▶ injecting + serving $DIR (stable per-doc default port, auto-advances if busy; idle-timeout disabled) ..."
+    echo "▶ injecting + serving $DIR (stable per-doc default port, auto-advances if busy; lives 24h past the last touch) ..."
   fi
-  # macOS-safe background start: no setsid. & so the server outlives this
-  # script but still dies with the launching session. Pass --port only when
-  # the caller asked for one; otherwise let the binary pick the stable default.
-  "$STDDOC" serve "$DIR" ${USER_PORT:+--port "$USER_PORT"} --idle-timeout 0 \
+  # macOS-safe background start: no setsid, and none needed. `&` is enough —
+  # the server is reparented to init when this script exits and keeps serving,
+  # because its life is measured by whether anyone TOUCHES the doc (a page load
+  # or an edit), not by whether this script is still around. This script exiting
+  # used to kill it within ~5s, right after printing "LIVE" below.
+  #
+  # No --idle-timeout here: the binary's 24h default is the behaviour we want.
+  # Pass --port only when the caller asked for one; otherwise let the binary
+  # pick the stable per-doc default.
+  "$STDDOC" serve "$DIR" ${USER_PORT:+--port "$USER_PORT"} \
     >"$DIR/feedback/server.log" 2>&1 &
   SERVER_PID=$!
   # learn the ACTUAL port the server bound (it writes feedback/.port) — never
@@ -107,10 +131,44 @@ if [[ "$EXISTS" != "1" ]]; then
   if [[ -f "$DIR/feedback/.port" ]]; then
     PORT="$(cat "$DIR/feedback/.port")"
   fi
-  for _ in $(seq 1 25); do
-    if curl -s --max-time 1 "http://localhost:$PORT/info" >/dev/null 2>&1; then break; fi
-    sleep 0.2
-  done
+
+  # NEVER print "LIVE" without proving it. This script used to declare success
+  # whether or not the server had actually come up: if the binary died at
+  # startup, .port was never written and the banner cheerfully printed
+  # "http://localhost:/index.html" — an empty port, nothing listening. From the
+  # reader's side that is indistinguishable from "the server grabbed a bad
+  # port", and it sent them back to their agent saying "it stopped".
+  #
+  # So: confirm the server answers on the port it claims, or fail loudly with
+  # the reason, which is already sitting in server.log.
+  SERVING=0
+  if [[ -n "$PORT" ]]; then
+    for _ in $(seq 1 25); do
+      if curl -s --max-time 1 "http://localhost:$PORT/info" >/dev/null 2>&1; then
+        SERVING=1
+        break
+      fi
+      sleep 0.2
+    done
+  fi
+
+  if [[ "$SERVING" != "1" ]]; then
+    echo "" >&2
+    echo "✖ FAILED to serve $DIR — the server did not come up." >&2
+    if [[ -z "$PORT" ]]; then
+      echo "  It never reported a port (no $DIR/feedback/.port)." >&2
+    else
+      echo "  It claimed port $PORT but never answered there." >&2
+    fi
+    if ! kill -0 "$SERVER_PID" 2>/dev/null; then
+      echo "  The server process exited." >&2
+    fi
+    echo "" >&2
+    echo "  ── $DIR/feedback/server.log ──" >&2
+    sed 's/^/  /' "$DIR/feedback/server.log" >&2 2>/dev/null || echo "  (empty)" >&2
+    echo "" >&2
+    exit 1
+  fi
 fi
 
 # find the first html to suggest as the URL
@@ -136,11 +194,15 @@ echo ""
 echo "  Stop later with:  lsof -ti:$PORT | xargs kill"
 echo "════════════════════════════════════════════════════════════════"
 
-# Stay alive as the server's parent: the native server's watchdog kills it the
-# moment it is reparented to PID 1, so if we exited here the doc would go dark.
-# Blocking here keeps the page live; the server dies when this script (and the
-# session that launched it) does. If we reused an already-running server above,
-# there is nothing to wait on — just return.
-if [[ "$EXISTS" != "1" && -n "${SERVER_PID:-}" ]]; then
-  wait "$SERVER_PID"
-fi
+# Return. Do NOT block.
+#
+# This script used to end with `wait "$SERVER_PID"` — blocking forever on
+# purpose, because the server's watchdog killed it the moment it was reparented
+# to PID 1, so the script had to stay alive as its parent. That workaround cost
+# more than the bug: setup.sh never returned, so the caller had to background it
+# or let the call time out, and whenever that shell finally died it took the
+# document with it. "I ran setup.sh and it stopped."
+#
+# The server no longer needs a babysitter. It survives being orphaned and lives
+# 24h past the last touch, so we print the URL and get out of the way — the
+# caller gets their prompt back and the doc stays up.

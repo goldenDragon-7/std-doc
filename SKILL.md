@@ -160,12 +160,13 @@ One command does inject + serve + heartbeat:
 ~/.claude/skills/std-doc/setup.sh <your-doc-dir> [port]   # wraps `stddoc serve`
 ```
 
-It injects, picks a free port (33333+), serves with **`--idle-timeout 0`**, and
-prints the URL. Open the **`http://localhost:…`** URL, *not* the `file://` one
-(only the served copy listens). Direct equivalent:
+It injects, picks a free port (33333+), and prints the URL. The server **keeps
+serving after `setup.sh` exits** and stays up for **24 hours past the last
+touch** — a page load or an edit to the doc. Open the **`http://localhost:…`**
+URL, *not* the `file://` one (only the served copy listens). Direct equivalent:
 
 ```bash
-stddoc serve <dir> --port 33333 --idle-timeout 0   # --recursive for subfolders
+stddoc serve <dir> --port 33333            # --recursive for subfolders
 ```
 
 `--port` is a **preference, not a claim**: the server force-checks it by binding
@@ -282,16 +283,20 @@ shape + reply: **`protocol/responding.md`**; worked example:
 
 ## Gotchas (these will bite)
 
-- **`serve` never idles out by default.** The Go server's `--idle-timeout`
-  defaults to `0` (never auto-shuts-down), so a doc you set up before the reader
-  opens it stays live. Pass `--idle-timeout N` only if you *want* it to exit
-  after N idle seconds; `setup.sh` keeps the never-idle default.
-- **macOS has no `setsid`.** Don't reach for it. Start the server with
-  `run_in_background` (in an agent session) or via `setup.sh` — never a start that
-  depends on `setsid`.
-- **Per-doc `nohup` dies on parent exit.** For an ad-hoc doc that's fine (it dies
-  with your session, by design). For something long-lived, run it under a
-  persistent service, not a bare `nohup`.
+- **A doc's life is measured in touches, not in shells.** `serve` stays up for
+  **24 hours after the last touch**, where a touch is a page load *or* an edit to
+  the served files. An open tab polls, so a reader keeps it alive for free; so
+  does an author editing with no tab open. `--idle-timeout N` sets a different
+  window, `--idle-timeout 0` means never exit.
+- **The server outlives the thing that started it — on purpose.** It used to run
+  a parent-death watchdog by default, which meant `setup.sh`, `nohup … &`, and an
+  agent's `run_in_background` all killed the doc ~5s after launching it, usually
+  before the reader had clicked the link. Parentage says nothing about whether
+  anyone wants the document. If you *do* want a doc that dies with the session
+  that made it, ask for it: `--exit-with-parent`.
+- **macOS has no `setsid`.** Don't reach for it — and you don't need it. A plain
+  `&` or `run_in_background` is enough now that the server no longer kills itself
+  when orphaned.
 - **`history.json` is append-only** — append, never prepend or overwrite. The
   client walks from the end to find the latest batch.
 - **`anchor.cf_id` is runtime-only** — assigned at page load, not in your file.
@@ -344,7 +349,7 @@ To bring an archived doc back, re-`publish` from its versioned `source.json` and
 ~/.claude/skills/std-doc/
 ├── SKILL.md                      # this file
 ├── LICENSE                       # MIT
-├── setup.sh                      # inject + serve (idle-timeout 0, macOS-safe)
+├── setup.sh                      # inject + serve (24h touch-based lifetime, macOS-safe)
 ├── method/
 │   └── prd-by-descent.md         # Move 1 — the writing method, full
 ├── style/

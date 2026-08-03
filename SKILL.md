@@ -34,13 +34,31 @@ If they hand you existing static HTML and only want commenting (no authoring),
 you can skip straight to **Move 3 (Serve)** — the engine works on any folder of
 `*.html`.
 
-## Move 0 — Model (optional: data-derived docs)
+## Move 0 — Model (DEFAULT: data-derived docs)
 
-Most living documents are a single hand-authored page. But when a document is
-*structured* — many pages over one knowledge base, or a shallow narrative over a
-deep evidence base — author a canonical **`source.json`** doc-tree first and let
-the HTML be **100% derived**. Strictly additive: no `source.json` → std-doc
-behaves exactly as below (hand-authored single page).
+**Default to the canonical `source.json` doc-tree.** Author the JSON first and let
+the HTML be **100% derived** (`stddoc publish`) for anything beyond a one-off,
+single-page, prose-only note — i.e. any doc that is **multi-page**, **structured**
+(tables, matrices, repeated components, decision lists), or that you expect to
+**iterate on**. Hand-authored single-page HTML is the *exception*, reserved for a
+genuinely one-shot prose page.
+
+**Why this is the default, not a nicety — it is a token-cost decision.** Hand-editing
+rendered HTML is the expensive anti-pattern: every table reorder, column add, or row
+change becomes a full-markup rewrite (the block appears *twice* — old_string +
+new_string), plus reading the file back for exact-match strings. The *same* change
+against `source.json` is a one-line data edit + a cheap `publish`. A doc iterated a
+dozen times as hand-HTML can burn 10–20× the tokens of the JSON-derived equivalent.
+**The rule: if you will edit it more than once, start from `source.json`.** (Still
+strictly additive: no `source.json` → std-doc falls back to hand-authored single page.)
+
+**One caveat when authoring the JSON:** the bundled publisher renders node **prose**
+(+ the `evidence` drill-down layer) into the styled multi-page shell. Bespoke
+interactive components beyond the built-in comment widget — custom dot-matrices,
+`data-cf-control` radios embedded mid-page, a non-default visual theme — are **not**
+native doctree constructs. Express structured data as prose/markdown tables the
+template renders; if a doc genuinely needs a custom component, that is the one case
+where a small hand-authored escape is justified — keep the rest JSON-derived.
 
 The win is a **forcing function**: a publisher that renders a *complete* page
 from JSON alone proves the JSON had everything; the HTML can't drift because it's

@@ -53,6 +53,37 @@ func TestInjectIdempotent(t *testing.T) {
 
 func cssMarker() string { return cssTag }
 
+// TestInjectRestoresStrippedTags guards the "LIVE over a page nobody can talk
+// to" defect fix: a doc rewritten after the server started has lost its widget
+// tags, and the reuse path (which never restarts the server) relies on a plain
+// Inject pass to put them back. Strip → Inject must restore the widget.
+func TestInjectRestoresStrippedTags(t *testing.T) {
+	dir := t.TempDir()
+	page := filepath.Join(dir, "a.html")
+	writeFile(t, page, "<html><head></head><body><p>hi</p></body></html>")
+
+	if err := Inject(dir, false); err != nil {
+		t.Fatal(err)
+	}
+	if b, _ := os.ReadFile(page); !bytes.Contains(b, []byte(jsTag)) {
+		t.Fatalf("setup: widget not injected: %s", b)
+	}
+
+	// Simulate a rewrite (Write tool / publish / hand re-author) — tags gone.
+	writeFile(t, page, "<html><head></head><body><p>hi v2</p></body></html>")
+	if b, _ := os.ReadFile(page); bytes.Contains(b, []byte(jsTag)) {
+		t.Fatalf("precondition: rewrite should have stripped the widget: %s", b)
+	}
+
+	// The reuse path's re-inject must restore it.
+	if err := Inject(dir, false); err != nil {
+		t.Fatal(err)
+	}
+	if b, _ := os.ReadFile(page); !bytes.Contains(b, []byte(jsTag)) {
+		t.Fatalf("re-inject did not restore the widget: %s", b)
+	}
+}
+
 func TestInjectMermaidConditional(t *testing.T) {
 	dir := t.TempDir()
 	plain := filepath.Join(dir, "plain.html")
@@ -185,8 +216,13 @@ func TestServeEndToEnd(t *testing.T) {
 	if err := json.Unmarshal(wb, &watcher); err != nil {
 		t.Fatalf("watcher.json not json: %v", err)
 	}
-	if watcher["status"] != "watching" {
-		t.Fatalf("watcher status = %v", watcher["status"])
+	// The server asserts only what it can prove — "serving", not "watching"
+	// (CARRIED-5) — and carries the staleness bound a file-reader needs.
+	if watcher["status"] != "serving" {
+		t.Fatalf("watcher status = %v (want \"serving\")", watcher["status"])
+	}
+	if watcher["stale_after_s"] == nil {
+		t.Fatal("watcher.json must carry stale_after_s so a file-reader knows the freshness bound")
 	}
 
 	// 6) .port file written

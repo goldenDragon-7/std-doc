@@ -187,7 +187,7 @@ func sectionsRender(n *wire.OrderedMap, ctx *template.Ctx) (string, error) {
 		}
 		h.WriteString("</div>")
 		if truthy(get(s, "summary")) {
-			h.WriteString("<div class='summary'>" + esc(str(s, "summary")) + "</div>")
+			h.WriteString("<div class='summary'>" + richText(str(s, "summary")) + "</div>")
 		}
 		for k0, iv := range list(s, "items") {
 			k := k0 + 1
@@ -196,7 +196,7 @@ func sectionsRender(n *wire.OrderedMap, ctx *template.Ctx) (string, error) {
 			h.WriteString("<div class='item' id='" + iid + "' data-cf-anchor='" + esc(ianchor) + "'>" +
 				"<div class='item-name'>" + esc(get(it, "name")) + "</div>")
 			if truthy(get(it, "desc")) {
-				h.WriteString("<div class='item-desc'>" + esc(str(it, "desc")) + "</div>")
+				h.WriteString("<div class='item-desc'>" + richText(str(it, "desc")) + "</div>")
 			}
 			if cites := list(it, "citations"); len(cites) > 0 {
 				h.WriteString("<ul class='impl'>")

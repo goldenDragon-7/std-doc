@@ -6,6 +6,9 @@
 //	stddoc lint     <source.json>
 //	stddoc freeze   <dir>
 //	stddoc serve    <dir>
+//	stddoc inject   <dir>
+//	stddoc ls
+//	stddoc status   <dir>
 //	stddoc roll     <source.json> --slug <slug>
 //	stddoc graduate <dir>
 //
@@ -31,7 +34,7 @@ func main() {
 
 func run(args []string) error {
 	if len(args) == 0 {
-		return fmt.Errorf("usage: stddoc <publish|lint|freeze|serve|roll|graduate> ...")
+		return fmt.Errorf("usage: stddoc <publish|lint|freeze|serve|inject|ls|status|roll|graduate> ...")
 	}
 	cmd, rest := args[0], args[1:]
 	switch cmd {
@@ -46,6 +49,12 @@ func run(args []string) error {
 		return cmdFreeze(rest)
 	case "serve":
 		return cmdServe(rest)
+	case "inject":
+		return cmdInject(rest)
+	case "ls":
+		return cmdLs(rest)
+	case "status":
+		return cmdStatus(rest)
 	case "roll":
 		return cmdRoll(rest)
 	case "graduate":

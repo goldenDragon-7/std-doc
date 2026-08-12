@@ -22,6 +22,8 @@ If `source.json` is absent, std-doc behaves exactly as v1 (author HTML by hand).
 {
   "title": "string",                 // doc title (nav brand + index h1)
   "generated_date": "YYYY-MM-DD",    // optional, shown in footers/banner
+  "evidence_levels": ["OBSERVED"],   // optional: extra citation-evidence labels
+                                     //   accepted on top of the canonical five
   "groups": ["A", "B"],              // optional nav-group order; else inferred + sorted
   "root": {                          // the index/landing page
     "summary": "string",
@@ -43,10 +45,13 @@ If `source.json` is absent, std-doc behaves exactly as v1 (author HTML by hand).
           "summary": "string",
           "items": [
             {
-              "name": "string", "desc": "string",
+              "name": "string", "desc": "string",   // desc/summary accept [text](https://…) links
               "citations": [
                 { "path": "src/x.go", "line": "10-14",
-                  "evidence": "MEASURED|CITED|INFERRED", "note": "string" }
+                  // one of the canonical five, or any label the doc declares in
+                  // the root evidence_levels list (below):
+                  "evidence": "MEASURED|CALCULATED|CITED|INFERRED|ESTIMATED|SPECULATIVE",
+                  "note": "string" }
               ],
               "evidence": { … }      // OPTIONAL item-level drill-down (additive)
             }
@@ -63,6 +68,31 @@ If `source.json` is absent, std-doc behaves exactly as v1 (author HTML by hand).
 
 - **Required:** `title`, `nodes[]`, each node's `slug` + `title`.
 - Everything else is optional. A minimal doc is `{title, nodes:[{slug,title}]}`.
+
+### Citation evidence vocabulary (the `evidence` string)
+
+A `citation.evidence` string — distinct from the additive `evidence` *object*
+below — is graded against a fixed vocabulary at publish time. The **canonical
+five** are `MEASURED`, `CALCULATED`, `CITED`, `INFERRED`, `ESTIMATED`,
+`SPECULATIVE` (a superset of the original three, so older docs stay valid). If
+your doc grades on its own scale, declare the extra labels once at the doc root:
+
+```jsonc
+{ "title": "…", "evidence_levels": ["OBSERVED", "THEORIZED"], "nodes": [ … ] }
+```
+
+Lint accepts the union of the five and whatever you declare, and its reject
+message names the whole effective set — so you never have to discover it by
+failing twice.
+
+### Links in prose (`desc` / `summary`)
+
+Prose fields (`desc`, `summary`) accept a markdown link `[text](https://…)`,
+rendered as a real `<a>`. Only `http(s)` URLs become links — a scheme-less or
+`javascript:`/`data:` target is left as plain text, so code-shaped prose like
+`ctx['x'](block)` is never mangled and nothing dangerous reaches an `href`. A
+reader-clickable link also survives `freeze` (it fetches nothing on load), so a
+data-derived doc can cite the web and still ship as a frozen snapshot.
 
 ## The additive `evidence` object
 

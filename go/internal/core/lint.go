@@ -29,7 +29,36 @@ import (
 
 var slugShapeRe = regexp.MustCompile(`^[a-z0-9]+(?:-[a-z0-9]+)*$`)
 
-var evidenceOK = map[string]bool{"MEASURED": true, "CITED": true, "INFERRED": true}
+// evidenceBuiltin is the kingdom's canonical evidence vocabulary (the ANSI
+// Knight's five levels), a SUPERSET of the original three so every existing doc
+// stays valid. A doc that grades on its own scale declares `evidence_levels`
+// (a list of strings) at the root; effectiveEvidence merges the two. This
+// closes the 2026-08-12 CARRIED-4 finding: the set was locked at three with no
+// way to discover or extend it except by failing.
+var evidenceBuiltin = map[string]bool{
+	"MEASURED": true, "CALCULATED": true, "CITED": true,
+	"INFERRED": true, "ESTIMATED": true, "SPECULATIVE": true,
+}
+
+// effectiveEvidence returns the accepted evidence set (built-in ∪ doc-declared)
+// and its sorted labels for a self-documenting error message.
+func effectiveEvidence(doc *wire.OrderedMap) (map[string]bool, []string) {
+	ok := map[string]bool{}
+	for k := range evidenceBuiltin {
+		ok[k] = true
+	}
+	for _, lv := range list(doc, "evidence_levels") {
+		if s, is := lv.(string); is && s != "" {
+			ok[s] = true
+		}
+	}
+	labels := make([]string, 0, len(ok))
+	for k := range ok {
+		labels = append(labels, k)
+	}
+	sort.Strings(labels)
+	return ok, labels
+}
 
 const asciiMax = 78
 
@@ -89,6 +118,10 @@ func lintDoc(doc *wire.OrderedMap, reg *registry.Registry) []registry.Finding {
 	if doc == nil {
 		return []registry.Finding{errf("<doc>", "source is not a JSON object")}
 	}
+	// the accepted evidence vocabulary for this doc (canonical five ∪ any the
+	// doc declares in evidence_levels), computed once and used by the citation
+	// check below — CARRIED-4.
+	evidenceOK, evidenceLabels := effectiveEvidence(doc)
 	if str(doc, "title") == "" {
 		out = append(out, errf("<doc>", "missing required key: title"))
 	}
@@ -258,7 +291,7 @@ func lintDoc(doc *wire.OrderedMap, reg *registry.Registry) []registry.Finding {
 					}
 					if ev, has := c.Get("evidence"); has && ev != nil {
 						if evs, _ := ev.(string); !evidenceOK[evs] {
-							out = append(out, errf(slug, "citation evidence '%s' not one of [CITED INFERRED MEASURED]", evs))
+							out = append(out, errf(slug, "citation evidence '%s' not one of %v (declare more via the doc-root evidence_levels list)", evs, evidenceLabels))
 						}
 					}
 				}

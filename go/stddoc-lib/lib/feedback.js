@@ -564,11 +564,39 @@
     return ids;
   }
 
-  // One per-comment status chip: ✓ answered (green) or ⏳ awaiting (dim).
-  function answerChip(done) {
-    return done
-      ? '<span style="flex:none;font-size:11px;font-weight:700;color:#1f7d4d;background:rgba(52,211,153,.16);border:1px solid rgba(52,211,153,.4);border-radius:99px;padding:1px 7px">✓ answered</span>'
-      : '<span style="flex:none;font-size:11px;font-weight:700;color:#9a7b1a;background:rgba(251,191,36,.14);border:1px solid rgba(251,191,36,.4);border-radius:99px;padding:1px 7px">⏳ awaiting</span>';
+  // Ids a change deliberately DECLINED — considered and not acted on. A change
+  // says so with disposition:"declined". Kept distinct from a plain answer so
+  // "we thought about it and said no" doesn't read to the reader as "ignored" —
+  // declined-with-a-reason is the state that keeps a reader trusting the loop.
+  function declinedIds() {
+    const ids = new Set();
+    for (const batch of (S.history || [])) {
+      for (const ch of (batch.changes || [])) {
+        if (ch.disposition === "declined") {
+          for (const id of (ch.in_response_to || [])) ids.add(id);
+        }
+      }
+    }
+    return ids;
+  }
+
+  // Three-state disposition for one comment id: "declined" | "answered" | "pending".
+  function dispositionOf(id) {
+    if (declinedIds().has(id)) return "declined";
+    if (answeredIds().has(id)) return "answered";
+    return "pending";
+  }
+
+  // One per-comment status chip: ✓ answered (green), ✗ declined (dim red), or
+  // ⏳ awaiting (amber). Accepts a disposition string OR a legacy boolean.
+  function answerChip(state) {
+    if (state === true) state = "answered";
+    if (state === false) state = "pending";
+    if (state === "declined")
+      return '<span style="flex:none;font-size:11px;font-weight:700;color:#a13a3a;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.4);border-radius:99px;padding:1px 7px">✗ declined</span>';
+    if (state === "answered")
+      return '<span style="flex:none;font-size:11px;font-weight:700;color:#1f7d4d;background:rgba(52,211,153,.16);border:1px solid rgba(52,211,153,.4);border-radius:99px;padding:1px 7px">✓ answered</span>';
+    return '<span style="flex:none;font-size:11px;font-weight:700;color:#9a7b1a;background:rgba(251,191,36,.14);border:1px solid rgba(251,191,36,.4);border-radius:99px;padding:1px 7px">⏳ awaiting</span>';
   }
 
   function renderPending() {
@@ -590,7 +618,7 @@
         ? `all ${n} answered ✓`
         : `${ansN} of ${n} answered · ${n - ansN} awaiting`;
       const submittedList = S.lastSubmittedBatch.pending_snapshot.map(c =>
-        `<div class="cf-comment-quote" style="margin-top:4px; display:flex; gap:8px; align-items:flex-start;">${answerChip(_ans.has(c.id))}<span>${escapeHtml(c.comment)}</span></div>`
+        `<div class="cf-comment-quote" style="margin-top:4px; display:flex; gap:8px; align-items:flex-start;">${answerChip(dispositionOf(c.id))}<span>${escapeHtml(c.comment)}</span></div>`
       ).join("");
 
       if (S.isBatchStale) {

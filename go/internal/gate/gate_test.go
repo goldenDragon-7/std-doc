@@ -103,6 +103,34 @@ func TestInlineScriptBenignNotFlagged(t *testing.T) {
 	}
 }
 
+// NEW 2 (2026-08-12): a reader-clickable <a href="https://…"> fetches nothing on
+// load, so it must NOT block freeze — a document may cite the web and still be
+// delivered. Loader href (<link>/<base>) and any src= stay blocked.
+func TestReaderLinkAllowed_LoaderHrefBlocked(t *testing.T) {
+	clean := []string{
+		`<a href="https://gitea.example/issues/51">ticket 51</a>`,
+		`<a href='http://example.com/x'>plain http anchor</a>`,
+		`<p>See <a href="https://docs.example/spec#section">the spec</a>.</p>`,
+		`<area href="https://example.com/map">`,
+	}
+	for _, c := range clean {
+		if leaks := Scan(c); len(leaks) != 0 {
+			t.Errorf("a reader-clickable anchor must be clean: %q -> %v", c, leaks)
+		}
+	}
+	leaky := []string{
+		`<link rel="stylesheet" href="https://cdn.example/x.css">`,
+		`<link href="/fonts/remote.css">`,
+		`<base href="https://cdn.example/">`,
+		`<link rel="icon" href="https://cdn.example/favicon.ico">`,
+	}
+	for _, c := range leaky {
+		if leaks := Scan(c); len(leaks) == 0 {
+			t.Errorf("a loader href must still leak: %q", c)
+		}
+	}
+}
+
 func TestMermaidRefused(t *testing.T) {
 	page := `<body><div class="mermaid">graph TD; A-->B</div></body>`
 	if !HasMermaid(page) {

@@ -87,6 +87,7 @@ type server struct {
 	clientDir   string // <LibRoot>/lib — where /lib/<file> resolves
 	note        string
 	port        int
+	recursive   bool // whether serve recurses subdirs (mirrors Options.Recursive; used by /info page count)
 
 	lastActivity    atomic.Int64 // unix-nano of the last touch; powers the idle timeout
 	lastContent     atomic.Int64 // unix-nano of the newest mtime seen under artifactDir
@@ -161,11 +162,20 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func (s *server) doGet(w http.ResponseWriter, r *http.Request) {
 	p := r.URL.Path
 	if p == "/info" {
+		// pages + note make /info self-describing: with the dir already here, a
+		// caller sweeping the port band can answer "whose server is this and
+		// what is it?" without shelling out to ps. See `stddoc ls`.
+		pages := 0
+		if htmls, err := findHTML(s.artifactDir, s.recursive); err == nil {
+			pages = len(htmls)
+		}
 		s.writeJSON(w, http.StatusOK, map[string]any{
 			"artifact_dir": s.artifactDir,
 			"feedback_dir": s.feedbackDir,
 			"lib_dir":      s.clientDir,
 			"port":         s.port,
+			"pages":        pages,
+			"note":         s.note,
 		})
 		return
 	}
@@ -338,17 +348,34 @@ func scanBind(start, scan int, strict bool) (net.Listener, int, error) {
 	return nil, 0, fmt.Errorf("no free port in %d..%d: %w", start, start+scan, last)
 }
 
+// WatcherStaleSeconds is the freshness bound the tool applies to a heartbeat:
+// a watcher.json older than this reads as COLD, not as its last value. It is
+// written into the file (stale_after_s) so a reader of the file alone — not
+// just the page — knows the bound the tool itself uses, and mirrors the client
+// WATCHER_FRESH_MS (15s). This closes CARRIED-5: the file "outlives the process
+// it names," so a direct reader needs the staleness bound to tell live from dead.
+const WatcherStaleSeconds = 15
+
 // heartbeat writes watcher.json every interval, folding the presence job
 // into the running server. Stops (and removes watcher.json) when done closes.
+//
+// The status is "serving", NOT "watching" (CARRIED-5, 2026-08-12): the writer is
+// the SERVER, and the only thing it can honestly assert is that it is serving —
+// the pid is the server's, never a human/session reading the inbox. "watching"
+// led a reader to believe a listener was on the other end; a stale file then
+// kept asserting it after the process was gone. The server states what it can
+// prove (serving + a self-described staleness bound); whether anyone is actually
+// watching is answered by heartbeat freshness, not by the word.
 func (s *server) heartbeat(interval time.Duration, done <-chan struct{}, wg *sync.WaitGroup) {
 	defer wg.Done()
 	watcher := filepath.Join(s.feedbackDir, "watcher.json")
 	beat := func() {
 		payload, _ := json.Marshal(map[string]any{
-			"status": "watching",
-			"ts":     time.Now().Unix(),
-			"pid":    os.Getpid(),
-			"note":   s.note,
+			"status":        "serving",
+			"ts":            time.Now().Unix(),
+			"pid":           os.Getpid(),
+			"note":          s.note,
+			"stale_after_s": WatcherStaleSeconds,
 		})
 		tmp := watcher + ".tmp"
 		if os.WriteFile(tmp, payload, 0o644) == nil {
@@ -387,7 +414,7 @@ func (s *server) watchdog(idleTimeout int, initialPPID int, watchParent bool) {
 		reason := s.exitReason(idleTimeout, watchParent, os.Getppid() == 1)
 		if reason != "" {
 			fmt.Printf("[server] %s; shutting down\n", reason)
-			s.cleanup()
+			s.cleanup(reason)
 			os.Exit(0)
 		}
 	}
@@ -486,13 +513,39 @@ func newestMTime(root string) int64 {
 	return newest
 }
 
-// cleanup removes the .port marker so no launcher, agent, or human is left
-// holding a URL for a port this process no longer serves. Best-effort.
-func (s *server) cleanup() {
+// writePortState writes feedback/.port as a small JSON state marker. It is the
+// address of the document, and it must OUTLIVE the process that served it
+// (CARRIED-5, 2026-08-12): a reader who arrives after a silent auto-shutdown
+// needs to recover the port AND learn why it stopped, without grepping a log.
+// Three distinguishable states, where before there were only "stale int" and
+// "absent" (indistinguishable from each other):
+//   - {"state":"serving", ...}  written at startup while the port is held.
+//   - {"state":"stopped", "reason":..., "stopped_at":...}  written on the way
+//     out — the address survives, and says why it is no longer live.
+//   - absent — never served (or cleaned by hand).
+// A reader still confirms "serving" by probing the port; the point is that a
+// stale marker now says stopped instead of cheerfully implying it is up.
+func (s *server) writePortState(state, reason string) {
 	if s.feedbackDir == "" {
 		return
 	}
-	_ = os.Remove(filepath.Join(s.feedbackDir, ".port"))
+	payload := map[string]any{"port": s.port, "state": state, "pid": os.Getpid()}
+	if state == "stopped" {
+		payload["reason"] = reason
+		payload["stopped_at"] = time.Now().Unix()
+	}
+	b, _ := json.Marshal(payload)
+	tmp := filepath.Join(s.feedbackDir, ".port.tmp")
+	dst := filepath.Join(s.feedbackDir, ".port")
+	if os.WriteFile(tmp, b, 0o644) == nil {
+		_ = os.Rename(tmp, dst)
+	}
+}
+
+// cleanup records that this server has stopped, keeping the .port address alive
+// with a reason rather than deleting it (CARRIED-5). Best-effort.
+func (s *server) cleanup(reason string) {
+	s.writePortState("stopped", reason)
 }
 
 // humanDuration renders a second count the way a person would say it.

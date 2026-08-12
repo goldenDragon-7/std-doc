@@ -14,6 +14,39 @@ import (
 // esc is the engine escaper (None/nil -> "", else Python str() + html.escape).
 func esc(v any) string { return wire.Esc(v) }
 
+// mdLinkRe matches a markdown link [text](url) in prose where the URL is an
+// explicit http(s) URL. Requiring the scheme is deliberate on two counts: it
+// refuses javascript:/data: (and every other scheme) so nothing dangerous
+// reaches an href, and it avoids linkifying code-shaped prose like
+// ctx['anchor_attr'](block) — a scheme-less target is left as plain text. The
+// URL forbids whitespace, quotes and angle brackets so a link cannot break out
+// of its own attribute. (An https anchor also freezes cleanly now — see NEW 2.)
+var mdLinkRe = regexp.MustCompile(`\[([^\]]+)\]\((https?://[^\s()<>"']+)\)`)
+
+// richText escapes prose AND turns markdown links [text](url) into real anchors
+// (finding 2026-08-12 NEW 4: a doc-tree could state a URL but never link to it).
+// It escapes every non-link segment exactly as esc would, so text with no link
+// is byte-identical to esc(raw) — existing pages don't use the syntax, so the
+// conformance golden-master holds. A reader-clickable anchor also freezes
+// cleanly now (pairs with the NEW 2 gate change). Only http(s) and scheme-less
+// relative URLs are emitted; anything else is escaped as ordinary text.
+func richText(raw string) string {
+	locs := mdLinkRe.FindAllStringSubmatchIndex(raw, -1)
+	if locs == nil {
+		return esc(raw)
+	}
+	var b strings.Builder
+	last := 0
+	for _, m := range locs {
+		b.WriteString(esc(raw[last:m[0]]))
+		text, url := raw[m[2]:m[3]], raw[m[4]:m[5]]
+		b.WriteString(`<a href="` + esc(url) + `">` + esc(text) + `</a>`)
+		last = m[1]
+	}
+	b.WriteString(esc(raw[last:]))
+	return b.String()
+}
+
 func itoa(i int) string { return strconv.Itoa(i) }
 
 // --- node accessors (a node is a *wire.OrderedMap) -------------------------

@@ -150,7 +150,7 @@ type Result struct {
 // frozen/ dir, refuses if any page needs mermaid and render is nil, freezes
 // every page, runs the leak self-check, carries leak-clean siblings, and emits
 // the zip. libDir is stddoc-lib/lib.
-func Run(outDir, title, generated, libDir string, render Renderer) (*Result, error) {
+func Run(outDir, title, generated, libDir string, render Renderer) (res *Result, err error) {
 	if title == "" {
 		title = "doc"
 	}
@@ -166,6 +166,16 @@ func Run(outDir, title, generated, libDir string, render Renderer) (*Result, err
 	if err := os.MkdirAll(frozen, 0o755); err != nil {
 		return nil, err
 	}
+	// A blocked freeze must leave NOTHING complete-looking behind (finding
+	// 2026-08-12 NEW 3): pages are written to frozen/ before the leak self-check,
+	// so any error return past this point would strand a trap artifact that is
+	// indistinguishable on disk from a real deliverable. Remove it on failure so
+	// "blocked" leaves an empty result, not a landmine beside the real file.
+	defer func() {
+		if err != nil {
+			os.RemoveAll(frozen)
+		}
+	}()
 
 	entries, err := os.ReadDir(outDir)
 	if err != nil {

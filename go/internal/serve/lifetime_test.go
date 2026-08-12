@@ -1,6 +1,7 @@
 package serve
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"testing"
@@ -112,22 +113,40 @@ func TestBaselineScanIsNotATouch(t *testing.T) {
 	}
 }
 
-// TestCleanupRemovesPortMarker proves we stop leaving a .port file pointing at
-// a port we no longer hold. A stale marker is how a launcher or an agent ends
-// up handing a human a URL that nothing is listening on — which reads exactly
-// like "the server came up on a bad port".
-func TestCleanupRemovesPortMarker(t *testing.T) {
+// TestCleanupWritesStoppedState proves .port SURVIVES shutdown carrying its
+// stopped state + reason (CARRIED-5, 2026-08-12). The address must outlive the
+// process so a reader arriving after a silent auto-shutdown can recover the port
+// and learn why it stopped — the old behaviour (delete on exit) made "absent"
+// and "never served" indistinguishable and forced a log-grep to find the port.
+func TestCleanupWritesStoppedState(t *testing.T) {
 	fb := t.TempDir()
 	portFile := filepath.Join(fb, ".port")
-	if err := os.WriteFile(portFile, []byte("33333"), 0o644); err != nil {
-		t.Fatal(err)
+
+	s := &server{artifactDir: t.TempDir(), feedbackDir: fb, port: 33497}
+	s.writePortState("serving", "")
+	s.cleanup("untouched for >24 hours")
+
+	b, err := os.ReadFile(portFile)
+	if err != nil {
+		t.Fatalf(".port must survive shutdown (address outlives the process): %v", err)
 	}
-
-	s := &server{artifactDir: t.TempDir(), feedbackDir: fb}
-	s.cleanup()
-
-	if _, err := os.Stat(portFile); !os.IsNotExist(err) {
-		t.Fatal(".port must be removed on shutdown so nobody is left holding a dead URL")
+	var st struct {
+		Port      int    `json:"port"`
+		State     string `json:"state"`
+		Reason    string `json:"reason"`
+		StoppedAt int64  `json:"stopped_at"`
+	}
+	if err := json.Unmarshal(b, &st); err != nil {
+		t.Fatalf(".port must be JSON state: %v (%s)", err, b)
+	}
+	if st.Port != 33497 {
+		t.Errorf("stopped .port must retain the address, got port=%d", st.Port)
+	}
+	if st.State != "stopped" {
+		t.Errorf("state must be \"stopped\", got %q", st.State)
+	}
+	if st.Reason == "" || st.StoppedAt == 0 {
+		t.Errorf("stopped .port must carry a reason and stopped_at, got reason=%q stopped_at=%d", st.Reason, st.StoppedAt)
 	}
 }
 

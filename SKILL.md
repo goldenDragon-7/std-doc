@@ -57,8 +57,12 @@ truth, (2) multi-page + auto-generated nav, (3) auto-rebake on every change,
 
 ```bash
 stddoc publish source.json published            # derive HTML from canonical JSON
+stddoc publish source.json published --overlay ~/prefs.css   # + inline reader-preference CSS (survives freeze)
 stddoc serve   published                         # inject widget + serve + presence heartbeat
 stddoc freeze  published                          # portable server-free snapshot + .zip
+stddoc status  published                          # which comments are open · answered · declined
+stddoc ls                                         # every live std-doc server on this machine, one row each
+stddoc inject  published                          # (re)inject the widget without starting a server
 ```
 
 `publish` only renders the pages — `serve` injects the comment widget. A published
@@ -171,8 +175,11 @@ stddoc serve <dir> --port 33333            # --recursive for subfolders
 
 `--port` is a **preference, not a claim**: the server force-checks it by binding
 (atomic — no lsof race), and if it's busy it **advances to the next free port**,
-prints the real URL, and writes the chosen port to `<dir>/feedback/.port`. So
-concurrent docs never stomp each other on 33333/33334. Pass `--strict-port` to
+prints the real URL, and writes the chosen port to `<dir>/feedback/.port` as a
+small JSON state marker — `{"port":…, "state":"serving", …}` while it's up, and
+`{"state":"stopped", "reason":…, "stopped_at":…}` after it exits, so the address
+outlives the process and a reader can see *why* a doc went dark without grepping
+a log. So concurrent docs never stomp each other on 33333/33334. Pass `--strict-port` to
 fail instead of advancing (when you need an exact port); `--port-scan N` bounds
 how far it climbs (default 50).
 

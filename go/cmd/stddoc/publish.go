@@ -7,6 +7,7 @@ import (
 
 	"stddoc/internal/core"
 	"stddoc/internal/library"
+	"stddoc/internal/serve"
 	"stddoc/internal/wire"
 )
 
@@ -15,7 +16,7 @@ import (
 //
 //	stddoc publish <source.json> <out-dir> [--style <name>] [--plugins <dir>]
 func cmdPublish(args []string) error {
-	var src, out, style, plugins string
+	var src, out, style, plugins, overlay string
 	noLint := false
 	rest := []string{}
 	for i := 0; i < len(args); i++ {
@@ -32,6 +33,12 @@ func cmdPublish(args []string) error {
 			}
 			plugins = args[i+1]
 			i++
+		case "--overlay":
+			if i+1 >= len(args) {
+				return fmt.Errorf("--overlay needs a value")
+			}
+			overlay = args[i+1]
+			i++
 		case "--no-lint":
 			noLint = true
 		default:
@@ -39,7 +46,7 @@ func cmdPublish(args []string) error {
 		}
 	}
 	if len(rest) < 2 {
-		return fmt.Errorf("usage: stddoc publish <source.json> <out-dir> [--style <name>] [--plugins <dir>] [--no-lint]")
+		return fmt.Errorf("usage: stddoc publish <source.json> <out-dir> [--style <name>] [--plugins <dir>] [--overlay <css-file>] [--no-lint]")
 	}
 	src, out = rest[0], rest[1]
 
@@ -48,6 +55,22 @@ func cmdPublish(args []string) error {
 	// set a persistent default style without passing --style every time.
 	if style == "" {
 		style = os.Getenv("STDDOC_STYLE")
+	}
+
+	// Overlay precedence mirrors --style exactly: --overlay flag > STDDOC_OVERLAY_CSS
+	// env > nothing. A reader's CSS preference (e.g. uncapped line length on a wide
+	// display) that a data-derived doc cannot otherwise keep — every publish
+	// regenerates the HTML and wipes anything inlined by hand. Read once here.
+	if overlay == "" {
+		overlay = os.Getenv("STDDOC_OVERLAY_CSS")
+	}
+	var overlayCSS string
+	if overlay != "" {
+		b, oerr := os.ReadFile(overlay)
+		if oerr != nil {
+			return fmt.Errorf("--overlay: %w", oerr)
+		}
+		overlayCSS = string(b)
 	}
 
 	root, err := resolveLibRoot(plugins)
@@ -102,8 +125,25 @@ func cmdPublish(args []string) error {
 		return err
 	}
 	for name, html := range pages {
+		if overlayCSS != "" {
+			html = applyOverlay(html, overlayCSS)
+		}
 		if err := os.WriteFile(filepath.Join(out, name), []byte(html), 0o644); err != nil {
 			return err
+		}
+	}
+
+	// Re-wire the feedback widget if this dir is being served (finding 2026-08-12
+	// NEW 1): serve injects the widget; a plain publish regenerates every page and
+	// would SILENTLY strip commenting from a doc that had it — killing the loop
+	// that is the whole point. The feedback/ dir is the honest marker that serve
+	// wired this dir; when present, re-inject so a rebake preserves the
+	// conversation. A never-served dir has no feedback/ dir, so publish output
+	// stays byte-identical clean and the conformance golden-master holds.
+	if fi, ferr := os.Stat(filepath.Join(out, "feedback")); ferr == nil && fi.IsDir() {
+		fmt.Println("(served dir — re-wiring feedback widget so commenting survives the rebake)")
+		if ierr := serve.Inject(out, false); ierr != nil {
+			return ierr
 		}
 	}
 

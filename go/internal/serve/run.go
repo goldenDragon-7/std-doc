@@ -58,19 +58,17 @@ func Run(dir string, opt Options) error {
 		fmt.Printf("[server] port %d busy → advanced to free port %d\n", start, chosen)
 	}
 
-	// Record the actual port so launchers/tools read the truth.
-	if werr := os.WriteFile(filepath.Join(feedbackDir, ".port"), []byte(fmt.Sprintf("%d", chosen)), 0o644); werr != nil {
-		// Non-fatal, best-effort write.
-		fmt.Printf("[server] warning: could not write .port: %v\n", werr)
-	}
-
 	srv := &server{
 		artifactDir: artifactDir,
 		feedbackDir: feedbackDir,
 		clientDir:   clientDir,
 		note:        opt.Note,
 		port:        chosen,
+		recursive:   opt.Recursive,
 	}
+	// Record the actual port (and that we're serving) so launchers/tools read
+	// the truth; the marker survives shutdown carrying why it stopped (CARRIED-5).
+	srv.writePortState("serving", "")
 	srv.touch()
 	srv.pollContent() // establish the content-mtime baseline before the watchdog runs
 
@@ -114,7 +112,7 @@ func Run(dir string, opt Options) error {
 		fmt.Printf("\n[server] stopping\n")
 		close(done)
 		wg.Wait()
-		srv.cleanup() // don't leave .port pointing at a port we no longer hold
+		srv.cleanup("stopped by signal (Ctrl-C/SIGTERM)")
 		httpSrv.Close()
 	}()
 

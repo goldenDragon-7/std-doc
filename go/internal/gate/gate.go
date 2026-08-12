@@ -31,10 +31,17 @@ import (
 )
 
 var (
-	// reDep: an external/root reference in a src=/href= attribute, or a CSS
-	// url(https://…) — a remote font/image via url() phones home too. The url()
-	// branch requires `//` so prose `url(https:)` is not a leak.
-	reDep     = regexp.MustCompile(`(?i)(?:src|href)\s*=\s*['"](?:/|https?:)|url\(\s*['"]?https?://`)
+	// reDep: a reference that a frozen page FETCHES on open — the exfil surface.
+	// Three shapes, each external (https?:) or root-relative (/):
+	//   • src=…      — any element that loads a resource (script/img/iframe/…).
+	//   • <link|base href=… — a stylesheet/icon/preload/base URL: an ASSET LOAD.
+	//   • url(https://…) — a CSS remote font/image phones home too (needs `//`
+	//     so authored prose `url(https:)` is not a leak).
+	// A reader-clickable <a href="https://…"> is DELIBERATELY not here (finding
+	// 2026-08-12 NEW 2): an anchor navigates only when clicked and fetches
+	// nothing on load, so a document may cite the web and still freeze. Only
+	// href on the loader elements <link>/<base> is a phone-home.
+	reDep = regexp.MustCompile(`(?i)src\s*=\s*['"](?:/|https?:)|<(?:link|base)\b[^>]*?\shref\s*=\s*['"](?:/|https?:)|url\(\s*['"]?https?://`)
 	reMermaid = regexp.MustCompile(`(?i)<div\s+class=['"]mermaid['"]\s*>`)
 	// reScript isolates inline <script>…</script> bodies for the exfil pass.
 	reScript = regexp.MustCompile(`(?is)<script\b[^>]*>(.*?)</script>`)

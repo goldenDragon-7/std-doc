@@ -216,3 +216,34 @@ just confirm you see it."* The reply:
 
 The page reloaded and walked them to the green panel. That reaction — *"oh wow"* —
 is the spec. Build for it.
+
+---
+
+## What is still open? — `stddoc status`
+
+`inbox.jsonl` is an append-only *event log* — it answers "every comment ever
+received", never "what is still open?". That is a *queue* question, and the
+answer is the join of the inbox against `history.json`'s `in_response_to[]`. A
+fresh session that reads only the inbox re-opens comments settled hours ago.
+
+Don't reconstruct that join by hand — ask the tool:
+
+```bash
+stddoc status <dir>     # N comments: X open · Y answered · Z declined, and lists the open ones
+```
+
+A comment is **answered** the moment any history change names it in
+`in_response_to`. It is **declined** — considered, deliberately not acted on —
+when the change also carries `"disposition": "declined"`. Declining *with a
+reason* is a real reply: it keeps a reader trusting the loop instead of reading
+silence as "ignored". The widget shows all three states per comment
+(✓ answered / ✗ declined / ⏳ awaiting).
+
+To decline a comment, append a history change like any other, but say so:
+
+```json
+{ "id": "ch-wontfix", "in_response_to": ["c-…"], "disposition": "declined",
+  "anchor": "ch-wontfix", "page": "x.html",
+  "title": "Considered — keeping the current wording",
+  "description": "why we're not changing it" }
+```

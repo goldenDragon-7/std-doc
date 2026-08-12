@@ -132,6 +132,34 @@ func TestLintCitationBadEvidence(t *testing.T) {
 	}
 }
 
+// CARRIED-4 (2026-08-12): the evidence vocabulary is the canonical five, not
+// three — a five-level grader now matches — and the reject message names the
+// effective set so it is discoverable without failing twice.
+func TestLintCitationCanonicalEvidence(t *testing.T) {
+	for _, lv := range []string{"MEASURED", "CALCULATED", "CITED", "INFERRED", "ESTIMATED", "SPECULATIVE"} {
+		src := `{"title":"T","nodes":[{"slug":"a","title":"A","sections":[{"items":[{"citations":[{"path":"x.go","evidence":"` + lv + `"}]}]}]}]}`
+		if f := findingBy(lintSrc(t, src), "not one of"); f != nil {
+			t.Errorf("canonical evidence %q must be accepted, got: %s", lv, f.Message)
+		}
+	}
+	// the reject message lists the effective set (self-documenting).
+	bad := `{"title":"T","nodes":[{"slug":"a","title":"A","sections":[{"items":[{"citations":[{"path":"x.go","evidence":"BOGUS"}]}]}]}]}`
+	f := findingBy(lintSrc(t, bad), "not one of")
+	if f == nil || !strings.Contains(f.Message, "SPECULATIVE") {
+		t.Fatalf("reject must name the effective set, got: %v", f)
+	}
+}
+
+// CARRIED-4: a doc grading on its own scale declares evidence_levels and lint
+// accepts them (extensible, not locked).
+func TestLintCitationDeclaredEvidence(t *testing.T) {
+	src := `{"title":"T","evidence_levels":["OBSERVED","THEORIZED"],` +
+		`"nodes":[{"slug":"a","title":"A","sections":[{"items":[{"citations":[{"path":"x.go","evidence":"OBSERVED"}]}]}]}]}`
+	if f := findingBy(lintSrc(t, src), "not one of"); f != nil {
+		t.Errorf("doc-declared evidence level must be accepted, got: %s", f.Message)
+	}
+}
+
 func TestLintAsciiTooWide(t *testing.T) {
 	wide := strings.Repeat("x", 90)
 	src := `{"title":"T","nodes":[{"slug":"a","title":"A","diagrams":[{"ascii":"` + wide + `"}]}]}`

@@ -66,6 +66,24 @@ func Run(dir string, opt Options) error {
 		port:        chosen,
 		recursive:   opt.Recursive,
 	}
+	// Decision 2 — serve auto-starts a codraw surface when the doc has a canvas.
+	// A second in-process listener serves the vendored codraw runtime with Go
+	// scene/feedback handlers (no Python), and every canvas mount's src is
+	// rewritten to it. The authored src becomes a fallback that never has to be right.
+	if docHasCanvas(artifactDir, opt.Recursive) {
+		runtimeRoot := filepath.Join(clientDir, "codraw")
+		if info, serr := os.Stat(filepath.Join(runtimeRoot, "index.html")); serr == nil && !info.IsDir() {
+			cs := newCodrawServer(runtimeRoot, feedbackDir)
+			if cport, cerr := cs.start(); cerr == nil {
+				srv.canvasURL = fmt.Sprintf("http://localhost:%d/", cport)
+				fmt.Printf("[server] canvas: co-drawing surface live at %s\n", srv.canvasURL)
+				fmt.Printf("[server] canvas: comments → %s (Monitor it)\n", cs.inboxFile)
+			} else {
+				fmt.Printf("[server] canvas: could not start surface (%v) — mounts fall back to their authored src\n", cerr)
+			}
+		}
+	}
+
 	// Record the actual port (and that we're serving) so launchers/tools read
 	// the truth; the marker survives shutdown carrying why it stopped (CARRIED-5).
 	srv.writePortState("serving", "")

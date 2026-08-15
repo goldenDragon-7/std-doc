@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Co-Draw Studio</title>
+<script>
+  // Fonts + lazy chunks resolve locally (vendored under vendor/excalidraw-assets/)
+  // so a live canvas reaches ZERO third parties and has ZERO 404s in the default
+  // (English) locale. Non-English UIs fall back to English offline (their locale
+  // chunks aren't vendored — a rare case, graceful degrade, no CDN call).
+  window.EXCALIDRAW_ASSET_PATH = "/vendor/";
+</script>
+<!-- Excalidraw 0.17.x UMD injects its own styles at runtime; no CSS link needed. -->
+<style>
+  html, body, #root { height: 100%; margin: 0; }
+  #bar {
+    position: fixed; top: 8px; left: 50%; transform: translateX(-50%);
+    z-index: 50; background: #1e1e2e; color: #eee; padding: 6px 14px;
+    border-radius: 999px; font: 13px -apple-system, system-ui, sans-serif;
+    box-shadow: 0 2px 10px rgba(0,0,0,.25); display: flex; gap: 10px; align-items: center;
+  }
+  #dot { width: 9px; height: 9px; border-radius: 50%; background: #6c6; transition: background .2s; }
+  #dot.remote { background: #fc6; }
+  .who { opacity: .7; }
+  #bar button { background:#3a3a5a; color:#eee; border:0; border-radius:6px; padding:3px 9px; font-size:12px; cursor:pointer; }
+  #bar button:hover { background:#4a4a70; }
+  /* feedback widget — the channel back to the agent (std-doc parity) */
+  #fb {
+    position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%);
+    z-index: 50; background: #1e1e2e; color: #eee; padding: 8px 10px;
+    border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,.25);
+    display: flex; gap: 8px; align-items: center;
+    font: 13px -apple-system, system-ui, sans-serif;
+  }
+  #fb input {
+    width: 360px; background:#2a2a3e; color:#eee; border:1px solid #44445e;
+    border-radius:8px; padding:6px 10px; font-size:13px; outline:none;
+  }
+  #fb input:focus { border-color:#6a6aa0; }
+  #fb button { background:#4a4a70; color:#fff; border:0; border-radius:8px; padding:6px 12px; font-size:13px; cursor:pointer; }
+  #fb button:hover { background:#5a5a88; }
+  #fb .hint { opacity:.55; font-size:11px; }
+</style>
+</head>
+<body>
+<div id="bar">
+  <span id="dot"></span>
+  <span id="status">connecting…</span>
+  <span class="who">· you = <b>human</b> · me = <b>agent</b></span>
+  <button id="exp-svg" title="Export canvas as SVG">SVG</button>
+  <button id="exp-png" title="Export canvas as PNG">PNG</button>
+</div>
+<div id="root"></div>
+<div id="fb">
+  <input id="fb-text" placeholder="Tell the agent something (select shapes first to point at them)…" />
+  <button id="fb-send">Send</button>
+  <span class="hint" id="fb-hint"></span>
+</div>
+
+<script>
+// Load libraries local-first (vendored, offline-proof); fall back to CDN per file.
+(function () {
+  var CDN = {
+    react: "https://unpkg.com/react@18/umd/react.production.min.js",
+    reactDom: "https://unpkg.com/react-dom@18/umd/react-dom.production.min.js",
+    excalidraw: "https://unpkg.com/@excalidraw/excalidraw@0.17.6/dist/excalidraw.production.min.js"
+  };
+  var LOCAL = {
+    react: "/vendor/react.production.min.js",
+    reactDom: "/vendor/react-dom.production.min.js",
+    excalidraw: "/vendor/excalidraw.production.min.js"
+  };
+  function load(localUrl, cdnUrl) {
+    return new Promise(function (res, rej) {
+      var s = document.createElement("script");
+      s.src = localUrl;
+      s.onload = function () { res(localUrl); };
+      s.onerror = function () {
+        var c = document.createElement("script");
+        c.src = cdnUrl;
+        c.onload = function () { res(cdnUrl); };
+        c.onerror = function () { rej(cdnUrl); };
+        document.head.appendChild(c);
+      };
+      document.head.appendChild(s);
+    });
+  }
+  load(LOCAL.react, CDN.react)
+    .then(function () { return load(LOCAL.reactDom, CDN.reactDom); })
+    .then(function () { return load(LOCAL.excalidraw, CDN.excalidraw); })
+    .then(function () { window.__startCoDraw(); })
+    .catch(function () {
+      var el = document.getElementById("status");
+      if (el) el.textContent = "failed to load libraries";
+    });
+})();
+</script>
+<script>
+window.__startCoDraw = function () {
+  var api = null;
+  var lastRev = -1;         // highest rev we have applied or saved
+  var applyingRemote = false;
+  var lastSig = "";         // signature of elements we last saved
+  var saveTimer = null;
+  var svgCanon = {};        // fileId -> original SVG dataURL (baked PNG is display-only;
+                            // save restores the SVG so scene.json canon stays SVG — Covenant I)
+  // Drawing surfaces default to DARK via the Excalidraw `theme:"dark"` prop, which
+  // renders the canvas through an invert filter. So the AUTHORED background stays
+  // light (#ffffff) and the theme inverts it to dark; image elements are counter-
+  // inverted by Excalidraw, so charts keep their true colors. (Setting a dark bg
+  // here would be double-inverted to grey.)
+  var CANVAS_BG = "#ffffff";
+
+  var statusEl = document.getElementById("status");
+  var dotEl = document.getElementById("dot");
+  function status(t, remote) {
+    statusEl.textContent = t;
+    dotEl.className = remote ? "remote" : "";
+  }
+
+  // cheap signature of what matters (position/shape/text), ignores volatile fields
+  function sig(elements) {
+    return JSON.stringify((elements || []).map(function (e) {
+      return [e.id, e.x, e.y, e.width, e.height, e.angle, e.text || "",
+              e.points ? e.points.length : 0, e.isDeleted ? 1 : 0,
+              e.backgroundColor, e.strokeColor];
+    }));
+  }
+
+  // Rasterize an SVG dataURL -> PNG dataURL in-browser. Excalidraw's image
+  // elements can't decode SVG (they render a broken-image placeholder), so we
+  // bake for DISPLAY only. Canon/freeze keep the SVG; the browser bakes the PNG.
+  function rasterizeSvg(svgDataUrl) {
+    return new Promise(function (res, rej) {
+      var img = new Image();
+      img.onload = function () {
+        var scale = 2, W = img.naturalWidth || 900, H = img.naturalHeight || 700;
+        var c = document.createElement("canvas");
+        c.width = W * scale; c.height = H * scale;
+        var ctx = c.getContext("2d");
+        // transparent background: charts composite onto the dark canvas cleanly
+        // (a chart with its own opaque bg — e.g. D2 dark — still paints over it).
+        ctx.drawImage(img, 0, 0, c.width, c.height);
+        try { res(c.toDataURL("image/png")); } catch (e) { rej(e); }
+      };
+      img.onerror = function () { rej("svg failed to load as image"); };
+      img.src = svgDataUrl;
+    });
+  }
+  // Bake every image/svg+xml file in a scene to PNG, in place. Returns a promise
+  // of the (possibly rewritten) files map. Non-SVG files pass through untouched.
+  function bakeSvgFiles(files) {
+    files = files || {};
+    var ids = Object.keys(files).filter(function (k) {
+      return String((files[k] || {}).mimeType || "").indexOf("svg") >= 0;
+    });
+    if (!ids.length) return Promise.resolve(files);
+    return Promise.all(ids.map(function (id) {
+      svgCanon[id] = files[id].dataURL;   // remember the SVG canon before baking
+      return rasterizeSvg(files[id].dataURL).then(function (png) {
+        files[id] = Object.assign({}, files[id], { mimeType: "image/png", dataURL: png });
+      }).catch(function () { delete svgCanon[id]; /* bake failed; keep SVG as-is */ });
+    })).then(function () { return files; });
+  }
+
+  function applyScene(scene) {
+    applyingRemote = true;
+    bakeSvgFiles(scene.files).then(function (files) {   // bake SVG charts -> PNG for display
+      if (files && api.addFiles) { api.addFiles(Object.values(files)); }
+      // Default to dark: a scene may override theme/bg, but an unspecified surface is dark.
+      var appState = Object.assign({ theme: "dark", viewBackgroundColor: CANVAS_BG }, scene.appState || {});
+      api.updateScene({ elements: scene.elements || [], appState: appState });
+      lastRev = scene._rev || 0;
+      lastSig = sig(scene.elements);
+      status("synced (rev " + lastRev + ", from " + (scene._author || "?") + ")", scene._author === "agent");
+      setTimeout(function () { applyingRemote = false; }, 60);
+    });
+  }
+
+  function save() {
+    if (!api) return;
+    var elements = api.getSceneElements();
+    var s = sig(elements);
+    if (s === lastSig) return;           // nothing meaningful changed
+    lastSig = s;
+    status("saving…");
+    // Restore SVG canon: Excalidraw holds the baked PNG for display, but the
+    // scene we persist must keep the original SVG (Covenant I — JSON is canon).
+    var files = api.getFiles ? api.getFiles() : {};
+    Object.keys(svgCanon).forEach(function (id) {
+      if (files[id]) {
+        files[id] = Object.assign({}, files[id], { mimeType: "image/svg+xml", dataURL: svgCanon[id] });
+      }
+    });
+    fetch("/scene", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        type: "excalidraw", version: 2, source: "codraw-studio",
+        elements: elements,
+        appState: (function () {
+          var a = api.getAppState ? api.getAppState() : {};
+          return { theme: a.theme || "dark", viewBackgroundColor: a.viewBackgroundColor || CANVAS_BG };
+        })(),
+        files: files, _author: "human"
+      })
+    }).then(function (r) { return r.json(); }).then(function (j) {
+      lastRev = j._rev;                  // adopt server rev so we don't re-pull our own save
+      status("synced (rev " + lastRev + ", your edit)");
+    }).catch(function () { status("save failed — is the server up?"); });
+  }
+
+  function onChange() {
+    if (applyingRemote) return;
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(save, 700);
+  }
+
+  function poll() {
+    fetch("/scene", { cache: "no-store" })
+      .then(function (r) { return r.json(); })
+      .then(function (scene) {
+        if ((scene._rev || 0) > lastRev) {
+          // a newer revision exists that we didn't create -> apply it
+          applyScene(scene);
+        }
+      })
+      .catch(function () { status("offline — retrying…"); })
+      .finally(function () { setTimeout(poll, 1200); });
+  }
+
+  var App = React.createElement(ExcalidrawLib.Excalidraw, {
+    theme: "dark",   // drawing surfaces default to dark mode
+    excalidrawAPI: function (a) {
+      api = a;
+      fetch("/scene").then(function (r) { return r.json(); })
+        .then(function (scene) { applyScene(scene); poll(); })
+        .catch(function () { status("could not load scene"); poll(); });
+    },
+    onChange: onChange
+  });
+  ReactDOM.createRoot(document.getElementById("root")).render(App);
+
+  // ---- export ----
+  function download(name, blob) {
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  }
+  function exportState() {
+    return {
+      elements: api.getSceneElements(),
+      appState: Object.assign({}, api.getAppState(), { exportBackground: true, exportWithDarkMode: true }),
+      files: api.getFiles ? api.getFiles() : {}
+    };
+  }
+  document.getElementById("exp-svg").onclick = async function () {
+    if (!api) return;
+    status("exporting SVG…");
+    try {
+      var svg = await ExcalidrawLib.exportToSvg(exportState());
+      var str = new XMLSerializer().serializeToString(svg);
+      download("codraw.svg", new Blob([str], { type: "image/svg+xml" }));
+      status("SVG downloaded");
+    } catch (e) { status("SVG export failed"); }
+  };
+  document.getElementById("exp-png").onclick = async function () {
+    if (!api) return;
+    status("exporting PNG…");
+    try {
+      var s = exportState(); s.mimeType = "image/png"; s.quality = 1;
+      var blob = await ExcalidrawLib.exportToBlob(s);
+      download("codraw.png", blob);
+      status("PNG downloaded");
+    } catch (e) { status("PNG export failed"); }
+  };
+
+  // ---- feedback channel (std-doc parity): typed comments -> /feedback -> feedback.jsonl ----
+  var fbText = document.getElementById("fb-text");
+  var fbSend = document.getElementById("fb-send");
+  var fbHint = document.getElementById("fb-hint");
+  function selectedIds() {
+    if (!api) return [];
+    var sel = (api.getAppState() || {}).selectedElementIds || {};
+    return Object.keys(sel).filter(function (k) { return sel[k]; });
+  }
+  function refreshHint() {
+    var ids = selectedIds();
+    fbHint.textContent = ids.length ? ("↳ " + ids.length + " shape" + (ids.length > 1 ? "s" : "") + " selected") : "";
+  }
+  setInterval(refreshHint, 600);
+  function sendFeedback() {
+    var text = (fbText.value || "").trim();
+    if (!text) return;
+    var ids = selectedIds();
+    fbSend.disabled = true;
+    fetch("/feedback", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: text, ref: ids.length ? ids : null, rev: lastRev })
+    }).then(function (r) { return r.json(); }).then(function () {
+      fbText.value = "";
+      fbHint.textContent = "sent ✓";
+      setTimeout(refreshHint, 1200);
+    }).catch(function () {
+      fbHint.textContent = "send failed — is the server up?";
+    }).finally(function () { fbSend.disabled = false; });
+  }
+  fbSend.onclick = sendFeedback;
+  fbText.addEventListener("keydown", function (e) {
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendFeedback(); }
+  });
+};
+</script>
+</body>
+</html>

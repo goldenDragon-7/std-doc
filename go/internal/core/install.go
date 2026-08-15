@@ -55,6 +55,9 @@ func buildRegistry(lib *library.Library) (*registry.Registry, error) {
 	// diagram team's vetted standard, shipped as data in diagram_engines.json).
 	// Purely additive; complements the structured swimlane/tree/statetrack.
 	reg.Register("diagram", diagramRenderWith(loadDiagramEngineTable(lib.DiagramEnginesJSON), lib.FlintSVGs, flintbake.Renderer(lib.Root)), cssMap["diagram"])
+	// canvas — a live co-drawing surface (codraw/Excalidraw) embedded in the page.
+	// Additive; live emits a sandboxed iframe mount, freeze bakes it to inline SVG.
+	reg.Register("canvas", canvasRender, cssMap["canvas"])
 	reg.Register("evidence", func(block *wire.OrderedMap, ctx *template.Ctx) (string, error) {
 		return ctx.RenderEvidence(block), nil
 	}, cssMap["evidence"])

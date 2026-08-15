@@ -243,9 +243,19 @@ func diagramRenderWith(table *diagramEngineTable, flintCatalog map[string]string
 	}
 }
 
-// toInt64 coerces a JSON number (float64) or int-ish value to int64.
+// toInt64 coerces a JSON number to int64. wire.OrderedMap decodes with
+// UseNumber(), so numbers arrive as json.Number — handle that FIRST (float64 is
+// kept for callers that pre-convert). Missing this case silently dropped the
+// diagram `theme` and canvas `height` overrides back to their defaults.
 func toInt64(v any) (int64, bool) {
 	switch n := v.(type) {
+	case json.Number:
+		if i, err := n.Int64(); err == nil {
+			return i, true
+		}
+		if f, err := n.Float64(); err == nil {
+			return int64(f), true
+		}
 	case float64:
 		return int64(n), true
 	case int:

@@ -45,6 +45,14 @@ var (
 	cdnScript = regexp.MustCompile(`(?i)\s*<script[^>]*src=['"][^'"]*(?:mermaid|svg-pan-zoom)[^'"]*['"][^>]*>\s*</script>`)
 	// the first <main ...> opener, for banner insertion.
 	mainOpen = regexp.MustCompile(`(?i)<main[^>]*>`)
+	// a live `canvas` primitive mount (canvasRender output): the canvas-embed div
+	// through its iframe and the div's own close. The iframe is an external ref, so
+	// a live canvas can't survive freeze — it degrades to a static placeholder.
+	canvasBlock = regexp.MustCompile(`(?is)<div class='canvas-embed' data-canvas-src='[^']*'>(.*?)</iframe>\s*</div>`)
+	// the dc-label text inside a canvas block, to carry the caption into the placeholder.
+	canvasLabel = regexp.MustCompile(`(?is)<span class='dc-label'>(.*?)</span>`)
+	// the author-time snapshot (inline SVG) hidden in a canvas block, if present.
+	canvasSnapshot = regexp.MustCompile(`(?is)<div class='canvas-snapshot' hidden>(.*?)</div>`)
 )
 
 // Renderer renders mermaid source to an inline "<svg>…</svg>" element, or an
@@ -92,6 +100,7 @@ func FreezePage(htmlStr, title, generated, libDir string, render Renderer) (stri
 	if err != nil {
 		return "", err
 	}
+	htmlStr = FreezeCanvas(htmlStr)
 	htmlStr = widgetScript.ReplaceAllString(htmlStr, "")
 	htmlStr = widgetLink.ReplaceAllString(htmlStr, "")
 	htmlStr = cdnScript.ReplaceAllString(htmlStr, "")
@@ -127,6 +136,37 @@ func FreezePage(htmlStr, title, generated, libDir string, render Renderer) (stri
 		htmlStr = htmlStr[:loc[1]] + banner + htmlStr[loc[1]:]
 	}
 	return htmlStr, nil
+}
+
+// FreezeCanvas degrades each live `canvas` mount to a static, self-contained
+// placeholder. A canvas is a LIVE co-drawing surface (an iframe to a companion
+// server); it reaches out to nothing once frozen, so — per Covenant IV — it
+// cannot ship live. Rather than fail the whole freeze on the external iframe,
+// the surface becomes an honest static card that names what it was and how to
+// get it back (open in serve mode). This is the conservative snapshot: it needs
+// no bake toolchain. A future upgrade can replace the placeholder body with a
+// real inline-SVG snapshot of the last scene (an author-side, freeze-time bake,
+// mirroring the mermaid path) — the transform seam is the same.
+func FreezeCanvas(htmlStr string) string {
+	return canvasBlock.ReplaceAllStringFunc(htmlStr, func(block string) string {
+		label := "canvas"
+		if m := canvasLabel.FindStringSubmatch(block); m != nil && strings.TrimSpace(m[1]) != "" {
+			label = m[1]
+		}
+		// Decision 1: if the author captured a scene snapshot, inline it — the frozen
+		// canvas shows the REAL drawing (freeze-clean SVG, no toolchain). Otherwise the
+		// honest placeholder. The snapshot was hidden under the live iframe; unhide it.
+		body := "<div class='canvas-frozen-note' style='padding:1.4rem;color:var(--muted,#94a3b8);font-size:.9rem;line-height:1.5'>" +
+			"&#10052;&#65039; This was a <b>live co-drawing surface</b>. A frozen snapshot can't co-draw &mdash; " +
+			"open the doc in serve mode (<code>stddoc serve</code>) to draw together.</div>"
+		if m := canvasSnapshot.FindStringSubmatch(block); m != nil && strings.TrimSpace(m[1]) != "" {
+			body = "<div class='canvas-snapshot'>" + m[1] + "</div>"
+		}
+		return "<div class='canvas-embed canvas-frozen'><div class='dc-top'>" +
+			"<span class='dc-label'>" + label + "</span>" +
+			"<span class='dc-render'>frozen &middot; canvas</span></div>" +
+			body + "</div>"
+	})
 }
 
 func readLib(libDir, name string) (string, error) {

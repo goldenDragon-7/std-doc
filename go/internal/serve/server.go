@@ -87,7 +87,8 @@ type server struct {
 	clientDir   string // <LibRoot>/lib — where /lib/<file> resolves
 	note        string
 	port        int
-	recursive   bool // whether serve recurses subdirs (mirrors Options.Recursive; used by /info page count)
+	recursive   bool   // whether serve recurses subdirs (mirrors Options.Recursive; used by /info page count)
+	canvasURL   string // when set, rewrite every canvas mount's src to this auto-started codraw surface
 
 	lastActivity    atomic.Int64 // unix-nano of the last touch; powers the idle timeout
 	lastContent     atomic.Int64 // unix-nano of the newest mtime seen under artifactDir
@@ -209,6 +210,12 @@ func (s *server) serveFromLib(w http.ResponseWriter, r *http.Request, rel string
 		http.Error(w, "404 not found", http.StatusNotFound)
 		return
 	}
+	// Auto-wire canvases: rewrite each mount's src to the live codraw surface
+	// (Decision 2 — serve auto-starts it). Only touches HTML, only when a surface
+	// is running; the authored src is a fallback that never has to be right.
+	if s.canvasURL != "" && strings.EqualFold(filepath.Ext(target), ".html") {
+		body = rewriteCanvasSrc(body, s.canvasURL)
+	}
 	ct := mime.TypeByExtension(filepath.Ext(target))
 	if ct == "" {
 		ct = "application/octet-stream"
@@ -252,6 +259,12 @@ func (s *server) serveStatic(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, "404 not found", http.StatusNotFound)
 		return
+	}
+	// Auto-wire canvases: rewrite each mount's src to the live codraw surface
+	// (Decision 2 — serve auto-starts it). Only touches HTML, only when a surface
+	// is running; the authored src is a fallback that never has to be right.
+	if s.canvasURL != "" && strings.EqualFold(filepath.Ext(target), ".html") {
+		body = rewriteCanvasSrc(body, s.canvasURL)
 	}
 	ct := mime.TypeByExtension(filepath.Ext(target))
 	if ct == "" {

@@ -1,0 +1,32 @@
+{
+ "title": "Canvas — a co-drawing surface inside a document",
+ "generated_date": "2026-08-14",
+ "palette": {
+  "core": {"label": "Structural", "color": "#22d3ee"}
+ },
+ "nodes": [
+  {
+   "slug": "canvas",
+   "group": "Core",
+   "title": "Draw together, in the document",
+   "tagline": "the living-surface pattern, with a canvas renderer",
+   "status": "LIVE",
+   "sections": [
+    {
+     "name": "One surface, a pen each",
+     "icon": "✏️",
+     "summary": "A `canvas` block embeds a shared Excalidraw board served by the companion codraw runtime. You drag shapes in the browser; the agent authors shapes as code; both poll one scene.json. Point `src` at a running codraw surface (stddoc's setup starts one) and the board mounts inline — prose above and below, unbroken. When there is no src, the primitive degrades loud rather than blanking."
+    },
+    {
+     "name": "Live now, honest when frozen",
+     "icon": "❄️",
+     "summary": "A canvas is LIVE — it reaches out to its server to exist — so it cannot ship in a frozen doc. At freeze the surface becomes a static placeholder that names what it was and how to get it back. Zero external references; Covenant IV holds. See protocol/canvas.md."
+    }
+   ],
+   "blocks": [
+    {"type": "canvas", "src": "http://localhost:8747/", "label": "shared board — point src at a running codraw surface", "height": 480},
+    {"type": "canvas", "label": "no src — the primitive degrades loud instead of blanking"}
+   ]
+  }
+ ]
+}

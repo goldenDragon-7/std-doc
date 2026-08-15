@@ -202,3 +202,56 @@ func TestBakeMermaid_NoMermaidIsNoop(t *testing.T) {
 		t.Error("clean page is returned byte-identical")
 	}
 }
+
+// CAPABILITY: a live `canvas` mount degrades to a static placeholder at freeze —
+// the external iframe (which would fail the Covenant IV gate) is gone, the label
+// is carried, and the honest "open in serve mode" note is present.
+func TestFreezeCanvas_DegradesLiveMountToPlaceholder(t *testing.T) {
+	live := "<div class='canvas-embed' data-canvas-src='http://localhost:8747/'>" +
+		"<div class='dc-top'><span class='dc-label'>architecture sketch</span>" +
+		"<span class='dc-render'>render: canvas</span><button class='fz-btn'>full</button></div>" +
+		"<iframe class='canvas-frame' src='http://localhost:8747/' sandbox='allow-scripts allow-same-origin'></iframe></div>"
+	got := FreezeCanvas(live)
+	if strings.Contains(got, "<iframe") {
+		t.Errorf("frozen canvas must NOT keep the iframe (external ref):\n%s", got)
+	}
+	if strings.Contains(got, "http://localhost") {
+		t.Errorf("frozen canvas must carry no external src:\n%s", got)
+	}
+	if !strings.Contains(got, "canvas-frozen") || !strings.Contains(got, "live co-drawing surface") {
+		t.Errorf("frozen canvas must render the honest placeholder:\n%s", got)
+	}
+	if !strings.Contains(got, "architecture sketch") {
+		t.Errorf("frozen canvas must carry the original label:\n%s", got)
+	}
+}
+
+// CAPABILITY: a page with no canvas is returned untouched (no false matches).
+func TestFreezeCanvas_NoCanvasIsNoop(t *testing.T) {
+	if got := FreezeCanvas(cleanPage); got != cleanPage {
+		t.Error("clean page must pass through FreezeCanvas byte-identical")
+	}
+}
+
+// CAPABILITY (Decision 1): when the author captured a scene snapshot, freeze
+// inlines the REAL drawing instead of the placeholder — freeze-clean, no iframe,
+// no "was live" note.
+func TestFreezeCanvas_InlinesAuthorSnapshot(t *testing.T) {
+	live := "<div class='canvas-embed' data-canvas-src='http://localhost:8747/'>" +
+		"<div class='dc-top'><span class='dc-label'>sketch</span></div>" +
+		"<div class='canvas-snapshot' hidden><svg id='the-drawing'><rect/></svg></div>" +
+		"<iframe class='canvas-frame' src='http://localhost:8747/'></iframe></div>"
+	got := FreezeCanvas(live)
+	if strings.Contains(got, "<iframe") || strings.Contains(got, "http://localhost") {
+		t.Errorf("snapshot freeze must drop the live iframe/external ref:\n%s", got)
+	}
+	if !strings.Contains(got, "<svg id='the-drawing'>") {
+		t.Errorf("frozen canvas must inline the captured snapshot SVG:\n%s", got)
+	}
+	if strings.Contains(got, "can't co-draw") {
+		t.Errorf("with a snapshot, the placeholder note must NOT appear:\n%s", got)
+	}
+	if strings.Contains(got, "hidden>") {
+		t.Errorf("the snapshot must be unhidden in the frozen copy:\n%s", got)
+	}
+}

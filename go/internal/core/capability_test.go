@@ -149,3 +149,58 @@ func TestCapability_DocsDoNotLie(t *testing.T) {
 		}
 	}
 }
+
+// CAPABILITY: the codraw canvas runtime is fully self-contained offline — a live
+// canvas must reach ZERO third parties. Guards the 404-class regression found on
+// 2026-08-14: EXCALIDRAW_ASSET_PATH points local, but the fonts and the lazy
+// vendor-<hash>.js chunk it code-splits weren't vendored, so they silently 404'd.
+// This MEASURES that the asset path is local AND every asset it needs is present.
+func TestCapability_CodrawVendoredOffline(t *testing.T) {
+	codraw := filepath.Join(repoRoot(t), "go", "stddoc-lib", "lib", "codraw")
+
+	// The runtime must resolve assets LOCALLY, never a third-party CDN.
+	idx, err := os.ReadFile(filepath.Join(codraw, "index.html"))
+	if err != nil {
+		t.Fatalf("read codraw/index.html: %v", err)
+	}
+	if !strings.Contains(string(idx), `EXCALIDRAW_ASSET_PATH = "/vendor/"`) {
+		t.Error("codraw must set EXCALIDRAW_ASSET_PATH to a local /vendor/ path (not a CDN)")
+	}
+
+	// The three UMD bundles the loader prefers local-first.
+	for _, f := range []string{
+		"vendor/react.production.min.js",
+		"vendor/react-dom.production.min.js",
+		"vendor/excalidraw.production.min.js",
+	} {
+		if _, err := os.Stat(filepath.Join(codraw, f)); err != nil {
+			t.Errorf("missing vendored bundle %s — live canvas would fall back to the CDN: %v", f, err)
+		}
+	}
+
+	// The runtime assets Excalidraw loads from EXCALIDRAW_ASSET_PATH: the 6 fonts
+	// and at least one code-split vendor-*.js chunk (else a silent 404 offline).
+	assets := filepath.Join(codraw, "vendor", "excalidraw-assets")
+	for _, font := range []string{
+		"Virgil.woff2", "Cascadia.woff2",
+		"Assistant-Regular.woff2", "Assistant-Medium.woff2",
+		"Assistant-SemiBold.woff2", "Assistant-Bold.woff2",
+	} {
+		if _, err := os.Stat(filepath.Join(assets, font)); err != nil {
+			t.Errorf("missing vendored font %s — hand-drawn text would 404 offline: %v", font, err)
+		}
+	}
+	entries, err := os.ReadDir(assets)
+	if err != nil {
+		t.Fatalf("read excalidraw-assets: %v", err)
+	}
+	hasChunk := false
+	for _, e := range entries {
+		if strings.HasPrefix(e.Name(), "vendor-") && strings.HasSuffix(e.Name(), ".js") {
+			hasChunk = true
+		}
+	}
+	if !hasChunk {
+		t.Error("no vendored vendor-*.js chunk — Excalidraw lazy-loads it from the asset path and it would 404 offline")
+	}
+}

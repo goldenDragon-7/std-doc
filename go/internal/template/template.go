@@ -49,6 +49,10 @@ type Ctx struct {
 	Anchor func(slug string, parts ...int) (string, string)
 	// RenderEvidence renders the additive evidence drill-down for a node/item.
 	RenderEvidence func(block *wire.OrderedMap) string
+	// RichText renders a prose field: escapes it AND turns newlines into
+	// paragraphs/<br> and "- "/"1. " runs into lists (the `rich` op). Falls back
+	// to Esc when nil, so a plain single-line field is byte-identical either way.
+	RichText func(string) string
 	// Doc is the whole source doc-tree (compose/evidence may consult it).
 	Doc any
 }
@@ -314,6 +318,22 @@ func renderNode(node any, env []Frame, ctx *Ctx) (string, error) {
 			}
 		}
 		return ctx.Esc(v), nil
+	}
+
+	// rich: like esc, but prose newlines/lists become paragraphs/<br>/<ul>. A
+	// single-line field is byte-identical to esc (RichText's fast path), so
+	// switching a template field from esc→rich never disturbs the golden-master.
+	if path, ok := m["rich"]; ok {
+		v := resolve(asStr(path), env)
+		if v == nil {
+			if def, ok := m["default"]; ok {
+				v = def
+			}
+		}
+		if ctx.RichText == nil {
+			return ctx.Esc(v), nil
+		}
+		return ctx.RichText(wire.PyStr(v)), nil
 	}
 
 	if path, ok := m["anchor"]; ok {

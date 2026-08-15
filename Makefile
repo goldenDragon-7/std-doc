@@ -1,4 +1,4 @@
-# std-doc release pipeline — one signed binary, given free.
+# std-doc release pipeline — one single binary, given free.
 #
 # The `stddoc` binary loads its rendering library from `stddoc-lib/` *beside the
 # executable* at runtime (see go/cmd/stddoc/publish.go:resolveLibRoot). So every

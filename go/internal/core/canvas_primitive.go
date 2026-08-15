@@ -17,14 +17,14 @@ import (
 //
 // THE TWO MODES (Covenant IV — freeze means frozen):
 //   - serve (live):   emit an <iframe> mount to the codraw surface. The iframe is
-//                     sandboxed so Excalidraw's React/globals/CSS cannot collide
-//                     with the page's palette tokens.
+//     sandboxed so Excalidraw's React/globals/CSS cannot collide
+//     with the page's palette tokens.
 //   - freeze (snap):  a live canvas reaches out to a server, so it CANNOT ship in
-//                     a frozen doc as-is. The freeze gate bakes it to an inline
-//                     SVG snapshot of the last scene (Slice 3). Until that lands,
-//                     freezing a canvas doc fails LOUD at the security gate (an
-//                     iframe src is an external reach) rather than shipping broken
-//                     — which is the honest behavior.
+//     a frozen doc as-is. The freeze gate bakes it to an inline
+//     SVG snapshot of the last scene (Slice 3). Until that lands,
+//     freezing a canvas doc fails LOUD at the security gate (an
+//     iframe src is an external reach) rather than shipping broken
+//     — which is the honest behavior.
 //
 // Charts as citizens: our library renders any diagram/chart to SVG; a chart is
 // delivered onto the board as an Excalidraw image element whose file is the SVG,
@@ -34,19 +34,41 @@ import (
 // Node schema:
 //
 //	{ "type":   "canvas",
-//	  "src":    "http://localhost:8747/", // the codraw mount URL (required for live)
+//	  "id":     "arch",                   // optional board id (v2 per-board boards); auto-derived when absent
+//	  "src":    "http://localhost:8747/", // optional EXPLICIT mount URL override; normally omitted
 //	  "label":  "architecture sketch",    // optional caption chip
 //	  "height": 520 }                      // optional iframe height in px (default 520)
-
+//
+// v2 — per-canvas boards (prd/canvas-primitive/v2-per-canvas-boards.md, Seam 1):
+// v1 served one shared board per doc — every canvas block mounted the SAME
+// codraw scene. v2 gives each block its own board: renderNode assigns every
+// canvas block a stable `id` before this function ever runs (see
+// assignCanvasBoardIDs in blocks.go — zero-config still works, no author
+// action required), and this function emits BOTH `data-canvas-board='<id>'`
+// (the routing key serve/codraw.go keys per-board scene/inbox files on) and,
+// when the author left `src` unset (the normal case), a `codraw:<id>`
+// PLACEHOLDER as the iframe src. serve rewrites each mount's placeholder to
+// its own `http://localhost:PORT/board/<id>/` at request time (per-mount, not
+// the old single global rewrite) — see rewriteCanvasBoards in codraw.go. An
+// explicit authored `src` is still honored verbatim as an override/fallback,
+// exactly as v1 did.
 const canvasDefaultHeight = 520
 
 // canvasRender emits the live iframe mount for a co-drawing surface. Purely
 // additive — no existing page uses `canvas`, so conformance is untouched.
 func canvasRender(block *wire.OrderedMap, ctx *template.Ctx) (string, error) {
 	label := strings.TrimSpace(getOr(block, "label", ""))
+	id := strings.TrimSpace(str(block, "id"))
 	src := strings.TrimSpace(str(block, "src"))
 	if src == "" {
-		return canvasDegraded(label, "no `src` — point it at a running codraw surface (e.g. http://localhost:8747/)"), nil
+		if id == "" {
+			// Should not happen for a doc-tree render (assignCanvasBoardIDs always
+			// sets one first) — but this function is also reachable standalone
+			// (tests, layout:page composition), so degrade loudly rather than
+			// mount a boardless placeholder no server will ever route.
+			return canvasDegraded(label, "no `src` and no board `id` — point it at a running codraw surface (e.g. http://localhost:8747/) or let the doc-tree renderer assign a board id"), nil
+		}
+		src = "codraw:" + id
 	}
 
 	height := canvasDefaultHeight
@@ -70,10 +92,19 @@ func canvasRender(block *wire.OrderedMap, ctx *template.Ctx) (string, error) {
 		snapshot = "<div class='canvas-snapshot' hidden>" + s + "</div>"
 	}
 
-	// sandbox: scripts + same-origin so Excalidraw runs and the page can talk to
-	// its own server; forms/popups off. The data-canvas-src marker is the anchor
-	// the freeze gate keys on to bake this iframe to the snapshot (or a placeholder).
-	return "<div class='canvas-embed' data-canvas-src='" + wire.HTMLEscape(src) + "'>" +
+	// board id attribute goes FIRST, before class — freeze.go's canvasBlock
+	// regex matches the literal substring "class='canvas-embed'
+	// data-canvas-src='...'>" with nothing in between, so any new attribute
+	// must land outside that span (freeze needs no change — PRD "what does
+	// NOT change"). sandbox: scripts + same-origin so Excalidraw runs and the
+	// page can talk to its own server; forms/popups off. The data-canvas-src
+	// marker is the anchor the freeze gate keys on to bake this iframe to the
+	// snapshot (or a placeholder).
+	boardAttr := ""
+	if id != "" {
+		boardAttr = "data-canvas-board='" + wire.HTMLEscape(id) + "' "
+	}
+	return "<div " + boardAttr + "class='canvas-embed' data-canvas-src='" + wire.HTMLEscape(src) + "'>" +
 		"<div class='dc-top'>" + cap +
 		"<span class='dc-render' title='live co-drawing surface — freezes to an inline SVG snapshot'>render: canvas</span>" +
 		"<button class='fz-btn'>&#x26F6; fullscreen</button></div>" + snapshot +

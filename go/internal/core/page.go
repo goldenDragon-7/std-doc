@@ -24,6 +24,24 @@ func head(title string, doc *wire.OrderedMap, current string, isIndex bool, styl
 		shell = "shell pager-shell"
 		nav = ""
 		shellStyle = pagerShellStyle(doc, current, isIndex)
+	} else {
+		// Layout MODES (see layout.go). Each mode's CSS rides ONLY here, so a doc
+		// with no `layout` field is byte-identical to today's left-nav shell
+		// (conformance holds). Unknown/absent → left-nav (this switch is a no-op).
+		switch layoutMode(doc) {
+		case "no-nav":
+			css += "\n" + nonavCSS
+			shell = "shell nonav-shell"
+			nav = ""
+		case "top-nav":
+			css += "\n" + topnavCSS
+			shell = "shell topnav-shell"
+			nav = renderTopNav(doc, current, isIndex)
+		case "hero":
+			css += "\n" + heroCSS
+			shell = "shell hero-shell"
+			nav = ""
+		}
 	}
 	return "<!doctype html><html><head><meta charset='utf-8'>" +
 		"<meta name='viewport' content='width=device-width,initial-scale=1'>" +
@@ -43,6 +61,7 @@ func makeCtx(doc *wire.OrderedMap, reg *registry.Registry, pal *palette.Palette)
 		Registry:       reg,
 		Anchor:         anchor,
 		RenderEvidence: renderEvidence,
+		RichText:       richText,
 		Doc:            doc,
 	}
 }
@@ -80,6 +99,7 @@ func renderNode(n, doc *wire.OrderedMap, reg *registry.Registry, styleRoot strin
 		h.WriteString("<style>" + pcss + "</style>")
 	}
 	nblocks := adaptNode(n)
+	assignCanvasBoardIDs(nblocks, str(n, "slug"))
 	if icss := collectBlockCSS(nblocks, reg); icss != "" {
 		h.WriteString("<style>" + icss + "</style>")
 	}
@@ -166,6 +186,7 @@ func RenderStandalone(doc *wire.OrderedMap, lib *library.Library) (string, strin
 		Anchor:         anchor,
 		RenderEvidence: renderEvidence,
 		AnchorAttr:     anchorAttr,
+		RichText:       richText,
 		Doc:            doc,
 	}
 	title := getOr(doc, "title", "doc")
@@ -175,7 +196,14 @@ func RenderStandalone(doc *wire.OrderedMap, lib *library.Library) (string, strin
 		extra = str(doc, "page_css")
 	}
 	var body []string
-	for _, bv := range list(doc, "blocks") {
+	pageBlocks := list(doc, "blocks")
+	var pageStream []streamBlock
+	for _, bv := range pageBlocks {
+		b, _ := omap(bv)
+		pageStream = append(pageStream, streamBlock{Type: str(b, "type"), Data: b})
+	}
+	assignCanvasBoardIDs(pageStream, getOr(doc, "slug", "page"))
+	for _, bv := range pageBlocks {
 		b, _ := omap(bv)
 		s, _ := reg.Render(str(b, "type"), b, ctx)
 		body = append(body, s)

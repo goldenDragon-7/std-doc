@@ -1,0 +1,41 @@
+{
+  "title": "Starter — hero",
+  "generated_date": "2026-08-15",
+  "layout": "hero",
+  "groups": ["Guide"],
+  "root": {
+    "summary": "A full-bleed magazine header, no rail — for a doc that wants to open with a statement, not a table of contents."
+  },
+  "nodes": [
+    {
+      "slug": "welcome",
+      "group": "Guide",
+      "title": "This is hero",
+      "status": "LIVE",
+      "tagline": "layout:\"hero\" — a full-bleed gradient title, no fixed left rail.",
+      "blocks": [
+        {
+          "type": "prose",
+          "lede": true,
+          "text": "Set \"layout\": \"hero\" and the doc opens with a large gradient-text heading and a wide, centered column below it — good for a proposal, an announcement, or anything that wants to lead with a statement instead of a nav tree."
+        },
+        {
+          "type": "prose",
+          "text": "Breadcrumb and search still work here, exactly as they do in the classic left-nav shell and in no-nav — they're decoupled from the sidebar, not tied to it."
+        }
+      ]
+    },
+    {
+      "slug": "next-page",
+      "group": "Guide",
+      "title": "A second page",
+      "status": "LIVE",
+      "blocks": [
+        {
+          "type": "prose",
+          "text": "Every layout mode shares the same node/blocks/primitives underneath — only the shell CSS changes. Copy this file's \"layout\" field into your own source.json to start a hero doc."
+        }
+      ]
+    }
+  ]
+}

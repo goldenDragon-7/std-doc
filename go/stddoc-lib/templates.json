@@ -461,7 +461,7 @@
       "then": [
         "<div class='callout-body'>",
         {
-          "esc": "body"
+          "rich": "body"
         },
         "</div>"
       ]
@@ -1615,5 +1615,456 @@
       ]
     },
     "</ol></div>"
+  ],
+  "tabs": [
+    "<div class='tabs'>",
+    {
+      "each": "tabs",
+      "body": [
+        "<input class='tabs-input' type='radio' name='tg-",
+        {
+          "esc": "@root.id",
+          "default": "tabs"
+        },
+        "' id='tg-",
+        {
+          "esc": "@root.id",
+          "default": "tabs"
+        },
+        "-",
+        {
+          "esc": "@index"
+        },
+        "'",
+        {
+          "if": {
+            "truthy": "@first"
+          },
+          "then": [
+            " checked"
+          ]
+        },
+        ">",
+        "<label class='tabs-label' for='tg-",
+        {
+          "esc": "@root.id",
+          "default": "tabs"
+        },
+        "-",
+        {
+          "esc": "@index"
+        },
+        "'>",
+        {
+          "esc": "label"
+        },
+        "</label>"
+      ]
+    },
+    "<div class='tabs-panels'>",
+    {
+      "each": "tabs",
+      "body": [
+        "<div class='tabs-panel'>",
+        {
+          "compose": "content"
+        },
+        "</div>"
+      ]
+    },
+    "</div>",
+    "</div>"
+  ],
+  "split": [
+    "<div class='split",
+    {
+      "if": {
+        "truthy": "seam"
+      },
+      "then": [
+        " seam"
+      ]
+    },
+    "'>",
+    "<div class='split-col split-left'>",
+    {
+      "compose": "left.content"
+    },
+    "</div>",
+    "<div class='split-col split-right'>",
+    {
+      "compose": "right.content"
+    },
+    "</div>",
+    "</div>"
+  ],
+  "statusboard": [
+    "<div class='statusboard'>",
+    {
+      "each": "groups",
+      "body": [
+        "<div class='sb-group'>",
+        {
+          "if": {
+            "truthy": "label"
+          },
+          "then": [
+            "<div class='sb-group-label'>",
+            {
+              "esc": "label"
+            },
+            "</div>"
+          ]
+        },
+        "<table class='sb-table'><thead><tr><th class='sb-corner'></th>",
+        {
+          "each": "@root.columns",
+          "body": [
+            "<th>",
+            {
+              "esc": "@item"
+            },
+            "</th>"
+          ]
+        },
+        "</tr></thead><tbody>",
+        {
+          "each": "rows",
+          "body": [
+            "<tr><th class='sb-row-label'>",
+            {
+              "esc": "label"
+            },
+            "</th>",
+            {
+              "each": "cells",
+              "body": [
+                "<td class='sb-cell'><span class='s ",
+                {
+                  "lookup": "status",
+                  "upper": true,
+                  "table": {
+                    "LIVE": "b-live",
+                    "PARTIAL": "b-partial",
+                    "WIP": "b-wip",
+                    "DEBT": "b-debt"
+                  },
+                  "default": "b-wip"
+                },
+                "'>",
+                {
+                  "esc": "status",
+                  "default": ""
+                },
+                "</span></td>"
+              ]
+            },
+            "</tr>"
+          ]
+        },
+        "</tbody></table>",
+        "</div>"
+      ]
+    },
+    "</div>"
+  ],
+  "pipeline": [
+    "<div class='pipeline'>",
+    {
+      "each": "stages",
+      "body": [
+        {
+          "if": {
+            "not": {
+              "truthy": "@first"
+            }
+          },
+          "then": [
+            "<span class='pl-arrow'>&rarr;</span>"
+          ]
+        },
+        "<div class='pl-stage pl-",
+        {
+          "esc": "state",
+          "default": "pending"
+        },
+        "'>",
+        "<div class='pl-label'>",
+        {
+          "esc": "label"
+        },
+        "</div>",
+        {
+          "if": {
+            "truthy": "note"
+          },
+          "then": [
+            "<div class='pl-note'>",
+            {
+              "esc": "note"
+            },
+            "</div>"
+          ]
+        },
+        "</div>"
+      ]
+    },
+    "</div>"
+  ],
+  "rolecard": [
+    "<div class='rolecard'",
+    {
+      "if": {
+        "truthy": "accent"
+      },
+      "then": [
+        " style='--c:",
+        {
+          "palette_var": "accent"
+        },
+        "'"
+      ]
+    },
+    ">",
+    "<div class='rc-head'>",
+    "<div class='rc-name'>",
+    {
+      "esc": "name"
+    },
+    "</div>",
+    {
+      "if": {
+        "truthy": "role"
+      },
+      "then": [
+        "<div class='rc-role'>",
+        {
+          "esc": "role"
+        },
+        "</div>"
+      ]
+    },
+    "</div>",
+    {
+      "if": {
+        "truthy": "summary"
+      },
+      "then": [
+        "<div class='rc-summary'>",
+        {
+          "esc": "summary"
+        },
+        "</div>"
+      ]
+    },
+    {
+      "if": {
+        "truthy": "pills"
+      },
+      "then": [
+        "<div class='rc-pills'>",
+        {
+          "each": "pills",
+          "body": [
+            "<span class='rc-pill'>",
+            {
+              "esc": "@item"
+            },
+            "</span>"
+          ]
+        },
+        "</div>"
+      ]
+    },
+    "</div>"
+  ],
+  "cardcluster": [
+    "<div class='cardcluster'>",
+    {
+      "each": "groups",
+      "body": [
+        "<div class='cc-group'>",
+        {
+          "if": {
+            "truthy": "label"
+          },
+          "then": [
+            "<div class='cc-label'>",
+            {
+              "esc": "label"
+            },
+            "</div>"
+          ]
+        },
+        "<div class='cc-grid'>",
+        {
+          "each": "cards",
+          "body": [
+            {
+              "if": {
+                "truthy": "ent"
+              },
+              "then": [
+                "<div class='cc-card accent' style='--c:",
+                {
+                  "palette_var": "ent"
+                },
+                "'>"
+              ],
+              "else": [
+                "<div class='cc-card'>"
+              ]
+            },
+            {
+              "if": {
+                "truthy": "eyebrow"
+              },
+              "then": [
+                "<div class='cc-eyebrow'>",
+                {
+                  "esc": "eyebrow"
+                },
+                "</div>"
+              ]
+            },
+            "<div class='cc-title'>",
+            {
+              "esc": "title"
+            },
+            "</div>",
+            "<div class='cc-body'>",
+            {
+              "esc": "body"
+            },
+            "</div></div>"
+          ]
+        },
+        "</div>",
+        "</div>"
+      ]
+    },
+    "</div>"
+  ],
+  "decision": [
+    "<div class='decision'>",
+    "<div class='dec-q'>",
+    {
+      "esc": "question"
+    },
+    "</div>",
+    "<div class='dec-chosen'><span class='dec-badge'>DECIDED</span> ",
+    {
+      "esc": "chosen"
+    },
+    "</div>",
+    {
+      "if": {
+        "truthy": "rationale"
+      },
+      "then": [
+        "<div class='dec-rationale'>",
+        {
+          "esc": "rationale"
+        },
+        "</div>"
+      ]
+    },
+    {
+      "if": {
+        "truthy": "alternatives"
+      },
+      "then": [
+        "<div class='dec-alts'>",
+        {
+          "each": "alternatives",
+          "body": [
+            "<div class='dec-alt'><span class='dec-alt-label'>",
+            {
+              "esc": "label"
+            },
+            "</span>",
+            {
+              "if": {
+                "truthy": "reason"
+              },
+              "then": [
+                " <span class='dec-alt-reason'>",
+                {
+                  "esc": "reason"
+                },
+                "</span>"
+              ]
+            },
+            "</div>"
+          ]
+        },
+        "</div>"
+      ]
+    },
+    "</div>"
+  ],
+  "pill": [
+    "<span class='pill",
+    {
+      "if": {
+        "truthy": "status"
+      },
+      "then": [
+        " ",
+        {
+          "lookup": "status",
+          "upper": true,
+          "table": {
+            "LIVE": "b-live",
+            "PARTIAL": "b-partial",
+            "WIP": "b-wip",
+            "DEBT": "b-debt"
+          },
+          "default": "b-wip"
+        }
+      ]
+    },
+    {
+      "if": {
+        "truthy": "ent"
+      },
+      "then": [
+        " pill-ent"
+      ]
+    },
+    "'",
+    {
+      "if": {
+        "truthy": "ent"
+      },
+      "then": [
+        " style='--c:",
+        {
+          "palette_var": "ent"
+        },
+        "'"
+      ]
+    },
+    ">",
+    {
+      "esc": "label",
+      "default": ""
+    },
+    "</span>"
+  ],
+  "showcase": [
+    "<div class='showcase'>",
+    "<div class='showcase-label'>",
+    {
+      "esc": "label",
+      "default": "LIVE RENDER"
+    },
+    "</div>",
+    "<div class='showcase-body'>",
+    {
+      "compose": "content"
+    },
+    "</div>",
+    "</div>"
   ]
 }

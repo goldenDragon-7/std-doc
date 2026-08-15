@@ -193,7 +193,7 @@ window.__startCoDraw = function () {
         files[id] = Object.assign({}, files[id], { mimeType: "image/svg+xml", dataURL: svgCanon[id] });
       }
     });
-    fetch("/scene", {
+    fetch("./scene", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -218,7 +218,7 @@ window.__startCoDraw = function () {
   }
 
   function poll() {
-    fetch("/scene", { cache: "no-store" })
+    fetch("./scene", { cache: "no-store" })
       .then(function (r) { return r.json(); })
       .then(function (scene) {
         if ((scene._rev || 0) > lastRev) {
@@ -234,7 +234,7 @@ window.__startCoDraw = function () {
     theme: "dark",   // drawing surfaces default to dark mode
     excalidrawAPI: function (a) {
       api = a;
-      fetch("/scene").then(function (r) { return r.json(); })
+      fetch("./scene").then(function (r) { return r.json(); })
         .then(function (scene) { applyScene(scene); poll(); })
         .catch(function () { status("could not load scene"); poll(); });
     },
@@ -297,7 +297,7 @@ window.__startCoDraw = function () {
     if (!text) return;
     var ids = selectedIds();
     fbSend.disabled = true;
-    fetch("/feedback", {
+    fetch("./feedback", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ text: text, ref: ids.length ? ids : null, rev: lastRev })

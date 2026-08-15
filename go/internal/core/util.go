@@ -30,7 +30,79 @@ var mdLinkRe = regexp.MustCompile(`\[([^\]]+)\]\((https?://[^\s()<>"']+)\)`)
 // conformance golden-master holds. A reader-clickable anchor also freezes
 // cleanly now (pairs with the NEW 2 gate change). Only http(s) and scheme-less
 // relative URLs are emitted; anything else is escaped as ordinary text.
+// olRe matches an ordered-list marker at the start of a (trimmed) line: "1. ".
+var olRe = regexp.MustCompile(`^\d+\.\s+`)
+
+// blankLineRe splits prose into blocks on a blank line (a run of newlines with
+// only whitespace between them).
+var blankLineRe = regexp.MustCompile(`\n[ \t]*\n`)
+
+// richText renders prose. Single-line input with no block markers is
+// byte-IDENTICAL to the old link-only richText (so the conformance golden-master
+// holds — no existing page uses newlines in a prose field). Multi-line input
+// gains real structure: blank line → paragraph, single newline → <br>, and a run
+// of "- "/"* " or "1. " lines → a <ul>/<ol>. This is the fix for prose that
+// "spewed" as one wall of text (a great header then an unbroken run-on). Inline
+// escaping + markdown links are applied within every segment via richInline.
 func richText(raw string) string {
+	if !strings.Contains(raw, "\n") {
+		return richInline(raw) // fast path — identical to the historical output
+	}
+	raw = strings.ReplaceAll(raw, "\r\n", "\n")
+	var b strings.Builder
+	for _, blk := range blankLineRe.Split(raw, -1) {
+		var lines []string
+		for _, ln := range strings.Split(blk, "\n") {
+			if strings.TrimSpace(ln) != "" {
+				lines = append(lines, strings.TrimSpace(ln))
+			}
+		}
+		if len(lines) == 0 {
+			continue
+		}
+		allUL, allOL := true, true
+		for _, ln := range lines {
+			if !(strings.HasPrefix(ln, "- ") || strings.HasPrefix(ln, "* ")) {
+				allUL = false
+			}
+			if !olRe.MatchString(ln) {
+				allOL = false
+			}
+		}
+		switch {
+		case allUL:
+			b.WriteString("<ul>")
+			for _, ln := range lines {
+				b.WriteString("<li>" + richInline(strings.TrimSpace(ln[2:])) + "</li>")
+			}
+			b.WriteString("</ul>")
+		case allOL:
+			b.WriteString("<ol>")
+			for _, ln := range lines {
+				b.WriteString("<li>" + richInline(olRe.ReplaceAllString(ln, "")) + "</li>")
+			}
+			b.WriteString("</ol>")
+		default:
+			b.WriteString("<p>")
+			for i, ln := range lines {
+				if i > 0 {
+					b.WriteString("<br>")
+				}
+				b.WriteString(richInline(ln))
+			}
+			b.WriteString("</p>")
+		}
+	}
+	return b.String()
+}
+
+// richInline escapes one line of prose and turns markdown links [text](url) into
+// real anchors (finding 2026-08-12 NEW 4: a doc-tree could state a URL but never
+// link to it). Every non-link segment is escaped exactly as esc would, so text
+// with no link is byte-identical to esc(raw) — the conformance golden-master
+// holds. Only http(s) URLs are emitted; anything else is escaped as ordinary
+// text (a reader-clickable https anchor also freezes cleanly — see NEW 2 gate).
+func richInline(raw string) string {
 	locs := mdLinkRe.FindAllStringSubmatchIndex(raw, -1)
 	if locs == nil {
 		return esc(raw)

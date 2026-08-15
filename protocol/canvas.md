@@ -18,18 +18,32 @@ they comment on prose, but with a pen each.
 
 ```json
 { "type":     "canvas",
-  "src":      "http://localhost:8747/", // codraw mount URL (optional — serve auto-wires it)
+  "id":       "arch",                   // optional board id (v2 per-canvas boards); auto-derived when absent
+  "src":      "http://localhost:8747/", // codraw mount URL (optional — serve auto-wires it per-board)
   "label":    "architecture sketch",    // optional caption chip
   "height":   520,                       // optional iframe height in px (default 520)
   "snapshot": "<svg …>…</svg>" }         // optional inline SVG of the finalized drawing (freeze uses it)
 ```
 
 `src` is optional in practice: `stddoc serve` auto-starts a codraw surface and
-rewrites `src` to it (Decision 2), so the authored value is only a fallback.
+rewrites every mount's `src` to it (Decision 2), so the authored value is only a
+fallback. **`id` is optional too** — the doc-tree renderer always assigns one
+(`<slug>-canvas-<ordinal>` when absent), so zero-config still works even with
+several canvas blocks on one page.
 
-A canvas with no `src` **degrades loud** — a labeled skip card, never a silent
-blank (Covenant VI). `render: canvas` is a generated chip, like `diagram`'s
-engine chip, so the surface always names itself from the render decision.
+**v2 — per-canvas boards** (`prd/canvas-primitive/v2-per-canvas-boards.md`): each
+canvas block gets its OWN board — its own `scene.json` and its own feedback inbox
+— routed by `id`, not shared with every other canvas block in the doc (that was
+v1's constraint: one board, period). One codraw *server* still serves the whole
+doc — path-routed by board id, not one listener per board — so a document stays a
+document, not a fleet of servers (Covenant V).
+
+A canvas with neither an `id` nor a `src` **degrades loud** — a labeled skip card,
+never a silent blank (Covenant VI). In practice this only happens outside the
+doc-tree renderer (a hand-authored fixture calling the primitive directly); every
+doc-tree canvas gets an `id`. `render: canvas` is a generated chip, like
+`diagram`'s engine chip, so the surface always names itself from the render
+decision.
 
 ## The two modes — Covenant IV made mechanical
 
@@ -105,12 +119,23 @@ widget (flows to `feedback.jsonl`, which the agent **Monitors**). A comment can
 ride `ref` ids of selected shapes, so the agent knows which shapes are meant.
 *The canvas is the conversation.*
 
+**v2 — per-board files.** Each board writes its own
+`feedback/canvas-<id>-scene.json` and `feedback/canvas-<id>-feedback.jsonl`
+(the v1 shared board keeps its original filenames, `canvas-scene.json` /
+`canvas-feedback.jsonl`, unprefixed — the id="" default). The agent now
+Monitors a **glob**, `feedback/canvas-*-feedback.jsonl` (plus the legacy
+unprefixed file for old-style docs), not one fixed path. Every per-board
+feedback entry carries a `"board"` field naming which surface it came from, so
+one Monitor loop can tell multiple boards apart without per-board plumbing.
+
 ## Where it lives
 
 | Piece | Path |
 |---|---|
 | primitive (Go core) | `go/internal/core/canvas_primitive.go` |
+| board id assignment (v2) | `go/internal/core/blocks.go` (`assignCanvasBoardIDs`) |
 | runtime (codraw assets) | `go/stddoc-lib/lib/codraw/` |
+| serve auto-wiring + per-board routing (v2) | `go/internal/serve/codraw.go`, `go/internal/serve/server.go` |
 | freeze degrade | `go/internal/freeze/freeze.go` (`FreezeCanvas`) |
-| self-tests | `go/internal/core/canvas_primitive_test.go`, `go/internal/freeze/freeze_test.go` |
-| design + findings | `prd/canvas-primitive/design.md` |
+| self-tests | `go/internal/core/canvas_primitive_test.go`, `go/internal/core/canvas_v2_boards_test.go`, `go/internal/serve/codraw_v2_boards_test.go`, `go/internal/freeze/freeze_test.go` |
+| design + findings | `prd/canvas-primitive/design.md`, `prd/canvas-primitive/v2-per-canvas-boards.md` |

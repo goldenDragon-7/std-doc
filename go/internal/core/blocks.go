@@ -51,6 +51,32 @@ func adaptNode(node *wire.OrderedMap) []streamBlock {
 	return out
 }
 
+// assignCanvasBoardIDs gives every `canvas` block in the stream a stable board
+// id before render (v2 per-canvas boards, Seam 1: prd/canvas-primitive/
+// v2-per-canvas-boards.md). An authored `id` field wins; otherwise it derives
+// `<slug>-canvas-<ordinal>` (page-relative slug + ordinal within the page, per
+// the PRD) — deterministic across rebuilds and unique even when a page has
+// several canvas blocks with no author-supplied id, so "zero-config still
+// works". Mutates each canvas block's OrderedMap in place (adaptNode's Data
+// pointers alias the authored block, matching how anchorAttr/lint already
+// read/write block fields elsewhere in this package).
+func assignCanvasBoardIDs(blocks []streamBlock, slug string) {
+	ordinal := 0
+	for _, sb := range blocks {
+		if sb.Type != "canvas" || sb.Data == nil {
+			continue
+		}
+		if id, ok := sb.Data.Get("id"); ok {
+			if s, ok2 := id.(string); ok2 && strings.TrimSpace(s) != "" {
+				ordinal++
+				continue
+			}
+		}
+		sb.Data.Set("id", slug+"-canvas-"+itoa(ordinal))
+		ordinal++
+	}
+}
+
 // renderBlocks walks the stream and renders each via the registry boundary.
 func renderBlocks(blocks []streamBlock, ctx *template.Ctx, reg *registry.Registry) string {
 	var b strings.Builder

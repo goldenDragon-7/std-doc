@@ -16,7 +16,7 @@ import (
 //   - every documented verb dispatches (does NOT report "unknown command")
 //   - every retired/phantom verb is gone (DOES report "unknown command")
 func TestContract_SubcommandSurface(t *testing.T) {
-	documented := []string{"version", "publish", "lint", "freeze", "serve", "roll", "graduate"}
+	documented := []string{"version", "publish", "lint", "freeze", "serve", "roll", "graduate", "primitives"}
 	for _, v := range documented {
 		err := run([]string{v})
 		if err != nil && strings.Contains(err.Error(), "unknown command") {

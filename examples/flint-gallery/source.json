@@ -1,24 +1,1227 @@
 {
-  "title": "Flint — the quantitative gallery (engine #3)",
-  "generated_date": "2026-07-18",
-  "palette": { "quant": { "label": "Quantitative", "color": "#a78bfa" } },
+  "title": "Flint Gallery \u2014 the full quantitative catalog (engine #3)",
+  "generated_date": "2026-08-15",
+  "layout": "top-nav",
+  "groups": [
+    "Comparison",
+    "Distribution",
+    "Trend & Time",
+    "Part-to-whole",
+    "Correlation",
+    "Geo",
+    "KPI & Tables"
+  ],
+  "palette": {
+    "quant": {
+      "label": "Quantitative",
+      "color": "#a78bfa"
+    },
+    "amber": {
+      "label": "Amber",
+      "color": "#f59e0b"
+    }
+  },
+  "root": {
+    "summary": "~34 quantitative charts, on tap, zero-dep, freeze-clean. Every card below is authored with nothing but a dtype \u2014 no pasted SVG, no Node toolchain, no CDN. std-doc looks the name up in the Flint catalog (stddoc-lib/flint/*.svg) and embeds the pre-baked, freeze-clean chart inline. Pick a group above to browse its charts; each page shows the LIVE render immediately followed by its copy-paste source.",
+    "facets": {
+      "Comparison": "bar chart, grouped bar chart, stacked bar chart, lollipop chart, bullet chart, waterfall chart, gantt chart, radar chart",
+      "Distribution": "boxplot, violin plot, histogram, density plot, ECDF plot, strip plot, pyramid chart, candlestick chart",
+      "Trend & Time": "line chart, area chart, range area chart, sparkline, bump chart, slope chart, streamgraph",
+      "Part-to-whole": "pie chart, rose chart",
+      "Correlation": "scatter plot, connected scatter plot, regression, ranged dot plot, heatmap",
+      "Geo": "map, choropleth",
+      "KPI & Tables": "KPI card, bar table"
+    }
+  },
   "nodes": [
     {
-      "slug": "gallery", "group": "Core",
-      "title": "One chart per family — named, not pasted",
-      "tagline": "dtype names a chart; the library embeds its freeze-clean SVG",
+      "slug": "f-bar-chart",
+      "group": "Comparison",
+      "title": "bar chart",
       "status": "LIVE",
-      "sections": [
-        { "name": "Six families, zero pasted SVG", "icon": "📊",
-          "summary": "Each card below is authored with only a dtype — no SVG in the source. std-doc looks the chart up in the library catalog (stddoc-lib/flint/) and embeds its pre-rendered, freeze-clean Vega-Lite SVG. This is the whole quantitative/statistical family D2 and Mermaid can't draw, available by NAME. All freeze browser-free (0 external refs)." }
-      ],
+      "tagline": "the `bar-chart` catalog chart \u2014 live render, then its source",
       "blocks": [
-        { "type": "diagram", "dtype": "scatter-plot", "label": "Points — scatter plot" },
-        { "type": "diagram", "dtype": "bar-chart", "label": "Bars — bar chart" },
-        { "type": "diagram", "dtype": "boxplot", "label": "Distributions — boxplot" },
-        { "type": "diagram", "dtype": "line-chart", "label": "Lines & Areas — line chart" },
-        { "type": "diagram", "dtype": "pie-chart", "label": "Circular — pie chart" },
-        { "type": "diagram", "dtype": "heatmap", "label": "Tables & Maps — heatmap" }
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "diagram",
+              "dtype": "bar-chart",
+              "label": "bar chart \u2014 live render"
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"diagram\",\n  \"dtype\": \"bar-chart\",\n  \"label\": \"bar chart \\u2014 live render\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "f-grouped-bar-chart",
+      "group": "Comparison",
+      "title": "grouped bar chart",
+      "status": "LIVE",
+      "tagline": "the `grouped-bar-chart` catalog chart \u2014 live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "diagram",
+              "dtype": "grouped-bar-chart",
+              "label": "grouped bar chart \u2014 live render"
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"diagram\",\n  \"dtype\": \"grouped-bar-chart\",\n  \"label\": \"grouped bar chart \\u2014 live render\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "f-stacked-bar-chart",
+      "group": "Comparison",
+      "title": "stacked bar chart",
+      "status": "LIVE",
+      "tagline": "the `stacked-bar-chart` catalog chart \u2014 live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "diagram",
+              "dtype": "stacked-bar-chart",
+              "label": "stacked bar chart \u2014 live render"
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"diagram\",\n  \"dtype\": \"stacked-bar-chart\",\n  \"label\": \"stacked bar chart \\u2014 live render\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "f-lollipop-chart",
+      "group": "Comparison",
+      "title": "lollipop chart",
+      "status": "LIVE",
+      "tagline": "the `lollipop-chart` catalog chart \u2014 live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "diagram",
+              "dtype": "lollipop-chart",
+              "label": "lollipop chart \u2014 live render"
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"diagram\",\n  \"dtype\": \"lollipop-chart\",\n  \"label\": \"lollipop chart \\u2014 live render\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "f-bullet-chart",
+      "group": "Comparison",
+      "title": "bullet chart",
+      "status": "LIVE",
+      "tagline": "the `bullet-chart` catalog chart \u2014 live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "diagram",
+              "dtype": "bullet-chart",
+              "label": "bullet chart \u2014 live render"
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"diagram\",\n  \"dtype\": \"bullet-chart\",\n  \"label\": \"bullet chart \\u2014 live render\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "f-waterfall-chart",
+      "group": "Comparison",
+      "title": "waterfall chart",
+      "status": "LIVE",
+      "tagline": "the `waterfall-chart` catalog chart \u2014 live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "diagram",
+              "dtype": "waterfall-chart",
+              "label": "waterfall chart \u2014 live render"
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"diagram\",\n  \"dtype\": \"waterfall-chart\",\n  \"label\": \"waterfall chart \\u2014 live render\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "f-gantt-chart",
+      "group": "Comparison",
+      "title": "gantt chart",
+      "status": "LIVE",
+      "tagline": "the `gantt-chart` catalog chart \u2014 live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "diagram",
+              "dtype": "gantt-chart",
+              "label": "gantt chart \u2014 live render"
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"diagram\",\n  \"dtype\": \"gantt-chart\",\n  \"label\": \"gantt chart \\u2014 live render\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "f-radar-chart",
+      "group": "Comparison",
+      "title": "radar chart",
+      "status": "LIVE",
+      "tagline": "the `radar-chart` catalog chart \u2014 live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "diagram",
+              "dtype": "radar-chart",
+              "label": "radar chart \u2014 live render"
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"diagram\",\n  \"dtype\": \"radar-chart\",\n  \"label\": \"radar chart \\u2014 live render\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "f-boxplot",
+      "group": "Distribution",
+      "title": "boxplot",
+      "status": "LIVE",
+      "tagline": "the `boxplot` catalog chart \u2014 live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "diagram",
+              "dtype": "boxplot",
+              "label": "boxplot \u2014 live render"
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"diagram\",\n  \"dtype\": \"boxplot\",\n  \"label\": \"boxplot \\u2014 live render\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "f-violin-plot",
+      "group": "Distribution",
+      "title": "violin plot",
+      "status": "LIVE",
+      "tagline": "the `violin-plot` catalog chart \u2014 live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "diagram",
+              "dtype": "violin-plot",
+              "label": "violin plot \u2014 live render"
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"diagram\",\n  \"dtype\": \"violin-plot\",\n  \"label\": \"violin plot \\u2014 live render\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "f-histogram",
+      "group": "Distribution",
+      "title": "histogram",
+      "status": "LIVE",
+      "tagline": "the `histogram` catalog chart \u2014 live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "diagram",
+              "dtype": "histogram",
+              "label": "histogram \u2014 live render"
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"diagram\",\n  \"dtype\": \"histogram\",\n  \"label\": \"histogram \\u2014 live render\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "f-density-plot",
+      "group": "Distribution",
+      "title": "density plot",
+      "status": "LIVE",
+      "tagline": "the `density-plot` catalog chart \u2014 live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "diagram",
+              "dtype": "density-plot",
+              "label": "density plot \u2014 live render"
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"diagram\",\n  \"dtype\": \"density-plot\",\n  \"label\": \"density plot \\u2014 live render\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "f-ecdf-plot",
+      "group": "Distribution",
+      "title": "ECDF plot",
+      "status": "LIVE",
+      "tagline": "the `ecdf-plot` catalog chart \u2014 live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "diagram",
+              "dtype": "ecdf-plot",
+              "label": "ECDF plot \u2014 live render"
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"diagram\",\n  \"dtype\": \"ecdf-plot\",\n  \"label\": \"ECDF plot \\u2014 live render\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "f-strip-plot",
+      "group": "Distribution",
+      "title": "strip plot",
+      "status": "LIVE",
+      "tagline": "the `strip-plot` catalog chart \u2014 live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "diagram",
+              "dtype": "strip-plot",
+              "label": "strip plot \u2014 live render"
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"diagram\",\n  \"dtype\": \"strip-plot\",\n  \"label\": \"strip plot \\u2014 live render\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "f-pyramid-chart",
+      "group": "Distribution",
+      "title": "pyramid chart",
+      "status": "LIVE",
+      "tagline": "the `pyramid-chart` catalog chart \u2014 live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "diagram",
+              "dtype": "pyramid-chart",
+              "label": "pyramid chart \u2014 live render"
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"diagram\",\n  \"dtype\": \"pyramid-chart\",\n  \"label\": \"pyramid chart \\u2014 live render\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "f-candlestick-chart",
+      "group": "Distribution",
+      "title": "candlestick chart",
+      "status": "LIVE",
+      "tagline": "the `candlestick-chart` catalog chart \u2014 live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "diagram",
+              "dtype": "candlestick-chart",
+              "label": "candlestick chart \u2014 live render"
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"diagram\",\n  \"dtype\": \"candlestick-chart\",\n  \"label\": \"candlestick chart \\u2014 live render\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "f-line-chart",
+      "group": "Trend & Time",
+      "title": "line chart",
+      "status": "LIVE",
+      "tagline": "the `line-chart` catalog chart \u2014 live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "diagram",
+              "dtype": "line-chart",
+              "label": "line chart \u2014 live render"
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"diagram\",\n  \"dtype\": \"line-chart\",\n  \"label\": \"line chart \\u2014 live render\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "f-area-chart",
+      "group": "Trend & Time",
+      "title": "area chart",
+      "status": "LIVE",
+      "tagline": "the `area-chart` catalog chart \u2014 live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "diagram",
+              "dtype": "area-chart",
+              "label": "area chart \u2014 live render"
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"diagram\",\n  \"dtype\": \"area-chart\",\n  \"label\": \"area chart \\u2014 live render\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "f-range-area-chart",
+      "group": "Trend & Time",
+      "title": "range area chart",
+      "status": "LIVE",
+      "tagline": "the `range-area-chart` catalog chart \u2014 live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "diagram",
+              "dtype": "range-area-chart",
+              "label": "range area chart \u2014 live render"
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"diagram\",\n  \"dtype\": \"range-area-chart\",\n  \"label\": \"range area chart \\u2014 live render\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "f-sparkline",
+      "group": "Trend & Time",
+      "title": "sparkline",
+      "status": "LIVE",
+      "tagline": "the `sparkline` catalog chart \u2014 live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "diagram",
+              "dtype": "sparkline",
+              "label": "sparkline \u2014 live render"
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"diagram\",\n  \"dtype\": \"sparkline\",\n  \"label\": \"sparkline \\u2014 live render\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "f-bump-chart",
+      "group": "Trend & Time",
+      "title": "bump chart",
+      "status": "LIVE",
+      "tagline": "the `bump-chart` catalog chart \u2014 live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "diagram",
+              "dtype": "bump-chart",
+              "label": "bump chart \u2014 live render"
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"diagram\",\n  \"dtype\": \"bump-chart\",\n  \"label\": \"bump chart \\u2014 live render\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "f-slope-chart",
+      "group": "Trend & Time",
+      "title": "slope chart",
+      "status": "LIVE",
+      "tagline": "the `slope-chart` catalog chart \u2014 live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "diagram",
+              "dtype": "slope-chart",
+              "label": "slope chart \u2014 live render"
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"diagram\",\n  \"dtype\": \"slope-chart\",\n  \"label\": \"slope chart \\u2014 live render\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "f-streamgraph",
+      "group": "Trend & Time",
+      "title": "streamgraph",
+      "status": "LIVE",
+      "tagline": "the `streamgraph` catalog chart \u2014 live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "diagram",
+              "dtype": "streamgraph",
+              "label": "streamgraph \u2014 live render"
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"diagram\",\n  \"dtype\": \"streamgraph\",\n  \"label\": \"streamgraph \\u2014 live render\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "f-pie-chart",
+      "group": "Part-to-whole",
+      "title": "pie chart",
+      "status": "LIVE",
+      "tagline": "the `pie-chart` catalog chart \u2014 live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "diagram",
+              "dtype": "pie-chart",
+              "label": "pie chart \u2014 live render"
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"diagram\",\n  \"dtype\": \"pie-chart\",\n  \"label\": \"pie chart \\u2014 live render\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "f-rose-chart",
+      "group": "Part-to-whole",
+      "title": "rose chart",
+      "status": "LIVE",
+      "tagline": "the `rose-chart` catalog chart \u2014 live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "diagram",
+              "dtype": "rose-chart",
+              "label": "rose chart \u2014 live render"
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"diagram\",\n  \"dtype\": \"rose-chart\",\n  \"label\": \"rose chart \\u2014 live render\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "f-scatter-plot",
+      "group": "Correlation",
+      "title": "scatter plot",
+      "status": "LIVE",
+      "tagline": "the `scatter-plot` catalog chart \u2014 live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "diagram",
+              "dtype": "scatter-plot",
+              "label": "scatter plot \u2014 live render"
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"diagram\",\n  \"dtype\": \"scatter-plot\",\n  \"label\": \"scatter plot \\u2014 live render\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "f-connected-scatter-plot",
+      "group": "Correlation",
+      "title": "connected scatter plot",
+      "status": "LIVE",
+      "tagline": "the `connected-scatter-plot` catalog chart \u2014 live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "diagram",
+              "dtype": "connected-scatter-plot",
+              "label": "connected scatter plot \u2014 live render"
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"diagram\",\n  \"dtype\": \"connected-scatter-plot\",\n  \"label\": \"connected scatter plot \\u2014 live render\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "f-regression",
+      "group": "Correlation",
+      "title": "regression",
+      "status": "LIVE",
+      "tagline": "the `regression` catalog chart \u2014 live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "diagram",
+              "dtype": "regression",
+              "label": "regression \u2014 live render"
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"diagram\",\n  \"dtype\": \"regression\",\n  \"label\": \"regression \\u2014 live render\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "f-ranged-dot-plot",
+      "group": "Correlation",
+      "title": "ranged dot plot",
+      "status": "LIVE",
+      "tagline": "the `ranged-dot-plot` catalog chart \u2014 live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "diagram",
+              "dtype": "ranged-dot-plot",
+              "label": "ranged dot plot \u2014 live render"
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"diagram\",\n  \"dtype\": \"ranged-dot-plot\",\n  \"label\": \"ranged dot plot \\u2014 live render\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "f-heatmap",
+      "group": "Correlation",
+      "title": "heatmap",
+      "status": "LIVE",
+      "tagline": "the `heatmap` catalog chart \u2014 live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "diagram",
+              "dtype": "heatmap",
+              "label": "heatmap \u2014 live render"
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"diagram\",\n  \"dtype\": \"heatmap\",\n  \"label\": \"heatmap \\u2014 live render\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "f-map",
+      "group": "Geo",
+      "title": "map",
+      "status": "LIVE",
+      "tagline": "the `map` catalog chart \u2014 live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "diagram",
+              "dtype": "map",
+              "label": "map \u2014 live render"
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"diagram\",\n  \"dtype\": \"map\",\n  \"label\": \"map \\u2014 live render\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "f-choropleth",
+      "group": "Geo",
+      "title": "choropleth",
+      "status": "LIVE",
+      "tagline": "the `choropleth` catalog chart \u2014 live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "diagram",
+              "dtype": "choropleth",
+              "label": "choropleth \u2014 live render"
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"diagram\",\n  \"dtype\": \"choropleth\",\n  \"label\": \"choropleth \\u2014 live render\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "f-kpi-card",
+      "group": "KPI & Tables",
+      "title": "KPI card",
+      "status": "LIVE",
+      "tagline": "the `kpi-card` catalog chart \u2014 live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "diagram",
+              "dtype": "kpi-card",
+              "label": "KPI card \u2014 live render"
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"diagram\",\n  \"dtype\": \"kpi-card\",\n  \"label\": \"KPI card \\u2014 live render\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "f-bar-table",
+      "group": "KPI & Tables",
+      "title": "bar table",
+      "status": "LIVE",
+      "tagline": "the `bar-table` catalog chart \u2014 live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "diagram",
+              "dtype": "bar-table",
+              "label": "bar table \u2014 live render"
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"diagram\",\n  \"dtype\": \"bar-table\",\n  \"label\": \"bar table \\u2014 live render\"\n}"
+            }
+          ]
+        }
       ]
     }
   ]

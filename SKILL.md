@@ -52,8 +52,9 @@ truth, (2) multi-page + auto-generated nav, (3) auto-rebake on every change,
 > **Go-only.** The engine is the single `stddoc` Go binary (`go/cmd/stddoc`,
 > built from `go/`); the library is **data** in `go/stddoc-lib/`. There is no
 > Python in this package anymore. The commands below are the whole surface:
-> `publish · freeze · serve · roll · graduate`. (`serve` folds in the old
-> inject + server + watch jobs.)
+> `publish · freeze · serve · roll · graduate · primitives`. (`serve` folds in
+> the old inject + server + watch jobs. `primitives` lists every primitive —
+> see examples/primitive-gallery/ to see them all live.)
 
 ```bash
 stddoc publish source.json published            # derive HTML from canonical JSON
@@ -367,7 +368,7 @@ To bring an archived doc back, re-`publish` from its versioned `source.json` and
 │   ├── doctree-schema.md         # Move 0 — the source.json doc-tree contract
 │   └── mermaid-gotchas.md        # dark-theme Mermaid traps + fixes + pan-zoom viewer
 ├── go/                          # the engine — one static binary, built from here
-│   ├── cmd/stddoc/              # the CLI: publish · freeze · serve · roll · graduate
+│   ├── cmd/stddoc/              # the CLI: publish · freeze · serve · roll · graduate · primitives
 │   ├── internal/               # renderer CORE + serve / gate / palette / template / d2
 │   └── stddoc-lib/             # the library as DATA (no code to ship)
 │       ├── templates.json      # the primitives, as data templates
@@ -381,5 +382,8 @@ To bring an archived doc back, re-`publish` from its versioned `source.json` and
 └── examples/
     ├── hello-living-doc/         # a served, worked single-page example
     ├── structured-controls/      # radio / checkbox / select, answered by picking
-    └── data-derived-example/     # a worked source.json doc-tree (Move 0)
+    ├── data-derived-example/     # a worked source.json doc-tree (Move 0)
+    ├── starter-no-nav/           # copy-from starter: layout:"no-nav"
+    ├── starter-hero/             # copy-from starter: layout:"hero"
+    └── primitive-gallery/        # EVERY primitive, live, source.json beside each
 ```

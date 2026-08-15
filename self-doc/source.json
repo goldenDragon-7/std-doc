@@ -1431,7 +1431,7 @@
           "type": "diagram",
           "dtype": "sequence",
           "label": "diagram primitive — best-engine routing (structural → D2, rendered in-process, freezes browser-free)",
-          "d2": "shape: sequence_diagram\nReader: Reader\nDoc: Living Doc\nPurr: Purr\nReader -> Doc: select a sentence + comment\nDoc -> Purr: inbox.jsonl\nPurr -> Doc: edit JSON, re-publish\nDoc -> Reader: reload + walkthrough"
+          "d2": "shape: sequence_diagram\nReader: Reader\nDoc: Living Doc\nAuthor: Author\nReader -> Doc: select a sentence + comment\nDoc -> Author: inbox.jsonl\nAuthor -> Doc: edit JSON, re-publish\nDoc -> Reader: reload + walkthrough"
         },
         {
           "type": "threeaxes",
@@ -2063,7 +2063,7 @@
                     {
                       "head": "ship",
                       "variant": "here",
-                      "sub": "signed binary"
+                      "sub": "single binary"
                     }
                   ]
                 },

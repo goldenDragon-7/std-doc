@@ -1,0 +1,1 @@
+window.CF_SEARCH_INDEX=[{"slug":"welcome","url":"welcome.html","number":"1.1","title":"Welcome","sections":null,"text":"welcome new docs default to layout:\"no-nav\" — copy this file to start one."},{"slug":"next-page","url":"next-page.html","number":"1.2","title":"A second page","sections":null,"text":"a second page"}];

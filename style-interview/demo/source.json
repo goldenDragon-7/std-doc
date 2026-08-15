@@ -226,7 +226,6 @@
       "tagline": "three Voices, not three skins — and the voice even suggests the name you'd call me",
       "status": "LIVE",
       "badges": {
-        "page": "3 of 7",
         "principle": "choose once, generate free"
       },
       "blocks": [
@@ -408,7 +407,7 @@
                     {
                       "head": "ship",
                       "variant": "here",
-                      "sub": "signed binary"
+                      "sub": "single binary"
                     }
                   ]
                 },
@@ -647,13 +646,383 @@
       ]
     },
     {
+      "slug": "new-vocabulary",
+      "group": "Make it yours",
+      "title": "4 · Meet the new vocabulary",
+      "tagline": "seven new primitives, and a CLI verb that lists every one of them",
+      "blocks": [
+        {
+          "type": "prose",
+          "lede": true,
+          "text": "std-doc's shape vocabulary grew: tabs, split panels, status boards, phase pipelines, role cards, grouped card clusters, and decision records — on top of everything it already had. Every one of them is DATA (a templates.json entry + a CSS entry), never a private renderer, so a new shape ships the same way a new sentence does."
+        },
+        {
+          "type": "tabs",
+          "id": "tour-tabs",
+          "tabs": [
+            {
+              "label": "tabs",
+              "content": [
+                {
+                  "type": "prose",
+                  "text": "This IS a `tabs` block — CSS-only switching, no client JS."
+                }
+              ]
+            },
+            {
+              "label": "pill",
+              "content": [
+                {
+                  "type": "pill",
+                  "status": "LIVE",
+                  "label": "LIVE"
+                }
+              ]
+            },
+            {
+              "label": "decision",
+              "content": [
+                {
+                  "type": "prose",
+                  "text": "A `decision` card records a choice already made — question, chosen answer, rationale, alternatives considered."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "cardcluster",
+          "groups": [
+            {
+              "label": "New this release",
+              "cards": [
+                {
+                  "title": "tabs",
+                  "body": "CSS-only tab switching.",
+                  "ent": "core"
+                },
+                {
+                  "title": "split",
+                  "body": "Two composed columns, optional seam."
+                },
+                {
+                  "title": "statusboard",
+                  "body": "Grouped rows, per-cell status color.",
+                  "ent": "live"
+                },
+                {
+                  "title": "pipeline",
+                  "body": "Phase-strip cards, active/done state."
+                },
+                {
+                  "title": "rolecard",
+                  "body": "Color-bordered entity card + pills."
+                },
+                {
+                  "title": "cardcluster",
+                  "body": "This — a grouped card-grid."
+                },
+                {
+                  "title": "decision",
+                  "body": "A static decision-record card."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "callout",
+          "kind": "core",
+          "style": "framed",
+          "lead": "See every primitive live",
+          "body": "`examples/primitive-gallery/` renders ALL ~37 primitives with their exact source.json beside each one — copy-paste-able. Or run `stddoc primitives` for a plain-text list with one-line descriptions."
+        }
+      ]
+    },
+    {
+      "slug": "pick-your-shell",
+      "group": "Make it yours",
+      "title": "5 · Pick your shell",
+      "tagline": "the left-nav rail is one layout mode now, not the frame",
+      "blocks": [
+        {
+          "type": "prose",
+          "lede": true,
+          "text": "For a long time every std-doc had the same fixed 250px left rail, whether it wanted one or not. `layout` is a MODE now — leave it unset and you get the classic rail; set it and the doc reshapes. Every mode below is a REAL, published example doc, not a mockup."
+        },
+        {
+          "type": "tabs",
+          "id": "pick-shell-tabs",
+          "tabs": [
+            {
+              "label": "left-nav (classic)",
+              "content": [
+                {
+                  "type": "prose",
+                  "text": "The original shell — this very tour uses it. A fixed 250px rail, always there."
+                },
+                {
+                  "type": "code",
+                  "mode": "snippet",
+                  "spans": [
+                    {
+                      "cls": "plain",
+                      "text": "// layout field absent — the default"
+                    }
+                  ]
+                },
+                {
+                  "type": "split",
+                  "seam": true,
+                  "left": {
+                    "content": [
+                      {
+                        "type": "panel",
+                        "variant": "pn-hairline",
+                        "lead": "rail",
+                        "body": "nav tree"
+                      }
+                    ]
+                  },
+                  "right": {
+                    "content": [
+                      {
+                        "type": "panel",
+                        "variant": "pn-lift",
+                        "lead": "content",
+                        "body": "the page"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "label": "no-nav",
+              "content": [
+                {
+                  "type": "prose",
+                  "text": "A clean centered essay, no rail. Real doc: examples/starter-no-nav/."
+                },
+                {
+                  "type": "code",
+                  "mode": "snippet",
+                  "spans": [
+                    {
+                      "cls": "plain",
+                      "text": "\"layout\": \"no-nav\""
+                    }
+                  ]
+                },
+                {
+                  "type": "panel",
+                  "variant": "pn-lift",
+                  "lead": "content — centered, no rail",
+                  "body": "one column, max-width, nothing on either side"
+                }
+              ]
+            },
+            {
+              "label": "top-nav",
+              "content": [
+                {
+                  "type": "prose",
+                  "text": "A sticky horizontal hub bar. Real doc: examples/primitive-gallery/ (this gallery IS one)."
+                },
+                {
+                  "type": "code",
+                  "mode": "snippet",
+                  "spans": [
+                    {
+                      "cls": "plain",
+                      "text": "\"layout\": \"top-nav\""
+                    }
+                  ]
+                },
+                {
+                  "type": "panel",
+                  "variant": "pn-hairline",
+                  "lead": "sticky top bar — search + page links",
+                  "body": "content flows full-width below it"
+                }
+              ]
+            },
+            {
+              "label": "hero",
+              "content": [
+                {
+                  "type": "prose",
+                  "text": "A full-bleed gradient header. Real doc: examples/starter-hero/."
+                },
+                {
+                  "type": "code",
+                  "mode": "snippet",
+                  "spans": [
+                    {
+                      "cls": "plain",
+                      "text": "\"layout\": \"hero\""
+                    }
+                  ]
+                },
+                {
+                  "type": "panel",
+                  "variant": "pn-tint",
+                  "lead": "full-bleed gradient header",
+                  "body": "narrower centered column below it"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Breadcrumb and search are decoupled from the sidebar in every mode — they never disappear just because the rail did."
+        }
+      ]
+    },
+    {
+      "slug": "see-it-draw-itself",
+      "group": "Make it yours",
+      "title": "6 · See it draw itself",
+      "tagline": "best-engine-per-type routing — D2 in-process, Mermaid only where position is the meaning",
+      "blocks": [
+        {
+          "type": "prose",
+          "lede": true,
+          "text": "A `diagram` block declares WHAT it is — a class diagram, a gantt chart, a state machine — and the library picks HOW to draw it. D2 renders in-process (pure Go, zero external tooling, even at freeze) and is the safe default. Mermaid renders in the browser and is reserved for diagrams whose meaning genuinely lives in POSITION (gantt, journey, sankey) — D2 can only encode a quantity as size, never as a computed x/y."
+        },
+        {
+          "type": "diagram",
+          "dtype": "class",
+          "label": "D2 — structural, in-process",
+          "d2": "doc: Document\nreader: Reader\ncomment: Comment\nreader -> comment: writes\ncomment -> doc: applies to"
+        },
+        {
+          "type": "diagram",
+          "dtype": "gantt",
+          "label": "Mermaid — position-encoded, routed automatically",
+          "mermaid": "gantt\n title Slice plan\n dateFormat YYYY-MM-DD\n section v0.11\n Gallery :a1, 2026-08-15, 1d\n CLI verb :a2, after a1, 1d\n Lint suggest :a3, after a2, 1d"
+        },
+        {
+          "type": "tree",
+          "label": "diagram dtype → engine, the whole routing table",
+          "legend": false,
+          "nodes": [
+            {
+              "label": "D2",
+              "sublabel": "in-process, zero external tooling, safe default",
+              "note": "structural · relational · flow · anything SIZE can encode",
+              "children": [
+                {
+                  "label": "sequence"
+                },
+                {
+                  "label": "class"
+                },
+                {
+                  "label": "erd"
+                },
+                {
+                  "label": "c4-architecture"
+                },
+                {
+                  "label": "network-topology"
+                },
+                {
+                  "label": "state-machine"
+                },
+                {
+                  "label": "dfd"
+                },
+                {
+                  "label": "tree"
+                },
+                {
+                  "label": "swimlane"
+                },
+                {
+                  "label": "block"
+                },
+                {
+                  "label": "requirement"
+                },
+                {
+                  "label": "venn"
+                },
+                {
+                  "label": "mindmap"
+                },
+                {
+                  "label": "packet"
+                },
+                {
+                  "label": "stacked-bands"
+                }
+              ]
+            },
+            {
+              "label": "Mermaid",
+              "sublabel": "browser-rendered, bakes via mmdc at freeze",
+              "note": "quantitative · temporal · anything only POSITION can encode",
+              "children": [
+                {
+                  "label": "gantt"
+                },
+                {
+                  "label": "quadrant"
+                },
+                {
+                  "label": "journey"
+                },
+                {
+                  "label": "sankey"
+                },
+                {
+                  "label": "gitgraph"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "callout",
+          "kind": "core",
+          "style": "framed",
+          "lead": "The full routing table",
+          "body": "Every semantic type (sequence · erd · state-machine · gantt · sankey · …) has a vetted verdict, shipped as DATA in `go/stddoc-lib/diagram_engines.json` — see `protocol/diagrams.md` for the complete table and why mindmap always routes to D2."
+        }
+      ]
+    },
+    {
+      "slug": "draw-with-me",
+      "group": "Make it yours",
+      "title": "7 · Draw with me",
+      "tagline": "a shared co-drawing surface, living inside the page — with its own board, per canvas",
+      "blocks": [
+        {
+          "type": "prose",
+          "lede": true,
+          "text": "This isn't a screenshot of a whiteboard — it's a LIVE Excalidraw surface (the codraw runtime), sandboxed in an iframe, reachable the moment you `stddoc serve` this doc. Draw on it, and it saves to a `scene.json` sibling of this file, the same way your comments save to `feedback.jsonl`. The canvas is the conversation too."
+        },
+        {
+          "type": "canvas",
+          "id": "tour-canvas",
+          "label": "try drawing here — it's live when served",
+          "height": 360
+        },
+        {
+          "type": "prose",
+          "text": "As of v0.11, EACH canvas block gets its OWN board — its own scene, its own feedback inbox — routed by id, not shared with every other canvas in the doc the way v1 worked. One codraw server still serves the whole document; it just knows how to keep boards apart now. See `protocol/canvas.md` for the full shape, including the author-time SVG snapshot that lets a frozen doc still show the real drawing with zero freeze-time toolchain."
+        }
+      ]
+    },
+    {
       "slug": "freeze-and-ship",
       "group": "Send it",
-      "title": "4 · Freeze & ship",
+      "title": "8 · Freeze & ship",
       "tagline": "turn the conversation into a thing you can hand to anyone",
       "status": "LIVE",
       "badges": {
-        "page": "4 of 7",
         "covenant": "IV · freeze means frozen"
       },
       "blocks": [
@@ -735,11 +1104,10 @@
       "slug": "the-palace",
       "accent": "purple",
       "group": "Send it",
-      "title": "5 · The Knowledge Palace",
+      "title": "9 · The Knowledge Palace",
       "tagline": "give your doc a home it can always walk back into",
       "status": "LIVE",
       "badges": {
-        "page": "5 of 7",
         "versioned": "the JSON, not the HTML"
       },
       "blocks": [
@@ -820,6 +1188,10 @@
           "text": "Each version is committed and addressable, so “show me the doc as it stood before the last rewrite” is one git address away. When you promote to the next version, the in-progress comments shed and housekeeping tidies up the room for the next visitor — the conversation lives in history, the doc moves on."
         },
         {
+          "type": "prose",
+          "text": "A drawing canvas works the same way: it persists to its own scene.json, sitting right next to feedback.jsonl — a canvas is state, exactly like a comment inbox, not a screenshot that vanishes when the tab closes."
+        },
+        {
           "type": "ask",
           "id": "git-home",
           "control": "text",
@@ -886,11 +1258,10 @@
       "accent": "rose",
       "sky": "right",
       "group": "The secret",
-      "title": "6 · It was never the document",
+      "title": "10 · It was never the document",
       "tagline": "what you actually made was a relationship",
       "status": "LIVE",
       "badges": {
-        "page": "6 of 7",
         "truth": "a snapshot of a relationship"
       },
       "blocks": [
@@ -1037,11 +1408,10 @@
     {
       "slug": "come-build",
       "group": "The secret",
-      "title": "7 · Come build with us",
+      "title": "11 · Come build with us",
       "tagline": "the community you're joining — and exactly how you join it",
       "status": "LIVE",
       "badges": {
-        "page": "7 of 7",
         "home": "public, free, signed"
       },
       "blocks": [
@@ -1190,7 +1560,7 @@
         },
         {
           "type": "prose",
-          "text": "The repo lives on a private git today and goes public on GitHub under goldenDragon7 — a signed binary, given free. Everything above is how you walk through it."
+          "text": "The repo lives on a private git today and goes public on GitHub under goldenDragon7 — a single binary, given free. Everything above is how you walk through it."
         },
         {
           "type": "reveal",

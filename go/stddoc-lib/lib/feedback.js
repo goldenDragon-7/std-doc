@@ -317,14 +317,14 @@
       '</div>'
     ].join("");
     const whisper = whisperWrap.firstElementChild;
-    const whisperMount =
-      document.getElementById("cf-whisper-mount") ||
-      document.querySelector("main") ||
-      document.querySelector(".content") ||
-      document.querySelector("article") ||
-      document.querySelector("section") ||
-      document.body;
-    whisperMount.appendChild(whisper);
+    // Opt-IN only: the inline compose box appears solely where a doc explicitly
+    // places <div id="cf-whisper-mount">. With no explicit mount we inject
+    // NOTHING — general feedback is always one click away on the "feedback"
+    // launcher (→ panel → "+ general"), so the box never pops up unbidden and
+    // there is nothing to dismiss. (Previously it auto-appended to main/.content/
+    // body on every page, which read as a feedback pane popping up every time.)
+    const whisperMount = document.getElementById("cf-whisper-mount");
+    if (whisperMount) whisperMount.appendChild(whisper);
   }
 
   const $ = (id) => document.getElementById(id);
@@ -1361,16 +1361,23 @@
     $("cf-reload-now").addEventListener("click", doReload);
     $("cf-reload-pause").addEventListener("click", toggleAutoReloadPause);
 
-    // First-class whisper widget
-    $("cf-whisper-send").addEventListener("click", sendWhisper);
-    $("cf-whisper-text").addEventListener("input", () => {
-      syncWhisperSendState();
-      // The reader is typing — don't reload out from under them.
-      if (S.autoReloadTimer) cancelAutoReload();
-    });
-    $("cf-whisper-text").addEventListener("keydown", (e) => {
-      if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); e.stopPropagation(); sendWhisper(); }
-    });
+    // First-class whisper widget — OPTIONAL now (only mounted when a doc opts in
+    // with #cf-whisper-mount). Guard every reference: if the box isn't present,
+    // wire nothing rather than throwing a null.addEventListener that would abort
+    // bindEvents/init and disable the WHOLE feedback widget. (This is exactly the
+    // regression the opt-in change introduced — the panel/selection path must
+    // survive with no whisper box.)
+    if ($("cf-whisper-send") && $("cf-whisper-text")) {
+      $("cf-whisper-send").addEventListener("click", sendWhisper);
+      $("cf-whisper-text").addEventListener("input", () => {
+        syncWhisperSendState();
+        // The reader is typing — don't reload out from under them.
+        if (S.autoReloadTimer) cancelAutoReload();
+      });
+      $("cf-whisper-text").addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); e.stopPropagation(); sendWhisper(); }
+      });
+    }
 
     // If the page is reloaded any other way (browser refresh, Cmd-R), still
     // carry the auto-tour flag forward so the user's mental model holds:
@@ -1495,7 +1502,48 @@
       footer.appendChild(note);
       footer.appendChild(btn);
       block.appendChild(footer);
+      // Persisted answered-state: if this control already has an answer (queued
+      // OR submitted, surviving a reload via localStorage), paint it answered NOW
+      // so it's immediately obvious which questions are already done.
+      paintControlAnswered(block);
     });
+  }
+
+  // controlAnswerFor returns the most recent answer record for a field — checking
+  // unsent pending first, then the last submitted batch's snapshot — or null.
+  function controlAnswerFor(field) {
+    for (let i = S.pending.length - 1; i >= 0; i--) {
+      const c = S.pending[i];
+      if (c && c.type === "control" && c.field === field) return c;
+    }
+    const snap = S.lastSubmittedBatch && S.lastSubmittedBatch.pending_snapshot;
+    if (Array.isArray(snap)) {
+      for (let i = snap.length - 1; i >= 0; i--) {
+        const c = snap[i];
+        if (c && c.type === "control" && c.field === field) return c;
+      }
+    }
+    return null;
+  }
+
+  // paintControlAnswered flips the block's submit button to an obvious INVERSE-
+  // VIDEO "answered" state and locks in the chosen value, so a reader can see at
+  // a glance which Submit Answers have already happened (the bug: no such signal).
+  function paintControlAnswered(block) {
+    const field = block.dataset.cfId;
+    const btn = block.querySelector(".cf-q-submit");
+    if (!btn) return;
+    const ans = controlAnswerFor(field);
+    if (!ans) {
+      btn.classList.remove("cf-answered");
+      btn.textContent = "submit answer";
+      btn.removeAttribute("title");
+      return;
+    }
+    const shown = Array.isArray(ans.label) ? ans.label.join(", ") : (ans.label || ans.value || "");
+    btn.classList.add("cf-answered");                 // inverse video (feedback.css)
+    btn.textContent = "✓ answered" + (shown ? ": " + shown : "");
+    btn.title = "answered — click to change";
   }
 
   function controlChoices(block, kind) {
@@ -1555,6 +1603,7 @@
     if (noteEl) noteEl.value = "";
     saveLS();
     renderPending();
+    paintControlAnswered(block);   // flip THIS control to the inverse-video answered state now
     openPanel();
     setActiveTab("pending");
     showToast("answer added");

@@ -18,6 +18,6 @@ __pycache__/
 # night-shift voice-baking output (regenerable)
 style-interview/demo/_voices/
 
-# cfv3 rm→mv quarantine (go-cfv3#171): never let `git add -A`
+# quarantine dir for safe-delete tooling — never commit
 # re-commit the very files someone just deleted.
 probably_trash/

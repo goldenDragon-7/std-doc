@@ -777,6 +777,15 @@ body.cf-elem-mode {
   background: var(--glow, #22d3ee);
   color: var(--bg, #0a0e17);
 }
+/* answered: INVERSE VIDEO (filled) so an already-submitted answer is obvious at
+   a glance — the fix for "no way to know a Submit Answer already happened". The
+   button locks in the chosen value and stays filled across reloads. */
+.cf-q-submit.cf-answered {
+  background: var(--glow, #22d3ee);
+  color: var(--bg, #0a0e17);
+  border-color: var(--glow, #22d3ee);
+}
+.cf-q-submit.cf-answered:hover { filter: brightness(0.92); }
 /* the structured answer as it appears in the pending panel (LIGHT surface) */
 .cf-comment-control div:first-child { font-size: 11.5px; color: var(--dim, #888); }
 .cf-comment-control div:last-child { color: var(--glow, #b14000); font-weight: 600; }

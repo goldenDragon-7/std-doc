@@ -1,0 +1,79 @@
+{
+    "title": "Starter — no-nav",
+    "generated_date": "2026-08-15",
+    "layout": "no-nav",
+    "groups": ["Guide"],
+    "root": {
+        "summary": "The default shape for a new std-doc: a clean centered essay, no fixed left rail."
+    },
+    "nodes": [
+        {
+            "slug": "welcome",
+            "group": "Guide",
+            "title": "Welcome",
+            "status": "LIVE",
+            "tagline": "New docs default to layout:\"no-nav\" — copy this file to start one.",
+            "blocks": [
+                {
+                    "type": "text",
+                    "content": [
+                        {
+                            "type": "text",
+                            "s": "This is the starter shape for a brand-new std-doc. Set "
+                        },
+                        {
+                            "type": "code",
+                            "s": "\"layout\": \"no-nav\""
+                        },
+                        {
+                            "type": "text",
+                            "s": " at the top of source.json and the fixed 250px left rail never appears — content reads as a single centered column instead. Existing docs with no layout field are untouched (they keep the classic left-nav shell); this default is opt-in, applied only by new docs choosing to author it."
+                        }
+                    ]
+                },
+                {
+                    "type": "text",
+                    "content": [
+                        {
+                            "type": "text",
+                            "s": "Other layout modes: "
+                        },
+                        {
+                            "type": "code",
+                            "s": "\"top-nav\""
+                        },
+                        {
+                            "type": "text",
+                            "s": " (sticky horizontal hub bar) and "
+                        },
+                        {
+                            "type": "code",
+                            "s": "\"hero\""
+                        },
+                        {
+                            "type": "text",
+                            "s": " (full-bleed magazine header). Leave the field absent for the original left-nav shell."
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "slug": "next-page",
+            "group": "Guide",
+            "title": "A second page",
+            "status": "LIVE",
+            "blocks": [
+                {
+                    "type": "text",
+                    "content": [
+                        {
+                            "type": "text",
+                            "s": "Breadcrumb and search stay available in every layout mode — they are decoupled from the left-nav sidebar, not tied to it."
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

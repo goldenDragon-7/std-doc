@@ -1,0 +1,1701 @@
+{
+  "title": "std-doc Primitive Gallery",
+  "generated_date": "2026-08-15",
+  "layout": "top-nav",
+  "groups": [
+    "Text & Emphasis",
+    "Status & Labels",
+    "Cards & Clusters",
+    "Comparison & Decision",
+    "Boards & Pipelines",
+    "Diagrammatic",
+    "Code & Docs",
+    "Interactive",
+    "Live Surfaces",
+    "Motion"
+  ],
+  "palette": {
+    "glow": {
+      "label": "Glow",
+      "color": "#22d3ee"
+    },
+    "amber": {
+      "label": "Amber",
+      "color": "#f59e0b"
+    }
+  },
+  "root": {
+    "summary": "Every std-doc primitive, live — click any one to see it rendered with its exact source.json beside it. Copy-paste-able, always in sync (this page IS a std-doc)."
+  },
+  "nodes": [
+    {
+      "slug": "p-prose",
+      "group": "Text & Emphasis",
+      "title": "prose",
+      "status": "LIVE",
+      "tagline": "the `prose` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "prose",
+              "text": "A plain paragraph of body text — the workhorse primitive. Set `lede:true` for an opening emphasis paragraph."
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"prose\",\n  \"text\": \"A plain paragraph of body text \\u2014 the workhorse primitive. Set `lede:true` for an opening emphasis paragraph.\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-kicker",
+      "group": "Text & Emphasis",
+      "title": "kicker",
+      "status": "LIVE",
+      "tagline": "the `kicker` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "kicker",
+              "text": "The living-doc loop, drawn from safe atoms."
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"kicker\",\n  \"text\": \"The living-doc loop, drawn from safe atoms.\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-callout",
+      "group": "Text & Emphasis",
+      "title": "callout",
+      "status": "LIVE",
+      "tagline": "the `callout` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "callout",
+              "kind": "amber",
+              "lead": "Heads up",
+              "body": "A single kind-parameterized callout — style (solid/gradient/dashed/framed) and variant (ghost-dashed/gate) both ride the same primitive."
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"callout\",\n  \"kind\": \"amber\",\n  \"lead\": \"Heads up\",\n  \"body\": \"A single kind-parameterized callout \\u2014 style (solid/gradient/dashed/framed) and variant (ghost-dashed/gate) both ride the same primitive.\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-gradient-band",
+      "group": "Text & Emphasis",
+      "title": "gradient-band",
+      "status": "LIVE",
+      "tagline": "the `gradient-band` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "gradient-band",
+              "text": "A full-bleed gradient statement band.",
+              "sub": "optional sub-line"
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"gradient-band\",\n  \"text\": \"A full-bleed gradient statement band.\",\n  \"sub\": \"optional sub-line\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-hero",
+      "group": "Text & Emphasis",
+      "title": "hero",
+      "status": "LIVE",
+      "tagline": "the `hero` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "hero",
+              "text": "A page-opening hero statement.",
+              "sub": "optional sub-line"
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"hero\",\n  \"text\": \"A page-opening hero statement.\",\n  \"sub\": \"optional sub-line\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-pill",
+      "group": "Status & Labels",
+      "title": "pill",
+      "status": "LIVE",
+      "tagline": "the `pill` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "pill",
+              "status": "LIVE",
+              "label": "LIVE"
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"pill\",\n  \"status\": \"LIVE\",\n  \"label\": \"LIVE\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-badges",
+      "group": "Status & Labels",
+      "title": "badges",
+      "status": "LIVE",
+      "tagline": "the `badges` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "badges",
+              "badges": {
+                "tests": "42 green",
+                "coverage": "88%"
+              },
+              "status": "LIVE"
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"badges\",\n  \"badges\": {\n    \"tests\": \"42 green\",\n    \"coverage\": \"88%\"\n  },\n  \"status\": \"LIVE\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-chip",
+      "group": "Status & Labels",
+      "title": "chip",
+      "status": "LIVE",
+      "tagline": "the `chip` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "chip",
+              "ent": "glow",
+              "label": "beta"
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"chip\",\n  \"ent\": \"glow\",\n  \"label\": \"beta\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-cardgrid",
+      "group": "Cards & Clusters",
+      "title": "cardgrid",
+      "status": "LIVE",
+      "tagline": "the `cardgrid` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "cardgrid",
+              "cards": [
+                {
+                  "title": "Gateway",
+                  "body": "MCP entrypoint",
+                  "eyebrow": "core",
+                  "ent": "glow"
+                },
+                {
+                  "title": "Doctor",
+                  "body": "health probes"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"cardgrid\",\n  \"cards\": [\n    {\n      \"title\": \"Gateway\",\n      \"body\": \"MCP entrypoint\",\n      \"eyebrow\": \"core\",\n      \"ent\": \"glow\"\n    },\n    {\n      \"title\": \"Doctor\",\n      \"body\": \"health probes\"\n    }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-cardcluster",
+      "group": "Cards & Clusters",
+      "title": "cardcluster",
+      "status": "LIVE",
+      "tagline": "the `cardcluster` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "cardcluster",
+              "groups": [
+                {
+                  "label": "Core",
+                  "cards": [
+                    {
+                      "title": "Gateway",
+                      "body": "MCP entrypoint",
+                      "ent": "glow"
+                    }
+                  ]
+                },
+                {
+                  "label": "Support",
+                  "cards": [
+                    {
+                      "title": "Beam",
+                      "body": "file transport"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"cardcluster\",\n  \"groups\": [\n    {\n      \"label\": \"Core\",\n      \"cards\": [\n        {\n          \"title\": \"Gateway\",\n          \"body\": \"MCP entrypoint\",\n          \"ent\": \"glow\"\n        }\n      ]\n    },\n    {\n      \"label\": \"Support\",\n      \"cards\": [\n        {\n          \"title\": \"Beam\",\n          \"body\": \"file transport\"\n        }\n      ]\n    }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-namecard",
+      "group": "Cards & Clusters",
+      "title": "namecard",
+      "status": "LIVE",
+      "tagline": "the `namecard` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "namecard",
+              "lead": "Handle",
+              "name": "@ada-lovelace",
+              "sub": "std-doc contributor"
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"namecard\",\n  \"lead\": \"Handle\",\n  \"name\": \"@ada-lovelace\",\n  \"sub\": \"std-doc contributor\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-rolecard",
+      "group": "Cards & Clusters",
+      "title": "rolecard",
+      "status": "LIVE",
+      "tagline": "the `rolecard` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "rolecard",
+              "name": "The Renderer",
+              "role": "Core",
+              "accent": "glow",
+              "summary": "Turns a JSON spec into an expressive HTML page.",
+              "pills": [
+                "json",
+                "html",
+                "svg"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"rolecard\",\n  \"name\": \"The Renderer\",\n  \"role\": \"Orchestration\",\n  \"accent\": \"glow\",\n  \"summary\": \"Turns a JSON spec into an expressive HTML page.\",\n  \"pills\": [\n    \"json\",\n    \"html\",\n    \"svg\"\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-panel",
+      "group": "Cards & Clusters",
+      "title": "panel",
+      "status": "LIVE",
+      "tagline": "the `panel` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "panel",
+              "variant": "pn-lift",
+              "lead": "Panel lead",
+              "body": "A softly-lifted content panel."
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"panel\",\n  \"variant\": \"pn-lift\",\n  \"lead\": \"Panel lead\",\n  \"body\": \"A softly-lifted content panel.\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-compare",
+      "group": "Comparison & Decision",
+      "title": "compare",
+      "status": "LIVE",
+      "tagline": "the `compare` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "compare",
+              "left": {
+                "title": "Before",
+                "pill": "legacy",
+                "items": [
+                  "fixed 250px rail",
+                  "one layout for every doc"
+                ]
+              },
+              "right": {
+                "title": "After",
+                "pill": "v0.10",
+                "items": [
+                  "layout is a mode",
+                  "no-nav / top-nav / hero"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"compare\",\n  \"left\": {\n    \"title\": \"Before\",\n    \"pill\": \"legacy\",\n    \"items\": [\n      \"fixed 250px rail\",\n      \"one layout for every doc\"\n    ]\n  },\n  \"right\": {\n    \"title\": \"After\",\n    \"pill\": \"v0.10\",\n    \"items\": [\n      \"layout is a mode\",\n      \"no-nav / top-nav / hero\"\n    ]\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-split",
+      "group": "Comparison & Decision",
+      "title": "split",
+      "status": "LIVE",
+      "tagline": "the `split` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "split",
+              "seam": true,
+              "left": {
+                "content": [
+                  {
+                    "type": "prose",
+                    "text": "Left column — any composed content."
+                  }
+                ]
+              },
+              "right": {
+                "content": [
+                  {
+                    "type": "prose",
+                    "text": "Right column, divided by a seam gutter."
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"split\",\n  \"seam\": true,\n  \"left\": {\n    \"content\": [\n      {\n        \"type\": \"prose\",\n        \"text\": \"Left column \\u2014 any composed content.\"\n      }\n    ]\n  },\n  \"right\": {\n    \"content\": [\n      {\n        \"type\": \"prose\",\n        \"text\": \"Right column, divided by a seam gutter.\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-decisionmatrix",
+      "group": "Comparison & Decision",
+      "title": "decisionmatrix",
+      "status": "LIVE",
+      "tagline": "the `decisionmatrix` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "decisionmatrix",
+              "columns": [
+                "build1",
+                "build2"
+              ],
+              "rows": [
+                {
+                  "label": "gateway",
+                  "cells": [
+                    {
+                      "verdict": "have",
+                      "text": "yes"
+                    },
+                    {
+                      "verdict": "miss",
+                      "text": "no"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"decisionmatrix\",\n  \"columns\": [\n    \"build1\",\n    \"build2\"\n  ],\n  \"rows\": [\n    {\n      \"label\": \"gateway\",\n      \"cells\": [\n        {\n          \"verdict\": \"have\",\n          \"text\": \"yes\"\n        },\n        {\n          \"verdict\": \"miss\",\n          \"text\": \"no\"\n        }\n      ]\n    }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-decision",
+      "group": "Comparison & Decision",
+      "title": "decision",
+      "status": "LIVE",
+      "tagline": "the `decision` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "decision",
+              "question": "Which database?",
+              "chosen": "Postgres",
+              "rationale": "Already deployed fleet-wide.",
+              "alternatives": [
+                {
+                  "label": "SQLite",
+                  "reason": "no concurrent writers"
+                },
+                {
+                  "label": "MySQL"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"decision\",\n  \"question\": \"Which database?\",\n  \"chosen\": \"Postgres\",\n  \"rationale\": \"Already deployed fleet-wide.\",\n  \"alternatives\": [\n    {\n      \"label\": \"SQLite\",\n      \"reason\": \"no concurrent writers\"\n    },\n    {\n      \"label\": \"MySQL\"\n    }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-spectrum",
+      "group": "Comparison & Decision",
+      "title": "spectrum",
+      "status": "LIVE",
+      "tagline": "the `spectrum` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "spectrum",
+              "label": "Confidence",
+              "stops": [
+                {
+                  "label": "Low",
+                  "note": "guessing"
+                },
+                {
+                  "label": "Medium",
+                  "note": "measured once"
+                },
+                {
+                  "label": "High",
+                  "note": "measured repeatedly"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"spectrum\",\n  \"label\": \"Confidence\",\n  \"stops\": [\n    {\n      \"label\": \"Low\",\n      \"note\": \"guessing\"\n    },\n    {\n      \"label\": \"Medium\",\n      \"note\": \"measured once\"\n    },\n    {\n      \"label\": \"High\",\n      \"note\": \"measured repeatedly\"\n    }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-threeaxes",
+      "group": "Comparison & Decision",
+      "title": "threeaxes",
+      "status": "LIVE",
+      "tagline": "the `threeaxes` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "threeaxes",
+              "axes": [
+                {
+                  "name": "Speed",
+                  "kind": "computed",
+                  "note": "cached"
+                },
+                {
+                  "name": "Safety",
+                  "kind": "computed",
+                  "note": "sandboxed"
+                },
+                {
+                  "name": "Offline",
+                  "kind": "blind",
+                  "note": "needs vendoring"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"threeaxes\",\n  \"axes\": [\n    {\n      \"name\": \"Speed\",\n      \"kind\": \"computed\",\n      \"note\": \"cached\"\n    },\n    {\n      \"name\": \"Safety\",\n      \"kind\": \"computed\",\n      \"note\": \"sandboxed\"\n    },\n    {\n      \"name\": \"Offline\",\n      \"kind\": \"blind\",\n      \"note\": \"needs vendoring\"\n    }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-statusboard",
+      "group": "Boards & Pipelines",
+      "title": "statusboard",
+      "status": "LIVE",
+      "tagline": "the `statusboard` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "statusboard",
+              "columns": [
+                "build1",
+                "build2"
+              ],
+              "groups": [
+                {
+                  "label": "Core",
+                  "rows": [
+                    {
+                      "label": "gateway",
+                      "cells": [
+                        {
+                          "status": "LIVE"
+                        },
+                        {
+                          "status": "DEBT"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"statusboard\",\n  \"columns\": [\n    \"build1\",\n    \"build2\"\n  ],\n  \"groups\": [\n    {\n      \"label\": \"Core\",\n      \"rows\": [\n        {\n          \"label\": \"gateway\",\n          \"cells\": [\n            {\n              \"status\": \"LIVE\"\n            },\n            {\n              \"status\": \"DEBT\"\n            }\n          ]\n        }\n      ]\n    }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-pipeline",
+      "group": "Boards & Pipelines",
+      "title": "pipeline",
+      "status": "LIVE",
+      "tagline": "the `pipeline` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "pipeline",
+              "stages": [
+                {
+                  "label": "Design",
+                  "state": "done"
+                },
+                {
+                  "label": "Build",
+                  "state": "active",
+                  "note": "in progress"
+                },
+                {
+                  "label": "Ship"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"pipeline\",\n  \"stages\": [\n    {\n      \"label\": \"Design\",\n      \"state\": \"done\"\n    },\n    {\n      \"label\": \"Build\",\n      \"state\": \"active\",\n      \"note\": \"in progress\"\n    },\n    {\n      \"label\": \"Ship\"\n    }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-tabs",
+      "group": "Boards & Pipelines",
+      "title": "tabs",
+      "status": "LIVE",
+      "tagline": "the `tabs` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "tabs",
+              "id": "gallery-tabs",
+              "tabs": [
+                {
+                  "label": "Alpha",
+                  "content": [
+                    {
+                      "type": "prose",
+                      "text": "Alpha panel content."
+                    }
+                  ]
+                },
+                {
+                  "label": "Beta",
+                  "content": [
+                    {
+                      "type": "prose",
+                      "text": "Beta panel content."
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"tabs\",\n  \"id\": \"gallery-tabs\",\n  \"tabs\": [\n    {\n      \"label\": \"Alpha\",\n      \"content\": [\n        {\n          \"type\": \"prose\",\n          \"text\": \"Alpha panel content.\"\n        }\n      ]\n    },\n    {\n      \"label\": \"Beta\",\n      \"content\": [\n        {\n          \"type\": \"prose\",\n          \"text\": \"Beta panel content.\"\n        }\n      ]\n    }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-figure",
+      "group": "Diagrammatic",
+      "title": "figure",
+      "status": "LIVE",
+      "tagline": "the `figure` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "figure",
+              "name": "balloon-playful"
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"figure\",\n  \"name\": \"balloon-playful\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-ascii",
+      "group": "Diagrammatic",
+      "title": "ascii",
+      "status": "LIVE",
+      "tagline": "the `ascii` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "ascii",
+              "ascii": "+------+\n| node |\n+------+",
+              "caption": "A monospace ASCII diagram."
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"ascii\",\n  \"ascii\": \"+------+\\n| node |\\n+------+\",\n  \"caption\": \"A monospace ASCII diagram.\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-endpoint",
+      "group": "Diagrammatic",
+      "title": "endpoint",
+      "status": "LIVE",
+      "tagline": "the `endpoint` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "endpoint",
+              "ascii": "GET /scene -> 200 {json}",
+              "caption": "HTTP endpoint sketch."
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"endpoint\",\n  \"ascii\": \"GET /scene -> 200 {json}\",\n  \"caption\": \"HTTP endpoint sketch.\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-mermaid",
+      "group": "Diagrammatic",
+      "title": "mermaid",
+      "status": "LIVE",
+      "tagline": "the `mermaid` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "mermaid",
+              "mermaid": "graph TD; A-->B; B-->C;",
+              "title": "A small mermaid flow",
+              "caption": "Rendered client-side."
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"mermaid\",\n  \"mermaid\": \"graph TD; A-->B; B-->C;\",\n  \"title\": \"A small mermaid flow\",\n  \"caption\": \"Rendered client-side.\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-flow",
+      "group": "Diagrammatic",
+      "title": "flow",
+      "status": "LIVE",
+      "tagline": "the `flow` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "flow",
+              "head": "Request path",
+              "steps": [
+                {
+                  "n": "1",
+                  "head": "Parse",
+                  "sub": "tokenize the request"
+                },
+                {
+                  "n": "2",
+                  "head": "Render",
+                  "sub": "walk the block stream"
+                },
+                {
+                  "n": "3",
+                  "head": "Serve",
+                  "sub": "write bytes to the socket"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"flow\",\n  \"head\": \"Request path\",\n  \"steps\": [\n    {\n      \"n\": \"1\",\n      \"head\": \"Parse\",\n      \"sub\": \"tokenize the request\"\n    },\n    {\n      \"n\": \"2\",\n      \"head\": \"Render\",\n      \"sub\": \"walk the block stream\"\n    },\n    {\n      \"n\": \"3\",\n      \"head\": \"Serve\",\n      \"sub\": \"write bytes to the socket\"\n    }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-descent",
+      "group": "Diagrammatic",
+      "title": "descent",
+      "status": "LIVE",
+      "tagline": "the `descent` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "descent",
+              "title": "Rewrite decision",
+              "tag": "net-new",
+              "why": "1290 lines, mixed responsibilities.",
+              "layers": [
+                {
+                  "here": true,
+                  "title": "feedback.js",
+                  "tag": "net-new",
+                  "why": "split by responsibility"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"descent\",\n  \"title\": \"Rewrite decision\",\n  \"tag\": \"net-new\",\n  \"why\": \"1290 lines, mixed responsibilities.\",\n  \"layers\": [\n    {\n      \"here\": true,\n      \"title\": \"feedback.js\",\n      \"tag\": \"net-new\",\n      \"why\": \"split by responsibility\"\n    }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-code",
+      "group": "Code & Docs",
+      "title": "code",
+      "status": "LIVE",
+      "tagline": "the `code` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "code",
+              "mode": "snippet",
+              "caption": "A syntax-flavored code block (mode: snippet).",
+              "spans": [
+                {
+                  "cls": "plain",
+                  "text": "func hello() string {\n\treturn \"hi\"\n}"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"code\",\n  \"mode\": \"snippet\",\n  \"caption\": \"A syntax-flavored code block (mode: snippet).\",\n  \"spans\": [\n    {\n      \"cls\": \"plain\",\n      \"text\": \"func hello() string {\\n\\treturn \\\"hi\\\"\\n}\"\n    }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-table",
+      "group": "Code & Docs",
+      "title": "table",
+      "status": "LIVE",
+      "tagline": "the `table` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "table",
+              "name": "Coverage",
+              "columns": [
+                "Area",
+                "Status"
+              ],
+              "groups": [
+                {
+                  "rows": [
+                    {
+                      "cells": [
+                        {
+                          "text": "gateway"
+                        },
+                        {
+                          "text": "LIVE"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"table\",\n  \"name\": \"Coverage\",\n  \"columns\": [\n    \"Area\",\n    \"Status\"\n  ],\n  \"groups\": [\n    {\n      \"rows\": [\n        {\n          \"cells\": [\n            {\n              \"text\": \"gateway\"\n            },\n            {\n              \"text\": \"LIVE\"\n            }\n          ]\n        }\n      ]\n    }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-howto",
+      "group": "Code & Docs",
+      "title": "howto",
+      "status": "LIVE",
+      "tagline": "the `howto` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "howto",
+              "label": "HOWTO",
+              "title": "Adding a primitive",
+              "intro": "Two files, no Go RenderFunc.",
+              "code_block": {
+                "type": "code",
+                "mode": "snippet",
+                "spans": [
+                  {
+                    "cls": "plain",
+                    "text": "templates.json[\"mine\"] = [...]\nprimitive_css.json[\"mine\"] = \"...\""
+                  }
+                ]
+              },
+              "steps": [
+                "Add the template entry.",
+                "Add the matching CSS entry.",
+                "Write a test that renders it.",
+                "Commit."
+              ]
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"howto\",\n  \"label\": \"HOWTO\",\n  \"title\": \"Adding a primitive\",\n  \"intro\": \"Two files, no Go RenderFunc.\",\n  \"code_block\": {\n    \"type\": \"code\",\n    \"mode\": \"snippet\",\n    \"spans\": [\n      {\n        \"cls\": \"plain\",\n        \"text\": \"templates.json[\\\"mine\\\"] = [...]\\nprimitive_css.json[\\\"mine\\\"] = \\\"...\\\"\"\n      }\n    ]\n  },\n  \"steps\": [\n    \"Add the template entry.\",\n    \"Add the matching CSS entry.\",\n    \"Write a test that renders it.\",\n    \"Commit.\"\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-call",
+      "group": "Code & Docs",
+      "title": "call",
+      "status": "LIVE",
+      "tagline": "the `call` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "call",
+              "title": "Verdict",
+              "text": "Ship it.",
+              "options": [
+                {
+                  "key": "cost",
+                  "text": "low"
+                },
+                {
+                  "key": "risk",
+                  "text": "low"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"call\",\n  \"title\": \"Verdict\",\n  \"text\": \"Ship it.\",\n  \"options\": [\n    {\n      \"key\": \"cost\",\n      \"text\": \"low\"\n    },\n    {\n      \"key\": \"risk\",\n      \"text\": \"low\"\n    }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-action",
+      "group": "Interactive",
+      "title": "action",
+      "status": "LIVE",
+      "tagline": "the `action` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "action",
+              "label": "Run the pipeline",
+              "idle_text": "idle",
+              "done_text": "complete",
+              "run_label": "Run",
+              "steps": [
+                {
+                  "label": "Parse",
+                  "detail": "tokenize"
+                },
+                {
+                  "label": "Render",
+                  "detail": "walk blocks"
+                },
+                {
+                  "label": "Serve",
+                  "detail": "write response"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"action\",\n  \"label\": \"Run the pipeline\",\n  \"idle_text\": \"idle\",\n  \"done_text\": \"complete\",\n  \"run_label\": \"Run\",\n  \"steps\": [\n    {\n      \"label\": \"Parse\",\n      \"detail\": \"tokenize\"\n    },\n    {\n      \"label\": \"Render\",\n      \"detail\": \"walk blocks\"\n    },\n    {\n      \"label\": \"Serve\",\n      \"detail\": \"write response\"\n    }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-control",
+      "group": "Interactive",
+      "title": "control",
+      "status": "LIVE",
+      "tagline": "the `control` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "control",
+              "id": "q1",
+              "prompt": "Pick a favorite primitive",
+              "control": "radio",
+              "choices": [
+                {
+                  "value": "tabs",
+                  "label": "tabs"
+                },
+                {
+                  "value": "pill",
+                  "label": "pill"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"control\",\n  \"id\": \"q1\",\n  \"prompt\": \"Pick a favorite primitive\",\n  \"control\": \"radio\",\n  \"choices\": [\n    {\n      \"value\": \"tabs\",\n      \"label\": \"tabs\"\n    },\n    {\n      \"value\": \"pill\",\n      \"label\": \"pill\"\n    }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-ask",
+      "group": "Interactive",
+      "title": "ask",
+      "status": "LIVE",
+      "tagline": "the `ask` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "ask",
+              "id": "q2",
+              "prompt": "Would you use this?",
+              "control": "select",
+              "choices": [
+                {
+                  "value": "y",
+                  "label": "yes"
+                },
+                {
+                  "value": "n",
+                  "label": "no"
+                }
+              ],
+              "hint": "one click"
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"ask\",\n  \"id\": \"q2\",\n  \"prompt\": \"Would you use this?\",\n  \"control\": \"select\",\n  \"choices\": [\n    {\n      \"value\": \"y\",\n      \"label\": \"yes\"\n    },\n    {\n      \"value\": \"n\",\n      \"label\": \"no\"\n    }\n  ],\n  \"hint\": \"one click\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-style-ab",
+      "group": "Interactive",
+      "title": "style_ab",
+      "status": "LIVE",
+      "tagline": "the `style_ab` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "style_ab",
+              "id": "sab",
+              "default": "corp",
+              "voices": [
+                {
+                  "id": "corp",
+                  "label": "Corporate",
+                  "line": "crisp, neutral",
+                  "dot": true,
+                  "preview": [
+                    {
+                      "type": "prose",
+                      "text": "A clean, buttoned-up voice."
+                    }
+                  ]
+                },
+                {
+                  "id": "playful",
+                  "label": "Playful",
+                  "line": "warm, rounded",
+                  "dot": true,
+                  "preview": [
+                    {
+                      "type": "prose",
+                      "text": "A warm, rounded voice."
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"style_ab\",\n  \"id\": \"sab\",\n  \"default\": \"corp\",\n  \"voices\": [\n    {\n      \"id\": \"corp\",\n      \"label\": \"Corporate\",\n      \"line\": \"crisp, neutral\",\n      \"dot\": true,\n      \"preview\": [\n        {\n          \"type\": \"prose\",\n          \"text\": \"A clean, buttoned-up voice.\"\n        }\n      ]\n    },\n    {\n      \"id\": \"playful\",\n      \"label\": \"Playful\",\n      \"line\": \"warm, rounded\",\n      \"dot\": true,\n      \"preview\": [\n        {\n          \"type\": \"prose\",\n          \"text\": \"A warm, rounded voice.\"\n        }\n      ]\n    }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-canvas",
+      "group": "Live Surfaces",
+      "title": "canvas",
+      "status": "LIVE",
+      "tagline": "the `canvas` primitive — a live co-drawing surface (Excalidraw/codraw), per-canvas boards (v2)",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "canvas",
+              "id": "gallery-canvas",
+              "label": "try drawing here — it's live when served",
+              "height": 340
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Structural (hand-coded), not a templates.json entry — but it IS a primitive, and one of std-doc's most distinctive. Draw on it above: it saves to a scene.json sibling of this doc, the same way comments save to feedback.jsonl. As of v0.11, EACH canvas block gets its own board — its own scene, its own feedback inbox — routed by id, not shared. See protocol/canvas.md."
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"canvas\",\n  \"id\": \"gallery-canvas\",\n  \"label\": \"try drawing here \\u2014 it's live when served\",\n  \"height\": 340\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-reveal",
+      "group": "Motion",
+      "title": "reveal",
+      "status": "LIVE",
+      "tagline": "the `reveal` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "reveal",
+              "tone": "muse",
+              "paras": [
+                {
+                  "content": [
+                    {
+                      "type": "text",
+                      "s": "An animated-in reveal paragraph — "
+                    },
+                    {
+                      "type": "soft",
+                      "s": "soft emphasis"
+                    },
+                    {
+                      "type": "text",
+                      "s": " mid-sentence."
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"reveal\",\n  \"tone\": \"muse\",\n  \"paras\": [\n    {\n      \"content\": [\n        {\n          \"type\": \"text\",\n          \"s\": \"An animated-in reveal paragraph \\u2014 \"\n        },\n        {\n          \"type\": \"soft\",\n          \"s\": \"soft emphasis\"\n        },\n        {\n          \"type\": \"text\",\n          \"s\": \" mid-sentence.\"\n        }\n      ]\n    }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

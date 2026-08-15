@@ -214,7 +214,7 @@ func (s *server) serveFromLib(w http.ResponseWriter, r *http.Request, rel string
 	// (Decision 2 — serve auto-starts it). Only touches HTML, only when a surface
 	// is running; the authored src is a fallback that never has to be right.
 	if s.canvasURL != "" && strings.EqualFold(filepath.Ext(target), ".html") {
-		body = rewriteCanvasSrc(body, s.canvasURL)
+		body = rewriteCanvasBoards(body, s.canvasURL)
 	}
 	ct := mime.TypeByExtension(filepath.Ext(target))
 	if ct == "" {
@@ -264,7 +264,7 @@ func (s *server) serveStatic(w http.ResponseWriter, r *http.Request) {
 	// (Decision 2 — serve auto-starts it). Only touches HTML, only when a surface
 	// is running; the authored src is a fallback that never has to be right.
 	if s.canvasURL != "" && strings.EqualFold(filepath.Ext(target), ".html") {
-		body = rewriteCanvasSrc(body, s.canvasURL)
+		body = rewriteCanvasBoards(body, s.canvasURL)
 	}
 	ct := mime.TypeByExtension(filepath.Ext(target))
 	if ct == "" {
@@ -536,6 +536,7 @@ func newestMTime(root string) int64 {
 //   - {"state":"stopped", "reason":..., "stopped_at":...}  written on the way
 //     out — the address survives, and says why it is no longer live.
 //   - absent — never served (or cleaned by hand).
+//
 // A reader still confirms "serving" by probing the port; the point is that a
 // stale marker now says stopped instead of cheerfully implying it is up.
 func (s *server) writePortState(state, reason string) {

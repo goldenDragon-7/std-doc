@@ -66,7 +66,26 @@ func cmdLint(args []string) error {
 		fmt.Printf("std-doc lint %s: clean ✓\n", src)
 	}
 
+	// v0.11 S3 — lint-suggestions: a SEPARATE pass (core.LintSuggest), printed
+	// as its own clearly-labeled section, NEVER folded into `findings` above.
+	// This is deliberate, not an oversight: `findings`/nErr/nWarn feed every
+	// exit-code decision below (including --lint-only's "ANY finding" gate),
+	// and a suggestion must NEVER trip that gate — "never blocks publish" is a
+	// hard rule, not a preference. Read the doc comment on core.LintSuggest.
+	if !quiet {
+		if doc, derr := wire.ParseOrderedJSON(mustReadFile(src)); derr == nil {
+			if suggestions, serr := core.LintSuggest(doc, lib); serr == nil && len(suggestions) > 0 {
+				fmt.Println()
+				fmt.Println("Suggestions (notes only — never block publish):")
+				for _, s := range suggestions {
+					fmt.Printf("  [suggest] %s: %s\n", s.Slug, s.Message)
+				}
+			}
+		}
+	}
+
 	// exit policy: --lint-only fails on ANY finding; otherwise only on errors.
+	// Suggestions are NEVER part of `findings` and NEVER consulted here.
 	if lintOnly && len(findings) > 0 {
 		os.Exit(1)
 	}
@@ -74,6 +93,17 @@ func cmdLint(args []string) error {
 		os.Exit(1)
 	}
 	return nil
+}
+
+// mustReadFile reads src, returning nil on any error (the suggestion pass is
+// best-effort informational output — a read failure here must never abort
+// `stddoc lint`, which already reported the real error via lintSource above).
+func mustReadFile(src string) []byte {
+	b, err := os.ReadFile(src)
+	if err != nil {
+		return nil
+	}
+	return b
 }
 
 // lintSource reads + parses a source.json and lints it.

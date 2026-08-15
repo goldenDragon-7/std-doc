@@ -204,3 +204,39 @@ func TestCapability_CodrawVendoredOffline(t *testing.T) {
 		t.Error("no vendored vendor-*.js chunk — Excalidraw lazy-loads it from the asset path and it would 404 offline")
 	}
 }
+
+// CAPABILITY: the codraw client's scene/feedback calls are RELATIVE (Seam 4,
+// prd/canvas-primitive/v2-per-canvas-boards.md — v2 per-canvas boards). An
+// absolute "/scene" would always hit the server ROOT (the v1 default board)
+// no matter which board's index.html served it; "./scene" resolves against
+// the document's own URL, so serving the SAME shared client under
+// "/board/<id>/" auto-scopes every request back to that board with ZERO
+// client-side knowledge of ids — the whole point of routing by URL path
+// instead of by, say, a query param the client would have to thread through.
+// EXCALIDRAW_ASSET_PATH stays absolute ("/vendor/") on purpose — the vendored
+// runtime IS shared across every board (one copy, PRD Seam 3 "What does NOT
+// change" isn't the right section, but the design doc's seam 3 note: "Static
+// assets…stay shared — one copy, served at the root").
+func TestCapability_CodrawSceneFeedbackAreRelative(t *testing.T) {
+	codraw := filepath.Join(repoRoot(t), "go", "stddoc-lib", "lib", "codraw")
+	idx, err := os.ReadFile(filepath.Join(codraw, "index.html"))
+	if err != nil {
+		t.Fatalf("read codraw/index.html: %v", err)
+	}
+	body := string(idx)
+	for _, absolute := range []string{`fetch("/scene"`, `fetch("/feedback"`} {
+		if strings.Contains(body, absolute) {
+			t.Errorf("codraw client must NOT fetch an ABSOLUTE %q — that always hits the default board regardless of which board's index.html served it; use a relative \"./...\" path instead", absolute)
+		}
+	}
+	for _, relative := range []string{`fetch("./scene"`, `fetch("./feedback"`} {
+		if !strings.Contains(body, relative) {
+			t.Errorf("codraw client must fetch the relative %q so /board/<id>/ auto-scopes it", relative)
+		}
+	}
+	// The shared vendored runtime stays absolute — it's the SAME copy for
+	// every board, not board-scoped.
+	if !strings.Contains(body, `EXCALIDRAW_ASSET_PATH = "/vendor/"`) {
+		t.Error("EXCALIDRAW_ASSET_PATH must stay the absolute shared /vendor/ path")
+	}
+}

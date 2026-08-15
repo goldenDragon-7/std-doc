@@ -80,6 +80,39 @@ func renderNavLevel(roots []any, current string, isIndex bool, onPath map[string
 	return h.String()
 }
 
+// renderTopNav renders a sticky HORIZONTAL nav bar (the "hub" layout) instead of
+// the left aside: brand, the top-level pages as inline links, and the SAME search
+// box the sidebar carries (id cf-search) — so full-text search keeps working with
+// no left rail. This is the top-nav mode's chrome; content flows full-width below.
+func renderTopNav(doc *wire.OrderedMap, current string, isIndex bool) string {
+	roots := buildTree(doc)
+	var h strings.Builder
+	h.WriteString("<header class='topnav'>")
+	h.WriteString("<a class='brand' href='index.html'>" + esc(getOr(doc, "title", "Doc")) + "</a>")
+	h.WriteString("<nav class='topnav-links'>")
+	ra := ""
+	if isIndex {
+		ra = " active"
+	}
+	h.WriteString("<a class='tn-link" + ra + "' href='index.html'>&#9672; index</a>")
+	for _, nv := range roots {
+		n, _ := omap(nv)
+		cls := "tn-link"
+		if !isIndex && str(n, "slug") == current {
+			cls += " active"
+		}
+		h.WriteString("<a class='" + cls + "' href='" + esc(str(n, "slug")) + ".html'>" +
+			esc(navLabel(str(n, "title"))) + "</a>")
+	}
+	h.WriteString("</nav>")
+	h.WriteString("<div class='cf-search-box'>" +
+		"<input id='cf-search' type='search' placeholder='Search…' " +
+		"autocomplete='off' spellcheck='false'>" +
+		"<div id='cf-search-results'></div></div>")
+	h.WriteString("</header>")
+	return h.String()
+}
+
 func renderBreadcrumb(n *wire.OrderedMap) string {
 	crumbs := []string{"<a href='index.html'>&#9672;</a>"}
 	anc := ancestors(n)

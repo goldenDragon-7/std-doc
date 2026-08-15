@@ -32,3 +32,35 @@ func TestRichText(t *testing.T) {
 		}
 	}
 }
+
+// TestRichTextBlocks covers the prose-structure fix (2026-08-15): a prose field
+// that "spewed" as one wall of text now gets real paragraphs, line breaks and
+// lists. Single-line input MUST stay byte-identical (guards the conformance
+// golden-master); newlines/lists gain structure.
+func TestRichTextBlocks(t *testing.T) {
+	cases := []struct {
+		name string
+		in   string
+		want string
+	}{
+		{"single line unchanged (conformance)", "just one line here",
+			esc("just one line here")},
+		{"two paragraphs on a blank line", "first para.\n\nsecond para.",
+			"<p>first para.</p><p>second para.</p>"},
+		{"single newline is a line break within a paragraph", "line one\nline two",
+			"<p>line one<br>line two</p>"},
+		{"dash run becomes an unordered list", "- one\n- two\n- three",
+			"<ul><li>one</li><li>two</li><li>three</li></ul>"},
+		{"numbered run becomes an ordered list", "1. first\n2. second",
+			"<ol><li>first</li><li>second</li></ol>"},
+		{"paragraph then list", "Do these:\n\n- a\n- b",
+			"<p>Do these:</p><ul><li>a</li><li>b</li></ul>"},
+		{"list items escape and linkify", "- see [x](https://e.test/p)\n- b & c",
+			`<ul><li>see <a href="https://e.test/p">x</a></li><li>b &amp; c</li></ul>`},
+	}
+	for _, c := range cases {
+		if got := richText(c.in); got != c.want {
+			t.Errorf("%s:\n  in   %q\n  got  %q\n  want %q", c.name, c.in, got, c.want)
+		}
+	}
+}

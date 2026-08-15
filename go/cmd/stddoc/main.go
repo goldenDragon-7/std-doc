@@ -2,15 +2,16 @@
 // that renders a source.json byte-identical to the Python reference, freezes
 // self-contained, and shells out to nothing at runtime.
 //
-//	stddoc publish  <source.json> <out-dir> [--style <name>]
-//	stddoc lint     <source.json>
-//	stddoc freeze   <dir>
-//	stddoc serve    <dir>
-//	stddoc inject   <dir>
+//	stddoc publish    <source.json> <out-dir> [--style <name>]
+//	stddoc lint       <source.json>
+//	stddoc freeze     <dir>
+//	stddoc serve      <dir>
+//	stddoc inject     <dir>
 //	stddoc ls
-//	stddoc status   <dir>
-//	stddoc roll     <source.json> --slug <slug>
-//	stddoc graduate <dir>
+//	stddoc status     <dir>
+//	stddoc roll       <source.json> --slug <slug>
+//	stddoc graduate   <dir>
+//	stddoc primitives
 //
 // Acceptance gate: conformance/run_go.sh — empty diff vs the language-neutral
 // goldens in conformance/cases/<case>/expected/ for all 7 cases.
@@ -34,7 +35,7 @@ func main() {
 
 func run(args []string) error {
 	if len(args) == 0 {
-		return fmt.Errorf("usage: stddoc <publish|lint|freeze|serve|inject|ls|status|roll|graduate> ...")
+		return fmt.Errorf("usage: stddoc <publish|lint|freeze|serve|inject|ls|status|roll|graduate|primitives> ...")
 	}
 	cmd, rest := args[0], args[1:]
 	switch cmd {
@@ -59,6 +60,8 @@ func run(args []string) error {
 		return cmdRoll(rest)
 	case "graduate":
 		return cmdGraduate(rest)
+	case "primitives":
+		return cmdPrimitives(rest)
 	default:
 		return fmt.Errorf("unknown command %q", cmd)
 	}

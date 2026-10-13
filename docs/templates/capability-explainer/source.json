@@ -1,0 +1,105 @@
+{
+  "title": "Capability Explainer — worked example",
+  "generated_date": "2026-09-01",
+  "layout": "top-nav",
+  "root": "cap",
+  "palette": {
+    "glow": { "label": "Glow", "color": "#22d3ee" },
+    "amber": { "label": "Amber", "color": "#f59e0b" },
+    "green": { "label": "Green", "color": "#10b981" }
+  },
+  "nodes": [
+    {
+      "slug": "cap",
+      "title": "Beacon — capability explainer",
+      "blocks": [
+        {
+          "type": "hero",
+          "text": "Beacon 🔔 — a capability that watches for you",
+          "sub": "TL;DR: it schedules the check, watches the result, and pages you only when something actually needs you."
+        },
+        {
+          "type": "callout",
+          "kind": "green",
+          "lead": "The problem & the promise",
+          "body": "Every citizen was hand-polling logs to know when a build finished. Beacon promises: arm it once, and it interrupts you exactly when — and only when — the thing you asked about changes state."
+        },
+        {
+          "type": "stats-bar",
+          "stats": [
+            { "value": "3", "label": "modes" },
+            { "value": "5", "label": "phases" },
+            { "value": "0", "label": "false pages this week", "kind": "green" }
+          ]
+        },
+        {
+          "type": "flow",
+          "head": "The three modes",
+          "steps": [
+            { "n": "1", "head": "DRY_RUN", "sub": "watches and logs, never pages" },
+            { "n": "2", "head": "ACTIVE", "sub": "pages on match" },
+            { "n": "3", "head": "KILL", "sub": "immediate stop, no residual watchers" }
+          ]
+        },
+        {
+          "type": "mermaid",
+          "title": "Mode transitions",
+          "mermaid": "stateDiagram-v2\n  [*] --> DRY_RUN\n  DRY_RUN --> ACTIVE: promote (after a clean match)\n  ACTIVE --> KILL: kill switch\n  DRY_RUN --> KILL: kill switch\n  KILL --> [*]",
+          "caption": "There is no ACTIVE -> DRY_RUN path — demoting means killing and re-arming, on purpose."
+        },
+        {
+          "type": "pipeline",
+          "stages": [
+            { "label": "Arm", "state": "done" },
+            { "label": "Watch", "state": "done" },
+            { "label": "Match", "state": "active", "note": "pattern found in stream" },
+            { "label": "Page", "note": "delivered to the owner" },
+            { "label": "Retire", "note": "auto-expire after 7 days" }
+          ]
+        },
+        {
+          "type": "code",
+          "mode": "command",
+          "caption": "Turn it on",
+          "spans": [
+            { "cls": "plain", "text": "beacon arm --pattern 'FAILED|Traceback' --target build.log --mode ACTIVE" }
+          ]
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": "Policy YAML",
+          "spans": [
+            { "cls": "plain", "text": "mode: ACTIVE\npattern: \"FAILED|Traceback|OOM\"\ncooldown_seconds: 60\nowner: std-doc-template-scout" }
+          ]
+        },
+        {
+          "type": "table",
+          "name": "What's live right now",
+          "columns": ["Watcher", "Mode", "Target"],
+          "groups": [
+            {
+              "rows": [
+                { "cells": [ {"text":"build1-ci"}, {"text":"ACTIVE"}, {"text":"build1 CI logs"} ] },
+                { "cells": [ {"text":"tiny-deploy"}, {"text":"DRY_RUN"}, {"text":"deploy.log"} ] }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "howto",
+          "intro": "Promoting DRY_RUN to ACTIVE",
+          "steps": [
+            "Confirm the watcher has logged at least one true match with no false positives",
+            "Run `beacon promote <watcher-id>`",
+            "Verify a real page arrives on the next match"
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Operational notes: pages route through the channel autonomic, so a suspended seat still receives on wake. Retention is 7 days, matching cron's own expiry — Beacon rides the same substrate deliberately, not by accident."
+        }
+      ]
+    }
+  ]
+}

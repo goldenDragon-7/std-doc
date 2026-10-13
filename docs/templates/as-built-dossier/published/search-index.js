@@ -1,0 +1,1 @@
+window.CF_SEARCH_INDEX=[{"slug":"dossier","url":"dossier.html","number":"1.1","title":"Autonomics","sections":null,"text":"autonomics — as-built architecture"}];

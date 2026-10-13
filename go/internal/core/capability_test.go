@@ -206,7 +206,7 @@ func TestCapability_CodrawVendoredOffline(t *testing.T) {
 }
 
 // CAPABILITY: the codraw client's scene/feedback calls are RELATIVE (Seam 4,
-// prd/canvas-primitive/v2-per-canvas-boards.md — v2 per-canvas boards). An
+// the canvas v2 per-board design — v2 per-canvas boards). An
 // absolute "/scene" would always hit the server ROOT (the v1 default board)
 // no matter which board's index.html served it; "./scene" resolves against
 // the document's own URL, so serving the SAME shared client under
@@ -238,5 +238,44 @@ func TestCapability_CodrawSceneFeedbackAreRelative(t *testing.T) {
 	// every board, not board-scoped.
 	if !strings.Contains(body, `EXCALIDRAW_ASSET_PATH = "/vendor/"`) {
 		t.Error("EXCALIDRAW_ASSET_PATH must stay the absolute shared /vendor/ path")
+	}
+}
+
+// CAPABILITY: the doc-tree schema documents the three node containers, and the
+// linter enforces exactly what the schema promises.
+//
+// The container rule (sections[]=prose, blocks[]=primitives, children[]=nodes)
+// was UNDOCUMENTED until 2026-08-22 and cost a full morning: primitives authored
+// into sections[] rendered as nothing, silently. Documenting it is only half a
+// fix — a doc can drift from the code. This binds the two together: if the
+// schema stops describing a container, or the linter stops enforcing it, this
+// goes red.
+func TestCapability_ContainerRuleDocumentedAndEnforced(t *testing.T) {
+	schema, err := os.ReadFile(filepath.Join(repoRoot(t), "protocol", "doctree-schema.md"))
+	if err != nil {
+		t.Fatalf("read doctree-schema.md: %v", err)
+	}
+	doc := string(schema)
+	for _, container := range []string{"sections[]", "blocks[]", "children[]"} {
+		if !strings.Contains(doc, container) {
+			t.Errorf("doctree-schema.md must document the %s container — an undocumented container is how the silent-drop class happened", container)
+		}
+	}
+
+	// …and the promise is kept by the code, not just the prose.
+	for _, tc := range []struct{ name, src, want string }{
+		{"primitive in sections[]",
+			`{"title":"T","nodes":[{"slug":"a","title":"A","sections":[{"type":"table","name":"N","columns":["c"],"groups":[]}]}]}`,
+			"authored in sections[]"},
+		{"primitive in children[]",
+			`{"title":"T","nodes":[{"slug":"a","title":"A","children":[{"type":"table","name":"N","columns":["c"],"groups":[]}]}]}`,
+			"authored in children[]"},
+		{"mistyped container",
+			`{"title":"T","nodes":[{"slug":"a","title":"A","block":[]}]}`,
+			"did you mean 'blocks'"},
+	} {
+		if f := findingBy(lintSrc(t, tc.src), tc.want); f == nil || f.Level != "error" {
+			t.Errorf("%s: schema documents this as wrong but the linter does not enforce it (want error containing %q)", tc.name, tc.want)
+		}
 	}
 }

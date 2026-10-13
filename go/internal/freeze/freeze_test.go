@@ -255,3 +255,33 @@ func TestFreezeCanvas_InlinesAuthorSnapshot(t *testing.T) {
 		t.Errorf("the snapshot must be unhidden in the frozen copy:\n%s", got)
 	}
 }
+
+// TestFreezeCanvas_V2AttributeOrder is the regression guard for the canvas-v2
+// freeze regression: the renderer emits `data-canvas-board` BEFORE `class`, so
+// an order-pinned pattern silently no-ops — the frozen page keeps a live
+// <iframe src='codraw:…'> and the author's snapshot stays `hidden`, i.e. the
+// drawing disappears from the frozen doc. The freeze gate cannot catch this,
+// because `codraw:` is not an http(s) URL and so is not an "external ref".
+// This fixture is copied from real `stddoc publish` output, NOT hand-written —
+// which is the entire point: the old fixtures passed while every real page broke.
+func TestFreezeCanvas_V2AttributeOrder(t *testing.T) {
+	live := `<div data-canvas-board='as-is' class='canvas-embed' data-canvas-src='codraw:as-is'>` +
+		`<div class='dc-top'><span class='dc-label'>AS-IS board</span></div>` +
+		`<div class='canvas-snapshot' hidden><svg id='drawing'></svg></div>` +
+		`<iframe class='canvas-frame' src='codraw:as-is'></iframe></div>`
+
+	got := FreezeCanvas(live)
+
+	if strings.Contains(got, "<iframe") {
+		t.Error("frozen canvas must not keep the live iframe (v2 attribute order)")
+	}
+	if strings.Contains(got, "hidden") {
+		t.Error("the author snapshot must be UNHIDDEN in the frozen output")
+	}
+	if !strings.Contains(got, "<svg id='drawing'></svg>") {
+		t.Error("the author snapshot SVG must be inlined into the frozen output")
+	}
+	if !strings.Contains(got, "AS-IS board") {
+		t.Error("the dc-label caption must be carried into the frozen block")
+	}
+}

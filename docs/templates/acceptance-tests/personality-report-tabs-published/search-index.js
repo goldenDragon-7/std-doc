@@ -1,0 +1,1 @@
+window.CF_SEARCH_INDEX=[{"slug":"t","url":"t.html","number":"1.1","title":"Plane 01","sections":null,"text":"plane 01 - personality configuration"}];

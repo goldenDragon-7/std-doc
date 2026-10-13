@@ -1,0 +1,90 @@
+{
+  "title": "Captain Synthesis Brief — worked example",
+  "generated_date": "2026-09-01",
+  "layout": "top-nav",
+  "root": "brief",
+  "palette": {
+    "glow": { "label": "Glow", "color": "#22d3ee" },
+    "amber": { "label": "Amber", "color": "#f59e0b" },
+    "red": { "label": "Red", "color": "#ef4444" },
+    "green": { "label": "Green", "color": "#10b981" },
+    "purple": { "label": "Purple", "color": "#a78bfa" }
+  },
+  "nodes": [
+    {
+      "slug": "brief",
+      "title": "Lane 07 · Cron Substrate — Captain Brief",
+      "blocks": [
+        {
+          "type": "hero",
+          "text": "Lane 07 · Cron Substrate — captain brief",
+          "sub": "Synthesis for the strategist. Full evidence trail lives in the detective report; this is the compressed, table-forward view."
+        },
+        {
+          "type": "synthesis-note",
+          "text": "The detective found the scheduler itself sound — the failure is entirely at the consumer boundary, where two independent readers make the same wrong assumption about what job presence proves."
+        },
+        {
+          "type": "stats-bar",
+          "stats": [
+            { "value": "31", "label": "files inventoried" },
+            { "value": "4", "label": "critical findings", "kind": "red" },
+            { "value": "6", "label": "orphaned jobs", "kind": "amber" }
+          ]
+        },
+        {
+          "type": "callout",
+          "kind": "amber",
+          "lead": "Axiom under partial violation",
+          "body": "\"A cron job proves a durable heartbeat\" is assumed by two consumers and true for neither. The gate and the handoff writer both read job PRESENCE as proof of job PERSISTENCE."
+        },
+        {
+          "type": "verdict-box",
+          "label": "Lane verdict",
+          "verdict": "appropriate_but_undernotified",
+          "kind": "amber",
+          "text": "The scheduler itself is sound and well-documented. The failure is entirely at the consumer boundary: nothing downstream distinguishes 'never armed' from 'armed and silently expired.'"
+        },
+        {
+          "type": "decisionmatrix",
+          "columns": ["Aspirational", "As-built"],
+          "rows": [
+            { "label": "Durable across restarts", "cells": [ {"verdict":"unknown","text":"undocumented"}, {"verdict":"miss","text":"confirmed gone"} ] },
+            { "label": "Notifies before expiry", "cells": [ {"verdict":"unknown","text":"undocumented"}, {"verdict":"miss","text":"silent"} ] },
+            { "label": "Off-:00/:30 minute discipline", "cells": [ {"verdict":"have","text":"documented"}, {"verdict":"have","text":"confirmed"} ] }
+          ]
+        },
+        {
+          "type": "cardcluster",
+          "groups": [
+            {
+              "label": "Critical",
+              "cards": [
+                { "title": "loop-gate false-pass", "body": "Gate re-passes on an expired job because absence-of-error is read as presence-of-heartbeat.", "ent": "red" }
+              ]
+            },
+            {
+              "label": "Drift / contradictions",
+              "cards": [
+                { "title": "Docs say durable", "body": "Onboarding copy says 'schedule your own wakeups' with no caveat about the 7-day cap.", "ent": "amber" }
+              ]
+            },
+            {
+              "label": "Load-bearing undocumented",
+              "cards": [
+                { "title": "9,39 off-herd convention", "body": "Every citizen sampled honors it; nowhere is it enforced or linted.", "ent": "glow" }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "kv",
+          "rows": [
+            { "k": "Open question", "v": "Track durability outside the session table, or just add a distinguishable expired-vs-never-armed gate state?" },
+            { "k": "Cross-lane pointer", "v": "handoff-writer shares this exact false-pass risk — worth a joint fix, not two patches" }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -35,6 +35,28 @@ for dir in "$CASES"/*/; do
   # search_capability_test.go) but are not byte-goldened here — same scope as the
   # Go TestConformanceCases_ByteIdentical, which only compares expected/ HTML.
   DIFF_X=(-x 'search-index.js' -x 'search-index.json')
+
+  # Normalize away <html data-style-default="…">, which the PUBLISH COMMAND adds
+  # after core.Publish has rendered (see cmd/stddoc/stylestamp.go) so that
+  # serve's style-lock honors the doc's published --style instead of repainting
+  # it techno-dark.
+  #
+  # WHY NORMALIZE RATHER THAN RE-SEED: expected/ is a LANGUAGE-NEUTRAL golden of
+  # core.Publish — the Python-parity contract — and it has a second consumer,
+  # internal/core's TestConformanceCases_ByteIdentical, which calls core.Publish
+  # directly and therefore never sees the stamp. Re-seeding the goldens with the
+  # stamp turns THAT test red (measured: 2026-10-13, internal/core FAIL, "first
+  # diff byte at ~20"). One golden set, two consumers, so the post-render
+  # attribute is stripped here instead.
+  #
+  # The stamp itself is NOT left unguarded: cmd/stddoc/stylestamp_test.go pins
+  # its exact form and idempotence, and TestPublishStampsThePublishedStyle runs
+  # the real publish command and asserts the attribute is present.
+  for f in "$out"/*.html; do
+    [ -f "$f" ] || continue
+    LC_ALL=C sed -i '' -E 's/ data-style-default="[^"]*"//g' "$f"
+  done
+
   if diff -r "${DIFF_X[@]}" "$out" "$expected" >/dev/null 2>&1; then
     echo "✓ $case"
   else

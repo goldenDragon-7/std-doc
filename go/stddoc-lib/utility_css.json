@@ -1,0 +1,34 @@
+{
+  "_doc": "THE UTILITY LAYER — an orthogonal axis, not a primitive. MEASURED: after `subtitle`, the most-shared vocabulary in the 73-doc corpus is bare tone modifiers applied to arbitrary elements (green 27 docs, amber 25, purple 23, red 20, tight 12). No primitive can absorb that, because a tone is not a thing — it is a property of any thing. Every rule here binds to a palette token, never a literal colour, so `--style` swaps the whole look without touching the markup (Covenant II: colour means things, and it must keep meaning them in every style). Emission is USAGE-SCANNED: a page that uses none of these classes receives zero bytes of this CSS, which is what keeps every existing golden byte-identical. Authors never supply a raw class — templates map an author TOKEN through a lookup table (the `code` primitive's pattern), so this vocabulary is whitelisted by construction and is not an injection surface. See docs/design/leaf-gap-worklist.md §4 Tier 3.",
+
+  "u-amber":    ".u-amber{color:var(--amber)}",
+  "u-green":    ".u-green{color:var(--green)}",
+  "u-red":      ".u-red{color:var(--red)}",
+  "u-purple":   ".u-purple{color:var(--purple)}",
+  "u-gold":     ".u-gold{color:var(--gold)}",
+  "u-lavender": ".u-lavender{color:var(--lavender)}",
+
+  "u-bg-amber":    ".u-bg-amber{background:color-mix(in srgb,var(--amber) 14%,transparent);border-radius:6px;padding:.05em .38em}",
+  "u-bg-green":    ".u-bg-green{background:color-mix(in srgb,var(--green) 14%,transparent);border-radius:6px;padding:.05em .38em}",
+  "u-bg-red":      ".u-bg-red{background:color-mix(in srgb,var(--red) 14%,transparent);border-radius:6px;padding:.05em .38em}",
+  "u-bg-purple":   ".u-bg-purple{background:color-mix(in srgb,var(--purple) 14%,transparent);border-radius:6px;padding:.05em .38em}",
+
+  "u-edge-amber":  ".u-edge-amber{border-left:3px solid var(--amber);padding-left:.7rem}",
+  "u-edge-green":  ".u-edge-green{border-left:3px solid var(--green);padding-left:.7rem}",
+  "u-edge-red":    ".u-edge-red{border-left:3px solid var(--red);padding-left:.7rem}",
+  "u-edge-purple": ".u-edge-purple{border-left:3px solid var(--purple);padding-left:.7rem}",
+
+  "u-dim":    ".u-dim{color:var(--text-dim)}",
+  "u-faint":  ".u-faint{color:var(--text-faint)}",
+  "u-quiet":  ".u-quiet{color:var(--text-2)}",
+  "u-mono":   ".u-mono{font-family:var(--mono)}",
+  "u-glow":   ".u-glow{text-shadow:0 0 10px var(--glow)}",
+  "u-strong": ".u-strong{font-weight:650}",
+  "u-caps":   ".u-caps{text-transform:uppercase;letter-spacing:.08em;font-size:.82em}",
+
+  "u-tight":  ".u-tight{margin-block:.25rem}",
+  "u-loose":  ".u-loose{margin-block:1.5rem}",
+  "u-center": ".u-center{text-align:center}",
+  "u-right":  ".u-right{text-align:right}",
+  "u-nowrap": ".u-nowrap{white-space:nowrap}"
+}

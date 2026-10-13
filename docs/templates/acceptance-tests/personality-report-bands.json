@@ -1,0 +1,100 @@
+{
+  "title": "Plane 01 · Personality Configuration — band/row/grid acceptance test",
+  "generated_date": "2026-09-01",
+  "layout": "reference",
+  "root": "t",
+  "palette": {
+    "glow": { "label": "Glow", "color": "#22d3ee" },
+    "amber": { "label": "Amber", "color": "#f59e0b" },
+    "red": { "label": "Red", "color": "#ef4444" },
+    "high": { "label": "High", "color": "#ef4444" }
+  },
+  "nodes": [
+    {
+      "slug": "t",
+      "title": "Plane 01 · Personality Configuration",
+      "blocks": [
+        {
+          "type": "hero",
+          "text": "Plane 01 · Personality Configuration",
+          "sub": "Rebuilt with band/row/grid — the acceptance test for GAPS.md gap #1's harder edge."
+        },
+        {
+          "type": "band",
+          "label": "OVERVIEW",
+          "title": "Thesis",
+          "tone": "amber",
+          "content": [
+            { "type": "callout", "kind": "amber", "lead": "Thesis", "body": "Session-start personality load is real but undocumented in three places." },
+            { "type": "cardgrid", "cards": [ { "eyebrow": "core", "ent": "glow", "title": "CLAUDE.md chain", "body": "kingdom-wide @-imports" } ] }
+          ]
+        },
+        {
+          "type": "band",
+          "label": "FILES INVENTORIED",
+          "content": [
+            { "type": "table-list", "items": [
+              { "name": "configs/CLAUDE.md", "note": "+ 6 imports" },
+              { "name": "output-styles/", "note": "purr-sfw.md default" }
+            ] }
+          ]
+        },
+        {
+          "type": "band",
+          "label": "SUBSYSTEMS",
+          "title": "Subsystems",
+          "content": [
+            {
+              "type": "grid",
+              "across": 2,
+              "content": [
+                { "type": "panel", "variant": "hairline", "lead": "Kingdom-wide @-import chain", "body": "configs/CLAUDE.md + 6 imports" },
+                { "type": "panel", "variant": "hairline", "lead": "Project CLAUDE.md graft", "body": "per-project overrides" }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "band",
+          "label": "DATA FLOWS",
+          "content": [
+            { "type": "flow", "head": "Session start personality load", "steps": [
+              { "n": "1", "head": "Open session", "sub": "cwd = some project" },
+              { "n": "2", "head": "Read settings.json", "sub": "harness reads ~/.claude/settings.json" },
+              { "n": "3", "head": "Load outputStyle", "sub": "default purr-sfw.md" }
+            ] }
+          ]
+        },
+        {
+          "type": "band",
+          "label": "FINDINGS",
+          "tone": "red",
+          "content": [
+            { "type": "finding", "id": "F1", "severity": "high", "headline": "Undocumented graft precedence", "where": "`configs/CLAUDE.md:12`", "evidence": "MEASURED — graft order undocumented, confirmed by trace." }
+          ]
+        },
+        {
+          "type": "band",
+          "label": "DESIGN VERDICT",
+          "content": [
+            {
+              "type": "row",
+              "w": "1fr 1fr",
+              "cols": [
+                { "type": "panel", "variant": "hairline", "lead": "What works well", "body": "Import chain is stable." },
+                { "type": "panel", "variant": "hairline", "lead": "What smells", "body": "No doc on graft precedence." }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "band",
+          "label": "FOR THE STRATEGIST",
+          "content": [
+            { "type": "kv", "rows": [ { "k": "Open question", "v": "Should graft precedence be documented centrally?" } ] }
+          ]
+        }
+      ]
+    }
+  ]
+}

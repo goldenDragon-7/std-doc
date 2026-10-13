@@ -1,0 +1,87 @@
+{
+  "title": "Runbook — cron job silently expired",
+  "generated_date": "2026-09-01",
+  "layout": "hero",
+  "groups": ["Runbook"],
+  "palette": {
+    "green": { "label": "Safe", "color": "#10b981" },
+    "gold": { "label": "Caution", "color": "#fbbf24" },
+    "red": { "label": "Danger", "color": "#ef4444" },
+    "cyan": { "label": "Info", "color": "#22d3ee" }
+  },
+  "root": {
+    "summary": "A worked runbook exemplar: what you'll see, the tags that classify severity/scope at a glance, a phase-strip you execute top to bottom, a legend so the colors mean something before you rely on them, and the table-list of exact commands. Copy this shape for any operational procedure someone follows under time pressure."
+  },
+  "nodes": [
+    {
+      "slug": "runbook",
+      "group": "Runbook",
+      "title": "Cron job silently expired",
+      "status": "LIVE",
+      "tagline": "Runbook — reference mode. Follow the phases top to bottom; don't skip the verify step.",
+      "blocks": [
+        {
+          "type": "kicker",
+          "text": "RUNBOOK-07 · Operational procedure"
+        },
+        {
+          "type": "hero",
+          "text": "A recurring cron job stopped firing and nobody was notified — here's how to confirm it, recover it, and prevent the next silent expiry.",
+          "sub": "Session-only cron jobs auto-expire after 7 days with no notification. This is the recovery path, not a permanent fix."
+        },
+        {
+          "type": "badges",
+          "badges": { "scope": "single session", "downtime": "none (read-only diagnosis)" }
+        },
+        { "type": "tag", "kind": "red", "label": "DANGER: skipping verify" },
+        { "type": "tag", "kind": "gold", "label": "CAUTION: destructive step in phase 3" },
+        { "type": "tag", "kind": "cyan", "label": "INFO: safe to re-run" },
+        {
+          "type": "legend",
+          "items": [
+            { "kind": "red", "label": "Irreversible or high-blast-radius — read twice before running" },
+            { "kind": "gold", "label": "Reversible but changes state — confirm the target first" },
+            { "kind": "cyan", "label": "Read-only — safe to run repeatedly while diagnosing" }
+          ]
+        },
+        {
+          "type": "phase-strip",
+          "phases": [
+            { "num": "1", "name": "Confirm", "desc": "Is the job actually gone, or just quiet?", "kind": "cyan", "effort": "2 min" },
+            { "num": "2", "name": "Diagnose", "desc": "Session-only expiry, or a real crash?", "kind": "cyan", "effort": "3 min" },
+            { "num": "3", "name": "Recover", "desc": "Re-arm the job — this is the destructive step", "kind": "gold", "effort": "1 min" },
+            { "num": "4", "name": "Verify", "desc": "Confirm it actually fires before you walk away", "kind": "red", "effort": "5-30 min wait" }
+          ]
+        },
+        {
+          "type": "callout",
+          "kind": "gold",
+          "lead": "Phase 3 changes state — confirm the job name before running.",
+          "body": "Re-arming with the wrong job name creates a second, orphaned job instead of fixing the original. There is no automatic dedup."
+        },
+        {
+          "type": "table-list",
+          "items": [
+            { "name": "CronList()", "note": "Phase 1 — lists every active job for this session; the missing job confirms expiry, not crash" },
+            { "name": "Check session age", "note": "Phase 2 — if the job's session has been alive 7+ days, this is the known auto-expiry, not a bug" },
+            { "name": "CronCreate(same schedule, same prompt)", "note": "Phase 3 — re-arms the job under a NEW session-scoped id; the old id is gone for good" },
+            { "name": "CronList() again, then wait one cycle", "note": "Phase 4 — confirm the new job appears AND actually fires once before considering this closed" }
+          ]
+        },
+        {
+          "type": "verdict-box",
+          "kind": "green",
+          "label": "Recovered",
+          "verdict": "Job re-armed and confirmed firing",
+          "text": "Recovery is complete only after phase 4's wait — a job that lists but never fires is still broken, and re-arming does not guarantee the underlying cause (session death, host restart) won't repeat it."
+        },
+        {
+          "type": "callout",
+          "kind": "cyan",
+          "lead": "Prevent the next one.",
+          "body": "Session-only cron cannot be made durable from inside a session. If this job matters across restarts, it needs to move to a durably-scheduled mechanism outside this runbook's scope — file that as a follow-up, don't try to patch it here."
+        }
+      ]
+    }
+  ]
+}

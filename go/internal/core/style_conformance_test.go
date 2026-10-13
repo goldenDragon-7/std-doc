@@ -7,7 +7,7 @@ package core
 // edit could silently break parchment and nothing would go red.
 //
 // Rather than freeze a golden per style (3× the golden bytes), this proves the
-// stronger, documented invariant directly: CLAUDE.md §4 claims "the body CSS is
+// stronger, documented invariant directly: the project conventions §4 claims "the body CSS is
 // style-agnostic, so --style swaps the whole look without touching the
 // structure." We make that claim EXECUTABLE — the sole byte difference between
 // any two styles' output is the :root token block. Combined with the existing

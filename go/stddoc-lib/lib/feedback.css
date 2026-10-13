@@ -813,6 +813,34 @@ body.cf-elem-mode {
   animation: cf-pulse-ring 1.6s ease-out infinite;
 }
 
+/* ---------------- Capture acknowledgement (comment / answer added) ----------
+   A captured comment must ACKNOWLEDGE without OCCUPYING. The launcher pulses
+   once and the badge pops; the panel stays DOWN. Previously this path opened
+   the whole panel, which covered a meaningful part of the page — including,
+   often, the very sentence being commented on. The corner is enough.
+   Distinct from .cf-present above: that is a calm green *state* (an agent is
+   watching); this is a warm accent *event* (your comment landed). They use
+   different channels — ::after vs the button's own shadow — so both can show
+   at once without collision. */
+@keyframes cf-capture-ring {
+  0%   { box-shadow: 0 0 0 0 var(--glow, #b14000); }
+  70%  { box-shadow: 0 0 0 10px rgba(177, 64, 0, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(177, 64, 0, 0); }
+}
+@keyframes cf-capture-bump {
+  0%, 100% { transform: scale(1); }
+  35%      { transform: scale(1.18); }
+}
+#cf-toggle.cf-captured { animation: cf-capture-ring .85s ease-out; }
+#cf-badge.cf-captured  { animation: cf-capture-bump .85s ease-out; }
+
+/* The acknowledgement is motion; for a reader who has asked for none, the
+   badge count alone carries the whole message. */
+@media (prefers-reduced-motion: reduce) {
+  #cf-toggle.cf-captured,
+  #cf-badge.cf-captured { animation: none; }
+}
+
 /* ---------------- Threaded history (you → reply conversation) ----------------
    Each answered comment renders as a pair of bubbles: the reader's note, then
    the agent's reply. Clear, scannable, and click-to-jump (cross-page aware). */

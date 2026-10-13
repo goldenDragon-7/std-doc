@@ -1,0 +1,53 @@
+{
+  "_doc": "THE ONE UNTRUSTED SLOT. This table is the entire attack surface of the `html` bounded-value primitive (docs/design/html-value-sanitizer.md). JSON stays canon; HTML is a bounded VALUE inside it, never the container — so instead of proving a negative over a whole document, the gate is a whitelist over one node type at a known schema location. Vocabulary MEASURED from 55 content-unique corpus documents: outside <script>, real Claude-written HTML uses only ~60 element types and ~6 meaningful attributes. Anything absent here is REJECTED LOUDLY, never stripped — a silently-stripping sanitizer is a silent-drop bug wearing a security label.",
+
+  "elements": [
+    "div", "section", "article", "header", "footer", "aside", "main", "p",
+    "h1", "h2", "h3", "h4", "h5", "h6", "hr", "br",
+    "span", "strong", "b", "em", "i", "code", "kbd", "var", "samp",
+    "small", "sub", "sup", "mark", "abbr", "q", "blockquote", "pre",
+    "ul", "ol", "li", "dl", "dt", "dd",
+    "table", "thead", "tbody", "tfoot", "tr", "th", "td", "caption",
+    "colgroup", "col",
+    "a", "figure", "figcaption",
+    "svg", "g", "path", "line", "circle", "rect", "ellipse", "polygon",
+    "polyline", "text", "tspan", "defs", "linearGradient", "radialGradient",
+    "stop", "title", "desc", "marker"
+  ],
+
+  "_rejected_note": "Deliberately absent: script, style, iframe, object, embed, form, input, button, link, meta, base, audio, video, img, canvas, template, slot, portal, math, foreignObject, and every unknown/custom element. `button` is excluded despite 184 corpus uses because a button with no script is a lie to the reader — interactivity belongs to primitives where the ENGINE writes the script. `img` is excluded because a raster source is either a remote fetch or a data URI, and inline SVG covers the corpus's real usage.",
+
+  "global_attributes": ["class", "id", "title", "lang", "dir", "role"],
+  "global_attribute_prefixes": ["aria-"],
+
+  "element_attributes": {
+    "a": ["href"],
+    "th": ["colspan", "rowspan", "scope", "headers", "abbr"],
+    "td": ["colspan", "rowspan", "headers"],
+    "col": ["span"],
+    "colgroup": ["span"],
+    "q": ["cite"],
+    "blockquote": ["cite"],
+    "abbr": ["title"]
+  },
+
+  "svg_attributes": [
+    "d", "x", "y", "x1", "y1", "x2", "y2", "cx", "cy", "r", "rx", "ry",
+    "width", "height", "viewBox", "points", "transform", "offset",
+    "fill", "stroke", "stroke-width", "stroke-dasharray", "stroke-linecap",
+    "stroke-linejoin", "opacity", "fill-opacity", "stroke-opacity",
+    "stop-color", "stop-opacity", "gradientUnits", "gradientTransform",
+    "text-anchor", "font-size", "font-family", "font-weight",
+    "dominant-baseline", "marker-end", "marker-start", "orient",
+    "refX", "refY", "markerWidth", "markerHeight", "preserveAspectRatio",
+    "xmlns"
+  ],
+
+  "_attribute_rejected_note": "ALWAYS rejected, on every element: every on* handler, style, src, srcset, formaction, xlink:href, data-*, contenteditable, tabindex, autofocus, and anything not listed above. `style=` is rejected despite 684 corpus occurrences for two reasons: it carries url(), a network vector that would require a CSS parser inside the gate; and inline colour hard-codes a value outside the palette, breaking `--style` and quietly violating Covenant II. The MITIGATION IS ALREADY SHIPPED — the utility layer (utility_css.json) gives authors themeable classes bound to palette tokens, so `class=\"u-amber u-tight\"` replaces `style=\"color:#f59e0b\"` and themes correctly under every style. Rejecting style= is reasonable rather than punitive precisely because that layer exists.",
+
+  "url_schemes": ["#"],
+  "url_schemes_serve_only": ["http", "https"],
+
+  "max_depth": 100,
+  "id_prefix": "u-"
+}

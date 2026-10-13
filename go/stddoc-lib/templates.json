@@ -949,6 +949,18 @@
         },
         {
           "if": {
+            "truthy": "owner"
+          },
+          "then": [
+            "<div class='ec-owner' style='font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-bottom:.2rem'>",
+            {
+              "esc": "owner"
+            },
+            "</div>"
+          ]
+        },
+        {
+          "if": {
             "truthy": "eyebrow"
           },
           "then": [
@@ -1055,11 +1067,39 @@
                         "</td>"
                       ],
                       "else": [
-                        "<td>",
                         {
-                          "esc": "text"
-                        },
-                        "</td>"
+                          "if": {
+                            "truthy": "tone"
+                          },
+                          "then": [
+                            "<td class='",
+                            {
+                              "lookup": "tone",
+                              "table": {
+                                "amber": "u-amber",
+                                "green": "u-green",
+                                "red": "u-red",
+                                "purple": "u-purple",
+                                "gold": "u-gold",
+                                "lavender": "u-lavender",
+                                "dim": "u-dim",
+                                "quiet": "u-quiet"
+                              }
+                            },
+                            "'>",
+                            {
+                              "esc": "text"
+                            },
+                            "</td>"
+                          ],
+                          "else": [
+                            "<td>",
+                            {
+                              "esc": "text"
+                            },
+                            "</td>"
+                          ]
+                        }
                       ]
                     }
                   ],
@@ -1298,7 +1338,20 @@
       "esc": "variant",
       "default": "lift"
     },
-    "'>",
+    "'",
+    {
+      "if": {
+        "truthy": "kind"
+      },
+      "then": [
+        " style='--c:",
+        {
+          "palette_var": "kind"
+        },
+        ";border-left:3px solid var(--c)'"
+      ]
+    },
+    ">",
     {
       "if": {
         "truthy": "lead"
@@ -2065,6 +2118,1014 @@
       "compose": "content"
     },
     "</div>",
+    "</div>"
+  ],
+  "presence": [
+    {
+      "if": {
+        "truthy": "readers"
+      },
+      "then": [
+        "<div class='presence'>",
+        {
+          "each": "readers",
+          "body": [
+            "<span class='pr-reader pr-",
+            {
+              "lookup": "state",
+              "table": {
+                "here": "here",
+                "idle": "idle",
+                "away": "away"
+              },
+              "default": "away"
+            },
+            "'><span class='pr-dot'></span><span class='pr-name'>",
+            {
+              "esc": "name"
+            },
+            "</span></span>"
+          ]
+        },
+        "</div>"
+      ]
+    }
+  ],
+  "sincelast": [
+    {
+      "if": {
+        "truthy": "changes"
+      },
+      "then": [
+        "<div class='sincelast'>",
+        {
+          "if": {
+            "truthy": "when"
+          },
+          "then": [
+            "<div class='sl-when'>since ",
+            {
+              "esc": "when"
+            },
+            "</div>"
+          ]
+        },
+        "<ul class='sl-list'>",
+        {
+          "each": "changes",
+          "body": [
+            "<li class='sl-item sl-",
+            {
+              "lookup": "kind",
+              "table": {
+                "added": "added",
+                "edited": "edited",
+                "removed": "removed",
+                "commented": "commented"
+              },
+              "default": "edited"
+            },
+            "'><span class='sl-kind'>",
+            {
+              "lookup": "kind",
+              "table": {
+                "added": "+",
+                "edited": "~",
+                "removed": "-",
+                "commented": "✓"
+              },
+              "default": "~"
+            },
+            "</span><span class='sl-what'>",
+            {
+              "esc": "what"
+            },
+            "</span>",
+            {
+              "if": {
+                "truthy": "who"
+              },
+              "then": [
+                "<span class='sl-who'>",
+                {
+                  "esc": "who"
+                },
+                "</span>"
+              ]
+            },
+            "</li>"
+          ]
+        },
+        "</ul>",
+        "</div>"
+      ]
+    }
+  ],
+  "attribution": [
+    {
+      "if": {
+        "truthy": "who"
+      },
+      "then": [
+        "<span class='attribution'><span class='at-who'>",
+        {
+          "esc": "who"
+        },
+        "</span>",
+        {
+          "if": {
+            "truthy": "kind"
+          },
+          "then": [
+            "<span class='at-kind'>",
+            {
+              "esc": "kind"
+            },
+            "</span>"
+          ]
+        },
+        {
+          "if": {
+            "truthy": "when"
+          },
+          "then": [
+            "<span class='at-when'>",
+            {
+              "esc": "when"
+            },
+            "</span>"
+          ]
+        },
+        "</span>"
+      ]
+    }
+  ],
+  "stats-bar": [
+    "<div class='stats-bar'>",
+    {
+      "each": "stats",
+      "body": [
+        "<div class='stat'",
+        {
+          "if": {
+            "truthy": "kind"
+          },
+          "then": [
+            " style='--c:",
+            {
+              "palette_var": "kind"
+            },
+            "'"
+          ]
+        },
+        "><div class='stat-val'",
+        {
+          "if": {
+            "truthy": "kind"
+          },
+          "then": [
+            " style='color:var(--c)'"
+          ]
+        },
+        ">",
+        {
+          "esc": "value"
+        },
+        "</div><div class='stat-lbl'>",
+        {
+          "esc": "label"
+        },
+        "</div></div>"
+      ]
+    },
+    "</div>"
+  ],
+  "legend": [
+    "<div class='legend'>",
+    {
+      "each": "items",
+      "body": [
+        "<span><span class='swatch' style='background:",
+        {
+          "palette_var": "kind"
+        },
+        "'></span>",
+        {
+          "esc": "label"
+        },
+        "</span>"
+      ]
+    },
+    "</div>"
+  ],
+  "table-list": [
+    "<ul class='table-list'>",
+    {
+      "each": "items",
+      "body": [
+        "<li><span>",
+        {
+          "esc": "name"
+        },
+        "</span><em>",
+        {
+          "esc": "note"
+        },
+        "</em></li>"
+      ]
+    },
+    "</ul>"
+  ],
+  "schema-grid": [
+    "<div class='schema-grid'>",
+    {
+      "each": "boxes",
+      "body": [
+        "<div class='schema-box'>",
+        "<span class='schema-name'",
+        {
+          "if": {
+            "truthy": "kind"
+          },
+          "then": [
+            " style='--c:",
+            {
+              "palette_var": "kind"
+            },
+            "'"
+          ]
+        },
+        ">",
+        {
+          "esc": "name"
+        },
+        "</span>",
+        {
+          "if": {
+            "truthy": "desc"
+          },
+          "then": [
+            "<p class='note'>",
+            {
+              "esc": "desc"
+            },
+            "</p>"
+          ]
+        },
+        "<ul class='table-list'>",
+        {
+          "each": "tables",
+          "body": [
+            "<li><span>",
+            {
+              "esc": "name"
+            },
+            "</span><em>",
+            {
+              "esc": "note"
+            },
+            "</em></li>"
+          ]
+        },
+        "</ul></div>"
+      ]
+    },
+    "</div>"
+  ],
+  "phase-strip": [
+    "<div class='phase-strip'>",
+    {
+      "each": "phases",
+      "body": [
+        "<div class='phase' style='--c:",
+        {
+          "palette_var": "kind"
+        },
+        "'>",
+        "<div class='num'>",
+        {
+          "esc": "num"
+        },
+        "</div>",
+        "<div class='nm'>",
+        {
+          "esc": "name"
+        },
+        "</div>",
+        "<div class='ds'>",
+        {
+          "esc": "desc"
+        },
+        "</div>",
+        {
+          "if": {
+            "truthy": "effort"
+          },
+          "then": [
+            "<div class='ef'>",
+            {
+              "esc": "effort"
+            },
+            "</div>"
+          ]
+        },
+        "</div>"
+      ]
+    },
+    "</div>"
+  ],
+  "verdict-box": [
+    "<div class='verdict-box' style='--c:",
+    {
+      "palette_var": "kind"
+    },
+    "'>",
+    {
+      "if": {
+        "truthy": "label"
+      },
+      "then": [
+        "<span class='verdict-label'>",
+        {
+          "esc": "label"
+        },
+        "</span>"
+      ]
+    },
+    {
+      "if": {
+        "truthy": "verdict"
+      },
+      "then": [
+        "<div class='verdict-text'>",
+        {
+          "esc": "verdict"
+        },
+        "</div>"
+      ]
+    },
+    {
+      "if": {
+        "truthy": "text"
+      },
+      "then": [
+        "<p class='verdict-prose'>",
+        {
+          "rich": "text"
+        },
+        "</p>"
+      ]
+    },
+    "</div>"
+  ],
+  "disclosure": [
+    "<details",
+    {
+      "if": {
+        "truthy": "open"
+      },
+      "then": [
+        " open"
+      ]
+    },
+    "><summary>",
+    {
+      "esc": "summary"
+    },
+    "</summary>",
+    "<div class='disclosure-body'>",
+    {
+      "compose": "content"
+    },
+    "</div>",
+    "</details>"
+  ],
+  "tag": [
+    "<span class='tag' style='--c:",
+    {
+      "palette_var": "kind"
+    },
+    "'>",
+    {
+      "esc": "label"
+    },
+    "</span>"
+  ],
+  "landscape-ascii": [
+    "<pre class='landscape'>",
+    {
+      "each": "lines",
+      "join": "\n",
+      "body": [
+        {
+          "each": "@item",
+          "join": "",
+          "body": [
+            {
+              "if": {
+                "truthy": "kind"
+              },
+              "then": [
+                "<span style='--c:",
+                {
+                  "palette_var": "kind"
+                },
+                "'>",
+                {
+                  "esc": "text"
+                },
+                "</span>"
+              ],
+              "else": [
+                {
+                  "esc": "text"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "</pre>"
+  ],
+  "finding": [
+    "<div class='finding' style='--c:",
+    {
+      "palette_var": "severity"
+    },
+    "'>",
+    {
+      "if": {
+        "truthy": "id"
+      },
+      "then": [
+        "<span class='finding-id' style='color:var(--c)'>",
+        {
+          "esc": "id"
+        },
+        "</span>"
+      ]
+    },
+    "<strong>",
+    {
+      "esc": "headline"
+    },
+    "</strong>",
+    {
+      "if": {
+        "truthy": "where"
+      },
+      "then": [
+        "<div class='finding-where'>",
+        {
+          "richcode": "where"
+        },
+        "</div>"
+      ]
+    },
+    {
+      "if": {
+        "truthy": "evidence"
+      },
+      "then": [
+        "<div class='finding-evidence'>",
+        {
+          "richcode": "evidence"
+        },
+        "</div>"
+      ]
+    },
+    "</div>"
+  ],
+  "enrich-steps": [
+    "<div class='enrich-steps'>",
+    {
+      "each": "steps",
+      "body": [
+        "<div class='enrich-step'>",
+        "<div class='step-num'>",
+        {
+          "esc": "num"
+        },
+        "</div>",
+        "<div class='step-name'>",
+        {
+          "esc": "name"
+        },
+        "</div>",
+        {
+          "if": {
+            "truthy": "desc"
+          },
+          "then": [
+            "<div class='step-desc'>",
+            {
+              "esc": "desc"
+            },
+            "</div>"
+          ]
+        },
+        "</div>"
+      ]
+    },
+    "</div>"
+  ],
+  "pattern-header": [
+    "<div class='pattern-header'>",
+    {
+      "if": {
+        "truthy": "era"
+      },
+      "then": [
+        "<div class='era'>",
+        {
+          "esc": "era"
+        },
+        "</div>"
+      ]
+    },
+    "<h2>",
+    {
+      "esc": "title"
+    },
+    "</h2>",
+    {
+      "if": {
+        "truthy": "desc"
+      },
+      "then": [
+        "<div class='desc'>",
+        {
+          "esc": "desc"
+        },
+        "</div>"
+      ]
+    },
+    "</div>"
+  ],
+  "timeline-infographic": [
+    "<div class='tl-infographic'>",
+    {
+      "each": "steps",
+      "body": [
+        "<div class='tl-step'",
+        {
+          "if": {
+            "truthy": "kind"
+          },
+          "then": [
+            " style='--c:",
+            {
+              "palette_var": "kind"
+            },
+            "'"
+          ]
+        },
+        ">",
+        "<div class='tl-num'",
+        {
+          "if": {
+            "truthy": "kind"
+          },
+          "then": [
+            " style='background:var(--c)'"
+          ]
+        },
+        ">",
+        {
+          "esc": "num"
+        },
+        "</div>",
+        "<div class='tl-content'>",
+        "<div class='tl-title'>",
+        {
+          "esc": "title"
+        },
+        "</div>",
+        {
+          "if": {
+            "truthy": "desc"
+          },
+          "then": [
+            "<div class='tl-desc'>",
+            {
+              "esc": "desc"
+            },
+            "</div>"
+          ]
+        },
+        {
+          "if": {
+            "truthy": "icons"
+          },
+          "then": [
+            "<div class='tl-icons'>",
+            {
+              "each": "icons",
+              "body": [
+                "<span class='tl-icon'>",
+                {
+                  "esc": "@item"
+                },
+                "</span>"
+              ]
+            },
+            "</div>"
+          ]
+        },
+        {
+          "if": {
+            "truthy": "timing"
+          },
+          "then": [
+            "<div class='tl-timing'>",
+            {
+              "esc": "timing"
+            },
+            "</div>"
+          ]
+        },
+        "</div></div>"
+      ]
+    },
+    "</div>"
+  ],
+  "quote": [
+    "<div class='quote'>",
+    {
+      "rich": "text"
+    },
+    {
+      "if": {
+        "truthy": "who"
+      },
+      "then": [
+        "<span class='who'>",
+        {
+          "esc": "who"
+        },
+        "</span>"
+      ]
+    },
+    "</div>"
+  ],
+  "kv": [
+    "<div>",
+    {
+      "each": "rows",
+      "body": [
+        "<div class='kv'><div class='k'>",
+        {
+          "esc": "k"
+        },
+        "</div><div class='v'>",
+        {
+          "richcode": "v"
+        },
+        "</div></div>"
+      ]
+    },
+    "</div>"
+  ],
+  "synthesis-note": [
+    "<div class='synthesis-note'>",
+    "<strong>",
+    {
+      "esc": "label",
+      "default": "Synthesis note:"
+    },
+    "</strong> ",
+    {
+      "richcode": "text"
+    },
+    "</div>"
+  ],
+  "stamp": [
+    "<div class='stamp'>",
+    "<div>",
+    {
+      "esc": "date"
+    },
+    {
+      "if": {
+        "and": [
+          {
+            "truthy": "date"
+          },
+          {
+            "truthy": "roles"
+          }
+        ]
+      },
+      "then": [
+        " &middot; "
+      ]
+    },
+    {
+      "each": "roles",
+      "body": [
+        {
+          "if": {
+            "not": {
+              "truthy": "@first"
+            }
+          },
+          "then": [
+            " + "
+          ]
+        },
+        "<span style='--c:",
+        {
+          "palette_var": "kind"
+        },
+        ";color:var(--c)'>",
+        {
+          "esc": "name"
+        },
+        "</span>"
+      ]
+    },
+    "</div>",
+    {
+      "if": {
+        "truthy": "caption"
+      },
+      "then": [
+        "<div>",
+        {
+          "esc": "caption"
+        },
+        "</div>"
+      ]
+    },
+    "</div>"
+  ],
+  "row": [
+    "<div class='row",
+    {
+      "if": {
+        "truthy": "seam"
+      },
+      "then": [
+        " seam"
+      ]
+    },
+    "' style='grid-template-columns:",
+    {
+      "if": {
+        "truthy": "w"
+      },
+      "then": [
+        {
+          "esc": "w"
+        }
+      ],
+      "else": [
+        {
+          "each": "cols",
+          "join": " ",
+          "body": [
+            "1fr"
+          ]
+        }
+      ]
+    },
+    ";gap:",
+    {
+      "esc": "gap",
+      "default": "1.4rem"
+    },
+    ";align-items:",
+    {
+      "esc": "align",
+      "default": "stretch"
+    },
+    "'>",
+    {
+      "each": "cols",
+      "body": [
+        "<div class='row-col'>",
+        {
+          "compose": "@item"
+        },
+        "</div>"
+      ]
+    },
+    "</div>"
+  ],
+  "grid": [
+    "<div class='grid' style='grid-template-columns:",
+    {
+      "if": {
+        "truthy": "across"
+      },
+      "then": [
+        "repeat(",
+        {
+          "esc": "across"
+        },
+        ",1fr)"
+      ],
+      "else": [
+        "repeat(auto-fill,minmax(",
+        {
+          "esc": "min",
+          "default": "280"
+        },
+        "px,1fr))"
+      ]
+    },
+    ";gap:",
+    {
+      "esc": "gap",
+      "default": "1.4rem"
+    },
+    "'>",
+    {
+      "each": "content",
+      "body": [
+        {
+          "compose": "@item"
+        }
+      ]
+    },
+    "</div>"
+  ],
+  "band": [
+    "<div class='band'",
+    {
+      "if": {
+        "truthy": "id"
+      },
+      "then": [
+        " id='",
+        {
+          "esc": "id"
+        },
+        "'"
+      ]
+    },
+    {
+      "if": {
+        "truthy": "tone"
+      },
+      "then": [
+        " style='--c:",
+        {
+          "palette_var": "tone"
+        },
+        "'"
+      ]
+    },
+    ">",
+    {
+      "if": {
+        "truthy": "label"
+      },
+      "then": [
+        "<div class='band-label'>",
+        {
+          "esc": "label"
+        },
+        "</div>"
+      ]
+    },
+    {
+      "if": {
+        "truthy": "title"
+      },
+      "then": [
+        "<div class='band-title'>",
+        {
+          "esc": "title"
+        },
+        "</div>"
+      ]
+    },
+    "<div class='band-body",
+    {
+      "if": {
+        "truthy": "tone"
+      },
+      "then": [
+        " band-tone"
+      ]
+    },
+    "'>",
+    {
+      "each": "content",
+      "body": [
+        {
+          "compose": "@item"
+        }
+      ]
+    },
+    "</div></div>"
+  ],
+  "subtitle": [
+    "<p class='subtitle ",
+    {
+      "if": {
+        "truthy": "tone"
+      },
+      "then": [
+        {
+          "lookup": "tone",
+          "table": {
+            "amber": "u-amber",
+            "green": "u-green",
+            "red": "u-red",
+            "purple": "u-purple",
+            "gold": "u-gold",
+            "lavender": "u-lavender",
+            "dim": "u-dim",
+            "quiet": "u-quiet"
+          }
+        }
+      ],
+      "else": [
+        "u-quiet"
+      ]
+    },
+    {
+      "if": {
+        "truthy": "tight"
+      },
+      "then": [
+        " u-tight"
+      ]
+    },
+    "'>",
+    {
+      "esc": "text"
+    },
+    "</p>"
+  ],
+  "stats": [
+    "<div class='stats",
+    {
+      "if": {
+        "truthy": "across"
+      },
+      "then": [
+        " stats-n",
+        {
+          "esc": "across"
+        }
+      ]
+    },
+    "'>",
+    {
+      "each": "items",
+      "body": [
+        "<div class='stat'>",
+        "<div class='stat-val",
+        {
+          "if": {
+            "truthy": "tone"
+          },
+          "then": [
+            " ",
+            {
+              "lookup": "tone",
+              "table": {
+                "amber": "u-amber",
+                "green": "u-green",
+                "red": "u-red",
+                "purple": "u-purple",
+                "gold": "u-gold",
+                "lavender": "u-lavender",
+                "dim": "u-dim",
+                "quiet": "u-quiet"
+              }
+            }
+          ]
+        },
+        "'>",
+        {
+          "esc": "value"
+        },
+        "</div>",
+        "<div class='stat-lbl'>",
+        {
+          "esc": "label"
+        },
+        "</div>",
+        {
+          "if": {
+            "truthy": "note"
+          },
+          "then": [
+            "<div class='stat-note'>",
+            {
+              "esc": "note"
+            },
+            "</div>"
+          ]
+        },
+        "</div>"
+      ]
+    },
     "</div>"
   ]
 }

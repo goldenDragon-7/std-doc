@@ -39,7 +39,7 @@ import (
 //	  "label":  "architecture sketch",    // optional caption chip
 //	  "height": 520 }                      // optional iframe height in px (default 520)
 //
-// v2 — per-canvas boards (prd/canvas-primitive/v2-per-canvas-boards.md, Seam 1):
+// v2 — per-canvas boards (the canvas v2 per-board design, Seam 1):
 // v1 served one shared board per doc — every canvas block mounted the SAME
 // codraw scene. v2 gives each block its own board: renderNode assigns every
 // canvas block a stable `id` before this function ever runs (see

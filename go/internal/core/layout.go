@@ -34,6 +34,8 @@ func layoutMode(doc *wire.OrderedMap) string {
 		return "top-nav"
 	case "hero":
 		return "hero"
+	case "reference":
+		return "reference"
 	default:
 		return "" // left-nav (unchanged) — conformance-safe absent default
 	}
@@ -60,6 +62,36 @@ const topnavCSS = `
 .topnav .tn-link:hover{color:var(--glow);text-decoration:none}
 .topnav .tn-link.active{color:var(--glow);font-weight:600}
 .topnav .cf-search-box{margin-left:auto;position:relative;min-width:180px}`
+
+// referenceCSS renders the THIRD column std-doc never had: rail + content +
+// a sticky aside. Every other mode (and the default shell) is a single content
+// column, which is why docs here come out as vertical stacks — the frame has
+// never offered anything else.
+//
+// SCOPE, honestly: this closes the COMPOSITION gap, not the density gap. It
+// gives a doc somewhere to put an index and metadata other than the main
+// column, and a wider main column to put content in. Measured on the demo,
+// vertical density did NOT improve (1357 chars/1000px against a 2108 baseline)
+// because the airiness lives in the PRIMITIVES — `sections` renders as roomy
+// cards — not in the frame. Density is a separate, later lever; do not read
+// this mode as having fixed it.
+//
+// Rides only under .reference-shell, so no existing page is touched. The aside
+// collapses below 1200px (content first), and prints away entirely.
+const referenceCSS = `
+.shell.reference-shell{grid-template-columns:250px minmax(0,1fr) 232px;max-width:1560px;gap:0 34px}
+.reference-shell .wrap{max-width:none;padding-top:22px}
+.otp{position:sticky;top:18px;align-self:start;max-height:calc(100vh - 36px);overflow-y:auto;padding:20px 0 28px;font-size:.72rem;line-height:1.5}
+.otp-head{font-size:.58rem;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:var(--text-faint);margin-bottom:.7rem}
+.otp-list{list-style:none;margin:0 0 1.5rem;padding:0;border-left:1px solid var(--border)}
+.otp-list li{margin:0}
+.otp-list a{display:block;padding:.3rem 0 .3rem .8rem;margin-left:-1px;border-left:1px solid transparent;color:var(--text-dim);text-decoration:none}
+.otp-list a:hover{color:var(--glow);border-left-color:var(--glow);text-decoration:none}
+.otp-meta{border-top:1px solid var(--border);padding-top:.9rem}
+.otp-meta dt{font-size:.55rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--text-faint);margin-top:.7rem}
+.otp-meta dd{margin:.15rem 0 0;color:var(--text-dim)}
+@media(max-width:1200px){.shell.reference-shell{grid-template-columns:250px minmax(0,1fr)}.otp{display:none}}
+@media print{.otp{display:none}}`
 
 // heroCSS renders a full-bleed magazine header with no rail. Rides only under
 // .hero-shell.

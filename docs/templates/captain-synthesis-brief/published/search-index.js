@@ -1,0 +1,1 @@
+window.CF_SEARCH_INDEX=[{"slug":"brief","url":"brief.html","number":"1.1","title":"Lane 07","sections":null,"text":"lane 07 · cron substrate — captain brief"}];

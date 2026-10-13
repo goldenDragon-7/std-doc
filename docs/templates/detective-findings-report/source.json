@@ -1,0 +1,126 @@
+{
+  "title": "Detective Findings Report — worked example",
+  "generated_date": "2026-09-01",
+  "layout": "top-nav",
+  "root": "report",
+  "palette": {
+    "glow": { "label": "Glow", "color": "#22d3ee" },
+    "amber": { "label": "Amber", "color": "#f59e0b" },
+    "red": { "label": "Red", "color": "#ef4444" },
+    "green": { "label": "Green", "color": "#10b981" },
+    "high": { "label": "High", "color": "#ef4444" },
+    "medium": { "label": "Medium", "color": "#f59e0b" }
+  },
+  "nodes": [
+    {
+      "slug": "report",
+      "title": "Plane 07 · Cron Substrate",
+      "blocks": [
+        {
+          "type": "hero",
+          "text": "Plane 07 · Cron Substrate — what actually runs, what it schedules, and where it lies about doing so.",
+          "sub": "Detective findings report"
+        },
+        {
+          "type": "badges",
+          "badges": {
+            "files inventoried": "31",
+            "critical findings": "4",
+            "orphaned jobs": "6",
+            "confidence": "HIGH"
+          },
+          "status": "LIVE"
+        },
+        {
+          "type": "callout",
+          "kind": "amber",
+          "lead": "Thesis",
+          "body": "Cron jobs are session-only and silently expire after 7 days, but three subsystems assume they are durable. That mismatch is the root cause behind two of the four critical findings below."
+        },
+        {
+          "type": "quote",
+          "text": "Show me the evidence. Let's verify that.",
+          "who": "the detective's standing rule"
+        },
+        {
+          "type": "prose",
+          "lede": true,
+          "text": "This report traces the cron substrate from the scheduler entrypoint down to the jobs it silently drops, and states what a fix requires at each layer."
+        },
+        {
+          "type": "cardgrid",
+          "cards": [
+            { "eyebrow": "core", "ent": "glow", "title": "CronCreate", "body": "In-memory job table, keyed per session." },
+            { "eyebrow": "core", "ent": "glow", "title": "CronList", "body": "Reads the same in-memory table — nothing else." },
+            { "eyebrow": "consumer", "ent": "amber", "title": "loop-gate", "body": "Assumes an active job proves a durable heartbeat." },
+            { "eyebrow": "consumer", "ent": "red", "title": "handoff writer", "body": "Reads cron state to decide whether to warn — reads it AFTER expiry." }
+          ]
+        },
+        {
+          "type": "flow",
+          "head": "How a job actually schedules",
+          "steps": [
+            { "n": "1", "head": "CronCreate", "sub": "job appended to session-local table" },
+            { "n": "2", "head": "REPL idle check", "sub": "fires only when the REPL is not mid-query" },
+            { "n": "3", "head": "Jitter", "sub": "up to 10% of period, max 15 min, added on top" },
+            { "n": "4", "head": "7-day expiry", "sub": "final fire, then silent delete — no notification" }
+          ]
+        },
+        {
+          "type": "compare",
+          "left": {
+            "title": "What works well",
+            "pill": "confirmed",
+            "items": [
+              "Off-herd minute convention (9,39) is honored by every citizen sampled",
+              "Jitter is documented and matches observed fire times"
+            ]
+          },
+          "right": {
+            "title": "What smells",
+            "pill": "risk",
+            "items": [
+              "No expiry notification — jobs vanish silently at day 7",
+              "loop-gate treats 'has an active job' as proof of a durable heartbeat"
+            ]
+          }
+        },
+        {
+          "type": "decisionmatrix",
+          "columns": ["Documented", "Observed"],
+          "rows": [
+            { "label": "Durable across restarts", "cells": [ {"verdict":"miss","text":"no"}, {"verdict":"miss","text":"confirmed gone on restart"} ] },
+            { "label": "Off-:00/:30 minute", "cells": [ {"verdict":"have","text":"yes"}, {"verdict":"have","text":"9,39 confirmed"} ] },
+            { "label": "Notifies before expiry", "cells": [ {"verdict":"miss","text":"not specified"}, {"verdict":"miss","text":"silent"} ] }
+          ]
+        },
+        {
+          "type": "mermaid",
+          "title": "How the false-pass actually happens",
+          "mermaid": "graph TD\n  A[CronCreate fires] --> B[Job satisfies loop-gate]\n  B --> C{7 days pass}\n  C -->|job expires silently| D[Gate re-checks]\n  D --> E[Non-empty CronList from a DIFFERENT job reads as healthy]\n  E --> F[False pass]\n  style F fill:#ef444433,stroke:#ef4444",
+          "caption": "The gate cannot distinguish 'never armed' from 'armed and expired' — this is the mechanism, not just the symptom."
+        },
+        {
+          "type": "finding",
+          "id": "F1",
+          "severity": "high",
+          "headline": "loop-gate false-pass on expired job",
+          "where": "`hooks/PostToolUse/loop_gate.py:112` — the check against `CronList()`",
+          "evidence": "MEASURED. `CronList()` returning non-empty is necessary but not sufficient — the check lives in `PostToolUse:CronList` and never distinguishes `never armed` from `armed and expired`, so a session-only job satisfies the gate for up to 7 days, then falsely re-passes on the NEXT check."
+        },
+        {
+          "type": "finding",
+          "id": "F2",
+          "severity": "medium",
+          "headline": "no expiry notification — silent job death",
+          "where": "cron scheduler, 7-day auto-expire path",
+          "evidence": "MEASURED. `recurring:true` jobs fire once at expiry then are deleted from the in-memory table — no call to `hk__ping` or any other notification path, confirmed by tracing `CronCreate`'s own doc comment against observed behavior."
+        },
+        {
+          "type": "prose",
+          "text": "Open questions handed to the strategist: should the gate persist a durability token outside the session table? Is the 7-day cap a hard platform limit, or a deliberate session-lifetime bound worth documenting more loudly at CronCreate call time?"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,97 @@
+{
+  "title": "Domain/System Reference — worked example",
+  "generated_date": "2026-09-01",
+  "layout": "top-nav",
+  "root": "ref",
+  "palette": {
+    "glow": { "label": "Glow", "color": "#22d3ee" },
+    "amber": { "label": "Amber", "color": "#f59e0b" },
+    "hot": { "label": "Hot", "color": "#f7c66a" },
+    "cold": { "label": "Cold", "color": "#4fc3f7" }
+  },
+  "nodes": [
+    {
+      "slug": "ref",
+      "title": "Cron Substrate — System Reference",
+      "blocks": [
+        {
+          "type": "hero",
+          "text": "Cron Substrate — system reference",
+          "sub": "What it is, what it stores, and every surface a reader can touch."
+        },
+        {
+          "type": "prose",
+          "lede": true,
+          "text": "The cron substrate is a session-scoped, in-memory job scheduler exposed to every citizen through three calls: CronCreate, CronList, CronDelete. It stores no state on disk and vanishes when the session ends."
+        },
+        {
+          "type": "table-list",
+          "items": [
+            { "name": "jobs (in-memory)", "note": "job id, cron expression, prompt, recurring flag, created-at" },
+            { "name": "no persistent table", "note": "nothing survives a session restart — this is the root cause behind most findings in the companion report" }
+          ]
+        },
+        {
+          "type": "schema-grid",
+          "boxes": [
+            {
+              "name": "job record",
+              "kind": "hot",
+              "desc": "One entry per CronCreate call, held in the session's in-memory table.",
+              "tables": [
+                { "name": "id", "note": "opaque job id, returned to caller" },
+                { "name": "cron", "note": "5-field cron expression, local time" },
+                { "name": "prompt", "note": "text enqueued at each fire" },
+                { "name": "recurring", "note": "bool — false auto-deletes after first fire" }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "mermaid",
+          "title": "What owns what",
+          "mermaid": "graph LR\n  caller[caller] -->|CronCreate| table[(in-memory job table)]\n  table -->|CronList| caller\n  caller -->|CronDelete| table\n  table -.->|7 days, no caller action| gone[[silently deleted]]",
+          "caption": "The dashed edge is the one path with no caller in the loop — this is the shape a reader needs before they trust the table above."
+        },
+        {
+          "type": "flow",
+          "head": "Call surface",
+          "steps": [
+            { "n": "1", "head": "CronCreate", "sub": "schedule; returns a job id" },
+            { "n": "2", "head": "CronList", "sub": "read the session's active jobs" },
+            { "n": "3", "head": "CronDelete", "sub": "cancel before the job fires or expires" }
+          ]
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": "Off-herd scheduling convention",
+          "spans": [
+            { "cls": "plain", "text": "CronCreate(cron=\"9,39 * * * *\", prompt=\"heartbeat check\", recurring=true)" }
+          ]
+        },
+        {
+          "type": "table",
+          "name": "Environment constraints",
+          "columns": ["Constraint", "Value"],
+          "groups": [
+            {
+              "rows": [
+                { "cells": [ {"text":"Max recurring lifetime"}, {"text":"7 days, then final fire + silent delete"} ] },
+                { "cells": [ {"text":"Jitter"}, {"text":"up to 10% of period, max 15 min"} ] },
+                { "cells": [ {"text":"Fires only when"}, {"text":"REPL is idle (not mid-query)"} ] }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "legend",
+          "items": [
+            { "kind": "hot", "label": "in-memory / session-scoped" },
+            { "kind": "cold", "label": "external call surface (stable API)" }
+          ]
+        }
+      ]
+    }
+  ]
+}

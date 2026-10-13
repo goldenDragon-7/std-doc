@@ -98,6 +98,16 @@ dossier; the load-bearing bits):
 - **Freeze-safe always.** Icons via `icon: ./local.svg` inline as `data:` URIs.
   The gate greps the frozen SVG for external refs and fails loudly at anything
   that isn't the w3.org namespace.
+- **Never put `{` or `}` inside a label.** In D2 a brace *opens a block*, so a
+  perfectly reasonable label like `POST /doc/{id}/feedback` is a parse error, not
+  text — the whole diagram fails to render and the card degrades to
+  `⚠ diagram not rendered (d2 in-process render failed) — source shown`. This
+  bites hardest on API-shaped labels, where `{id}` / `{doc_id}` path placeholders
+  are the natural way to write things. Write `POST /doc/ID/feedback`,
+  `/doc/:id/feedback`, or `/doc/<id>/feedback` instead. **MEASURED 2026-08-21**
+  by bisecting a failing `sequence` diagram: quotes, parentheses and `?` in
+  labels all render fine; braces alone fail. The degrade is loud and the source
+  is shown, so this costs you a diagram — never a silent blank.
 
 ## Engine #3 — Flint (the quantitative/statistical family)
 

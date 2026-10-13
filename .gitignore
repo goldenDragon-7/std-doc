@@ -21,3 +21,6 @@ style-interview/demo/_voices/
 # quarantine dir for safe-delete tooling — never commit
 # re-commit the very files someone just deleted.
 probably_trash/
+
+# local dev build of the stddoc binary (34MB artifact, rebuild with: cd go && go build -o stddoc-dev ./cmd/stddoc)
+go/stddoc-dev

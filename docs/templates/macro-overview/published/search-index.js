@@ -1,0 +1,1 @@
+window.CF_SEARCH_INDEX=[{"slug":"overview","url":"overview.html","number":"1.1","title":"Kingdom Autonomics","sections":null,"text":"kingdom autonomics — landscape"}];

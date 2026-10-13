@@ -58,11 +58,47 @@ If `source.json` is absent, std-doc behaves exactly as v1 (author HTML by hand).
           ]
         }
       ],
+      "blocks": [                    // OPTIONAL — this is where PRIMITIVES go
+        { "type": "table",    "name": "…", "columns": […], "groups": […] },
+        { "type": "callout",  "kind": "green", "lead": "…", "body": "…" },
+        { "type": "diagram",  "dtype": "c4-architecture", "label": "…", "d2": "…" }
+        // …any of the ~40 declarative primitives; `stddoc primitives` lists them.
+        // Three of those primitives — row/grid/band — are CONTAINERS: they
+        // compose other blocks/[content] the same way sections/children/blocks
+        // compose the node. See protocol/primitives.md "The page layout
+        // language" for the grammar; `blocks[]` is still the only place a
+        // container (or any primitive) gets authored at the node level.
+      ],
+      "children": [ { "slug": "…", "title": "…" } ],  // OPTIONAL child NODES
       "evidence": { … }              // OPTIONAL node-level drill-down (additive)
     }
   ]
 }
 ```
+
+### The three node containers — and the trap
+
+A node has exactly three containers, and **putting content in the wrong one used
+to discard it in silence.** This is the single most common authoring mistake, so
+it is stated here plainly:
+
+| Container | Holds | Shape |
+|---|---|---|
+| `sections[]` | **prose only** | `{name, icon, tag, summary, items}` — no `type` key |
+| `blocks[]` | **primitives** | `{type: "table" \| "callout" \| "diagram" \| …}` |
+| `children[]` | **child nodes** | `{slug, title, …}` — a node, not a primitive |
+
+> **A primitive authored into `sections[]` renders as nothing.** So does a
+> primitive in `children[]`, and so does everything under a mistyped container
+> key (`block:` for `blocks:`, `section:` for `sections:`). Before 2026-08-22
+> all of these exited 0 with no message and simply produced a page missing its
+> diagrams. The linter now catches every one and names the correct key — believe
+> it when it fires, and never reach for `--no-lint` to make it quiet.
+
+Field names inside a primitive are checked the same way: a near-miss of a field
+the primitive actually reads (`colums` for `columns`, `bodyy` for `body`) is a
+warning naming the right one. Deliberate extra keys you carry for your own
+purposes (`internal_note`, `ticket`) are left alone.
 
 ### Required vs optional
 

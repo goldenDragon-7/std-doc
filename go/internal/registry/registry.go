@@ -31,11 +31,19 @@ type Finding struct {
 // the contract self-doc documents ("validate (optional)").
 type ValidateFunc func(block *wire.OrderedMap) []Finding
 
-// Registry maps a block type to its render func, static CSS, and optional
-// validator.
+// VariantCSSFunc returns EXTRA CSS a block needs because of its OWN data —
+// emitted only when that data is present. This is how an additive feature earns
+// new CSS without breaking the strangler proof: a page that never opts into the
+// variant collects zero extra bytes, so it stays byte-identical to before the
+// variant shipped. Static CSS (Register) is unconditional; variant CSS is not.
+type VariantCSSFunc func(block *wire.OrderedMap) string
+
+// Registry maps a block type to its render func, static CSS, optional
+// variant CSS, and optional validator.
 type Registry struct {
 	funcs      map[string]RenderFunc
 	css        map[string]string
+	variantCSS map[string]VariantCSSFunc
 	validators map[string]ValidateFunc
 }
 
@@ -44,9 +52,19 @@ func New() *Registry {
 	return &Registry{
 		funcs:      map[string]RenderFunc{},
 		css:        map[string]string{},
+		variantCSS: map[string]VariantCSSFunc{},
 		validators: map[string]ValidateFunc{},
 	}
 }
+
+// RegisterVariantCSS installs an optional data-conditional CSS contributor for
+// a type. Wholly optional: a type without one contributes only its static CSS.
+func (r *Registry) RegisterVariantCSS(typ string, fn VariantCSSFunc) {
+	r.variantCSS[typ] = fn
+}
+
+// VariantCSS returns the variant contributor for a type (nil if none).
+func (r *Registry) VariantCSS(typ string) VariantCSSFunc { return r.variantCSS[typ] }
 
 // Register installs a render func (and its CSS, possibly "") under a type.
 func (r *Registry) Register(typ string, fn RenderFunc, css string) {

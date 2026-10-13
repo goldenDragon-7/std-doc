@@ -1,0 +1,106 @@
+{
+  "title": "As-Built Architecture Dossier — worked example",
+  "generated_date": "2026-09-01",
+  "layout": "top-nav",
+  "root": "dossier",
+  "palette": {
+    "glow": { "label": "Glow", "color": "#22d3ee" },
+    "amber": { "label": "Amber", "color": "#f59e0b" },
+    "red": { "label": "Red", "color": "#ef4444" },
+    "green": { "label": "Green", "color": "#10b981" },
+    "purple": { "label": "Purple", "color": "#a78bfa" }
+  },
+  "nodes": [
+    {
+      "slug": "dossier",
+      "title": "Autonomics — AS-BUILT Architecture",
+      "blocks": [
+        {
+          "type": "hero",
+          "text": "Autonomics — AS-BUILT architecture, v1 → v2",
+          "sub": "Canonical orientation for the lane detectives. One dossier, every lane, one pass."
+        },
+        {
+          "type": "stats-bar",
+          "stats": [
+            { "value": "3", "label": "lanes" },
+            { "value": "2", "label": "marquee findings", "kind": "amber" },
+            { "value": "1", "label": "axiom under review", "kind": "red" }
+          ]
+        },
+        {
+          "type": "prose",
+          "lede": true,
+          "text": "This dossier exists so ten (here, three) lane detectives share one starting picture instead of ten independently reconstructed ones. Read the block diagram before your own lane's deep-dive."
+        },
+        {
+          "type": "callout",
+          "kind": "amber",
+          "lead": "Marquee findings",
+          "body": "(1) cron's durability assumption is violated at two consumer boundaries. (2) channel delivery is 'stored' vs 'received' are conflated by every caller sampled so far."
+        },
+        {
+          "type": "cardgrid",
+          "cards": [
+            { "owner": "Lane 01 · cron", "ent": "glow", "title": "cron", "body": "Session-scoped scheduler; three-call surface." },
+            { "owner": "Lane 02 · monitor", "ent": "amber", "title": "monitor", "body": "Streaming watch over a running process." },
+            { "owner": "Lane 03 · channel", "ent": "purple", "title": "channel", "body": "Postgres-NOTIFY-backed messaging substrate." }
+          ]
+        },
+        {
+          "type": "flow",
+          "head": "Write pipeline (a message from arm to delivery)",
+          "steps": [
+            { "n": "1", "head": "ping()", "sub": "caller enqueues, gets message_id back" },
+            { "n": "2", "head": "NOTIFY", "sub": "Postgres fires the channel" },
+            { "n": "3", "head": "wait_for_message()", "sub": "recipient's blocking ear wakes" },
+            { "n": "4", "head": "ACK", "sub": "only the reply proves 'received', not 'delivered'" }
+          ]
+        },
+        {
+          "type": "table",
+          "name": "ADR inventory",
+          "columns": ["Decision", "Status"],
+          "groups": [
+            {
+              "rows": [
+                { "cells": [ {"text":"Session-only cron (no durable persistence)"}, {"text":"accepted, under review"} ] },
+                { "cells": [ {"text":"Postgres NOTIFY over polling for channel"}, {"text":"accepted"} ] }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "verdict-box",
+          "label": "Transport-irrelevance axiom — system-level verdict",
+          "verdict": "partially_violated",
+          "kind": "amber",
+          "text": "Holds for channel; violated for cron, where in-memory transport IS session lifetime, and every consumer that forgets this gets it wrong the same way."
+        },
+        {
+          "type": "mermaid",
+          "title": "Where the lanes actually touch",
+          "mermaid": "graph LR\n  cron[cron] -->|job presence read as proof| gate[loop-gate]\n  channel[channel] -->|delivered:true| handoff[handoff writer]\n  gate -.->|false-pass risk| handoff\n  style gate fill:#f59e0b33,stroke:#f59e0b\n  style handoff fill:#f59e0b33,stroke:#f59e0b",
+          "caption": "The dashed edge is the seam risk itself, not a real call — both consumers make the same wrong assumption independently."
+        },
+        {
+          "type": "table",
+          "name": "Cross-lane seams",
+          "columns": ["Seam", "Risk"],
+          "groups": [
+            {
+              "rows": [
+                { "cells": [ {"text":"cron -> loop-gate"}, {"text":"false-pass on expired job"} ] },
+                { "cells": [ {"text":"channel -> handoff writer"}, {"text":"delivered:true read as received"} ] }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Open questions handed to the strategist: should durability live outside the session table for cron? Should 'delivered' be renamed to reduce the conflation risk at the channel/handoff seam?"
+        }
+      ]
+    }
+  ]
+}

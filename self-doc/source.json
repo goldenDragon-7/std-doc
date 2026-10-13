@@ -173,6 +173,35 @@
               "desc": "Let the Monitor notification arrive. Polling burns context for nothing."
             }
           ]
+        },
+        {
+          "name": "Two v0.11 discoverability tools",
+          "icon": "🧭",
+          "tag": "discoverability",
+          "summary": "Before you author a block, two commands answer \"what already exists\" and \"what should I use instead\" — both read the live library, so they can never drift from what the engine actually renders.",
+          "items": [
+            {
+              "name": "stddoc primitives",
+              "desc": "Lists every registered primitive — declarative (templates.json-driven) and structural (hand-coded Go) — with a one-line description, read straight from the library at runtime. Add a primitive to templates.json and it appears here for free.",
+              "citations": [
+                {
+                  "path": "go/cmd/stddoc/primitives.go",
+                  "evidence": "CITED"
+                }
+              ]
+            },
+            {
+              "name": "Lint suggestions",
+              "desc": "`stddoc publish` lint can also SUGGEST a richer primitive for a plain block that matches a known shape — a table with a Status column nudges toward `statusboard`, a 3+ step flow toward `pipeline`, a call box with 2+ options toward `decision`. Suggestions are non-blocking (level `suggest`, never an error) and conservative — a 2-step flow or a table with no Status column stays quiet.",
+              "citations": [
+                {
+                  "path": "go/internal/core/suggest_test.go",
+                  "evidence": "CITED",
+                  "note": "gates the trigger thresholds"
+                }
+              ]
+            }
+          ]
         }
       ]
     },
@@ -471,6 +500,61 @@
           "icon": "🎨",
           "tag": "palette",
           "summary": "Never invent a hue — paste the :root block from style/skeleton.html verbatim and use colour to MEAN something. Below, each hue is a LIVE swatch (rendered by the cardgrid primitive) with its meaning printed on the card itself: the green card literally says 'we stand here'. Then the six diagram idioms, then the copy-from skeleton. (Full prose reference: style/styleguide.md.)"
+        },
+        {
+          "name": "Layout modes — the left-nav is one mode, not the frame",
+          "icon": "🗺️",
+          "tag": "layout",
+          "summary": "A doc-tree's `layout` field picks the page shell. Leaving it absent renders exactly as before (left-nav, conformance-safe); naming one of the three modes below swaps the whole frame without touching a single block.",
+          "items": [
+            {
+              "name": "no-nav — a clean centered essay",
+              "desc": "No left rail. A single centered column, up to 880px, for a doc that reads front-to-back rather than getting browsed by section.",
+              "citations": [
+                {
+                  "path": "go/internal/core/layout.go",
+                  "line": "31-32",
+                  "evidence": "CITED"
+                }
+              ]
+            },
+            {
+              "name": "top-nav — a sticky horizontal hub",
+              "desc": "The nav becomes a sticky top bar instead of a side rail; content runs full-width beneath it. Search and breadcrumb still render — they were decoupled from the sidebar so every mode keeps them.",
+              "citations": [
+                {
+                  "path": "go/internal/core/layout.go",
+                  "line": "33-34",
+                  "evidence": "CITED"
+                }
+              ]
+            },
+            {
+              "name": "hero — a full-bleed magazine header",
+              "desc": "No rail, a large gradient-clipped headline, and a wider hero band up top — for a doc that opens with a statement before it opens with a table of contents.",
+              "citations": [
+                {
+                  "path": "go/internal/core/layout.go",
+                  "line": "35-36",
+                  "evidence": "CITED"
+                }
+              ]
+            },
+            {
+              "name": "Starting points",
+              "desc": "There's no `stddoc new` scaffold yet — copy examples/starter-no-nav/source.json or examples/starter-hero/source.json as your starting doc-tree for a new no-nav or hero doc.",
+              "citations": [
+                {
+                  "path": "examples/starter-no-nav/source.json",
+                  "evidence": "CITED"
+                },
+                {
+                  "path": "examples/starter-hero/source.json",
+                  "evidence": "CITED"
+                }
+              ]
+            }
+          ]
         }
       ],
       "blocks": [
@@ -624,6 +708,36 @@
                   "path": "examples/data-derived-example/source.json",
                   "evidence": "MEASURED",
                   "note": "the canonical doc-tree example"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Two galleries — every primitive, every Flint chart, live",
+          "icon": "🖼️",
+          "tag": "galleries",
+          "summary": "Two more data-derived docs ship in the repo as living catalogs: one page per primitive, one page per chart type — each entry rendered live, not screenshotted.",
+          "items": [
+            {
+              "name": "primitive-gallery",
+              "desc": "Every first-party primitive, one showcase block each, rendered from a single source.json. The fastest way to see a shape before you author it — and the doc this shift's `stddoc primitives` CLI verb points readers at.",
+              "citations": [
+                {
+                  "path": "examples/primitive-gallery/source.json",
+                  "evidence": "MEASURED",
+                  "note": "published + verified this shift"
+                }
+              ]
+            },
+            {
+              "name": "flint-gallery",
+              "desc": "The full 34-chart Flint quantitative family (bar, line, scatter, heatmap, and more), each chart embedded live and MIT-credited — proof that a data-derived doc can host a real charting library, not just prose primitives.",
+              "citations": [
+                {
+                  "path": "examples/flint-gallery/source.json",
+                  "evidence": "CITED",
+                  "note": "shipped v0.9.6, part of the v0.11 discoverability sweep"
                 }
               ]
             }

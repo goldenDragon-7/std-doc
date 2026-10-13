@@ -1,0 +1,99 @@
+{
+  "title": "The Page Layout Language",
+  "generated_date": "2026-09-01",
+  "layout": "reference",
+  "groups": ["Containers"],
+  "palette": {
+    "glow": { "label": "Glow", "color": "#22d3ee" }
+  },
+  "root": {
+    "summary": "row, grid, band — the three containers docs/design/layout-language.md adds. This page is itself an example of all three, plus a sections[] section proving the two spines coexist."
+  },
+  "nodes": [
+    {
+      "slug": "containers",
+      "group": "Containers",
+      "title": "row, grid, band",
+      "status": "LIVE",
+      "updated": "2026-09-01",
+      "tagline": "One tree, all three containers, plus a sections[] section — coexisting on one page.",
+      "sections": [
+        {
+          "name": "Why this exists",
+          "summary": "std-doc shipped exactly one content column in every layout and forced every doc through node -> sections -> numbered cards. This page is the counter-example."
+        }
+      ],
+      "blocks": [
+        {
+          "type": "band",
+          "label": "THE TERSENESS TRICK",
+          "at": "lead",
+          "content": [
+            {
+              "type": "prose",
+              "text": "A row column is a block, or a bare array of blocks — no wrapper object. This lead band's own label appears in the \"on this page\" aside ABOVE the sections[] entry, because adaptNode hoists at:\"lead\" blocks before the section spine."
+            },
+            {
+              "type": "row",
+              "w": "2fr 1fr",
+              "cols": [
+                [
+                  { "type": "prose", "text": "This column is a bare array of two blocks." },
+                  { "type": "prose", "text": "Both render in one .row-col, with no wrapper — the single riskiest claim in the design, proven here and in go/internal/core/layout_language_test.go." }
+                ],
+                {
+                  "type": "panel",
+                  "lead": "One block",
+                  "body": "This column is a single block — also legal, no array required."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "band",
+          "label": "THE GRID",
+          "tone": "glow",
+          "content": [
+            {
+              "type": "prose",
+              "text": "grid auto-flows a FLAT list of blocks — no per-cell wrapper, because auto-flow means the author is explicitly not choosing placement."
+            },
+            {
+              "type": "grid",
+              "across": 3,
+              "content": [
+                { "type": "panel", "lead": "A", "body": "Grid cell A." },
+                { "type": "panel", "lead": "B", "body": "Grid cell B." },
+                { "type": "panel", "lead": "C", "body": "Grid cell C." }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "band",
+          "label": "DEPTH FOUR",
+          "content": [
+            {
+              "type": "prose",
+              "text": "band > row > grid > panel — four levels deep, still renders every leaf and every leaf's CSS."
+            },
+            {
+              "type": "row",
+              "cols": [
+                {
+                  "type": "grid",
+                  "across": 2,
+                  "content": [
+                    { "type": "panel", "lead": "Deep", "body": "Four containers down." }
+                  ]
+                },
+                { "type": "prose", "text": "Sibling column, same row." }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

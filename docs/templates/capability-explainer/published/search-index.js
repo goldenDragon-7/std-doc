@@ -1,0 +1,1 @@
+window.CF_SEARCH_INDEX=[{"slug":"cap","url":"cap.html","number":"1.1","title":"Beacon","sections":null,"text":"beacon — capability explainer"}];

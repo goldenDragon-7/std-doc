@@ -1,0 +1,1 @@
+window.CF_SEARCH_INDEX=[{"slug":"report","url":"report.html","number":"1.1","title":"Plane 07","sections":null,"text":"plane 07 · cron substrate"}];

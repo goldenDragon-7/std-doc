@@ -12,7 +12,8 @@
     "Code & Docs",
     "Interactive",
     "Live Surfaces",
-    "Motion"
+    "Motion",
+    "Layout & Composition"
   ],
   "palette": {
     "glow": {
@@ -22,6 +23,34 @@
     "amber": {
       "label": "Amber",
       "color": "#f59e0b"
+    },
+    "bad": {
+      "label": "Bad",
+      "color": "#ef4444"
+    },
+    "good": {
+      "label": "Good",
+      "color": "#22c55e"
+    },
+    "hot": {
+      "label": "Hot",
+      "color": "#f97316"
+    },
+    "frozen": {
+      "label": "Frozen",
+      "color": "#a78bfa"
+    },
+    "high": {
+      "label": "High",
+      "color": "#ef4444"
+    },
+    "med": {
+      "label": "Med",
+      "color": "#f59e0b"
+    },
+    "accent": {
+      "label": "Accent",
+      "color": "#22d3ee"
     }
   },
   "root": {
@@ -91,6 +120,50 @@
             {
               "cls": "plain",
               "text": "{\n  \"type\": \"kicker\",\n  \"text\": \"The living-doc loop, drawn from safe atoms.\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-subtitle",
+      "group": "Text & Emphasis",
+      "title": "subtitle",
+      "status": "LIVE",
+      "tagline": "the `subtitle` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "subtitle",
+              "text": "A deck line under the heading — the most-shared shape in the corpus (56 of 73 documents)."
+            },
+            {
+              "type": "subtitle",
+              "text": "Tone routes through a whitelist, so an author token can only ever become a known utility class.",
+              "tone": "amber"
+            },
+            {
+              "type": "subtitle",
+              "text": "Every tone binds to a palette token, so --style swaps the whole look.",
+              "tone": "green"
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"subtitle\",\n  \"text\": \"A deck line under the heading \\u2014 the most-shared shape in the corpus.\"\n}\n\n{\n  \"type\": \"subtitle\",\n  \"text\": \"Tone routes through a whitelist \\u2014 amber, green, red, purple, gold, lavender, dim, quiet.\",\n  \"tone\": \"amber\"\n}"
             }
           ]
         }
@@ -339,6 +412,29 @@
           ]
         },
         {
+          "type": "showcase",
+          "label": "LIVE RENDER — with owner (lane identity, GAPS.md gap #8)",
+          "content": [
+            {
+              "type": "cardgrid",
+              "cards": [
+                {
+                  "owner": "Lane 03 · IndexService",
+                  "ent": "glow",
+                  "title": "Query routing",
+                  "body": "Owns the read path."
+                },
+                {
+                  "owner": "Lane 07 · Cron Substrate",
+                  "ent": "amber",
+                  "title": "Scheduling",
+                  "body": "Owns wakeups + retries."
+                }
+              ]
+            }
+          ]
+        },
+        {
           "type": "prose",
           "text": "Source (copy into your own source.json):"
         },
@@ -350,6 +446,21 @@
             {
               "cls": "plain",
               "text": "{\n  \"type\": \"cardgrid\",\n  \"cards\": [\n    {\n      \"title\": \"Gateway\",\n      \"body\": \"MCP entrypoint\",\n      \"eyebrow\": \"core\",\n      \"ent\": \"glow\"\n    },\n    {\n      \"title\": \"Doctor\",\n      \"body\": \"health probes\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "With `owner` (lane-identity slot):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"cardgrid\",\n  \"cards\": [\n    {\n      \"owner\": \"Lane 03 \\u00b7 IndexService\",\n      \"ent\": \"glow\",\n      \"title\": \"Query routing\",\n      \"body\": \"Owns the read path.\"\n    }\n  ]\n}"
             }
           ]
         }
@@ -507,6 +618,19 @@
           ]
         },
         {
+          "type": "showcase",
+          "label": "LIVE RENDER — with kind (temperature)",
+          "content": [
+            {
+              "type": "panel",
+              "variant": "hairline",
+              "kind": "frozen",
+              "lead": "01 Personality",
+              "body": "Frozen at LOAD_BEARING — the temperature-accented panel (GAPS.md gap #6)."
+            }
+          ]
+        },
+        {
           "type": "prose",
           "text": "Source (copy into your own source.json):"
         },
@@ -518,6 +642,21 @@
             {
               "cls": "plain",
               "text": "{\n  \"type\": \"panel\",\n  \"variant\": \"pn-lift\",\n  \"lead\": \"Panel lead\",\n  \"body\": \"A softly-lifted content panel.\"\n}"
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "With `kind` (palette-validated, GAPS.md gap #6):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"panel\",\n  \"variant\": \"hairline\",\n  \"kind\": \"frozen\",\n  \"lead\": \"01 Personality\",\n  \"body\": \"Frozen at LOAD_BEARING.\"\n}"
             }
           ]
         }
@@ -1265,21 +1404,60 @@
               "name": "Coverage",
               "columns": [
                 "Area",
-                "Status"
+                "Status",
+                "Note"
               ],
               "groups": [
                 {
                   "rows": [
-                    {
-                      "cells": [
-                        {
-                          "text": "gateway"
-                        },
-                        {
-                          "text": "LIVE"
-                        }
-                      ]
-                    }
+                    [
+                      {
+                        "text": "gateway"
+                      },
+                      {
+                        "text": "LIVE",
+                        "tone": "green"
+                      },
+                      {
+                        "text": "stable"
+                      }
+                    ],
+                    [
+                      {
+                        "text": "recall"
+                      },
+                      {
+                        "text": "DEGRADED",
+                        "tone": "amber"
+                      },
+                      {
+                        "text": "retry loop"
+                      }
+                    ],
+                    [
+                      {
+                        "text": "legacy poller"
+                      },
+                      {
+                        "text": "DEAD",
+                        "tone": "red"
+                      },
+                      {
+                        "text": "scheduled for removal",
+                        "tone": "dim"
+                      }
+                    ],
+                    [
+                      {
+                        "text": "plain cell"
+                      },
+                      {
+                        "text": "no tone"
+                      },
+                      {
+                        "text": "renders exactly as before"
+                      }
+                    ]
                   ]
                 }
               ]
@@ -1646,6 +1824,144 @@
       ]
     },
     {
+      "slug": "p-presence",
+      "group": "Live Surfaces",
+      "title": "presence",
+      "status": "LIVE",
+      "tagline": "the `presence` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "presence",
+              "readers": [
+                {
+                  "name": "Ada",
+                  "state": "here"
+                },
+                {
+                  "name": "Grace",
+                  "state": "idle"
+                },
+                {
+                  "name": "Hedy",
+                  "state": "away"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"presence\",\n  \"readers\": [\n    {\n      \"name\": \"Ada\",\n      \"state\": \"here\"\n    },\n    {\n      \"name\": \"Grace\",\n      \"state\": \"idle\"\n    },\n    {\n      \"name\": \"Hedy\",\n      \"state\": \"away\"\n    }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-sincelast",
+      "group": "Live Surfaces",
+      "title": "sincelast",
+      "status": "LIVE",
+      "tagline": "the `sincelast` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "sincelast",
+              "when": "2 min ago",
+              "changes": [
+                {
+                  "kind": "added",
+                  "what": "a new `attribution` example",
+                  "who": "Ada"
+                },
+                {
+                  "kind": "edited",
+                  "what": "the presence dot legend",
+                  "who": "Grace"
+                },
+                {
+                  "kind": "commented",
+                  "what": "on the readers array shape",
+                  "who": "Hedy"
+                },
+                {
+                  "kind": "removed",
+                  "what": "the stale fixture note"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"sincelast\",\n  \"when\": \"2 min ago\",\n  \"changes\": [\n    {\n      \"kind\": \"added\",\n      \"what\": \"a new `attribution` example\",\n      \"who\": \"Ada\"\n    },\n    {\n      \"kind\": \"edited\",\n      \"what\": \"the presence dot legend\",\n      \"who\": \"Grace\"\n    },\n    {\n      \"kind\": \"commented\",\n      \"what\": \"on the readers array shape\",\n      \"who\": \"Hedy\"\n    },\n    {\n      \"kind\": \"removed\",\n      \"what\": \"the stale fixture note\"\n    }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-attribution",
+      "group": "Live Surfaces",
+      "title": "attribution",
+      "status": "LIVE",
+      "tagline": "the `attribution` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "attribution",
+              "who": "Ada",
+              "kind": "edited",
+              "when": "just now"
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"attribution\",\n  \"who\": \"Ada\",\n  \"kind\": \"edited\",\n  \"when\": \"just now\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "slug": "p-reveal",
       "group": "Motion",
       "title": "reveal",
@@ -1692,6 +2008,1024 @@
             {
               "cls": "plain",
               "text": "{\n  \"type\": \"reveal\",\n  \"tone\": \"muse\",\n  \"paras\": [\n    {\n      \"content\": [\n        {\n          \"type\": \"text\",\n          \"s\": \"An animated-in reveal paragraph \\u2014 \"\n        },\n        {\n          \"type\": \"soft\",\n          \"s\": \"soft emphasis\"\n        },\n        {\n          \"type\": \"text\",\n          \"s\": \" mid-sentence.\"\n        }\n      ]\n    }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-stats",
+      "group": "Status & Labels",
+      "title": "stats",
+      "status": "LIVE",
+      "tagline": "the `stats` primitive — a row of value+label tiles",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "stats",
+              "items": [
+                {
+                  "value": "10",
+                  "label": "lanes"
+                },
+                {
+                  "value": "99+",
+                  "label": "actor declarations in Core"
+                },
+                {
+                  "value": "16",
+                  "label": "CLI commands",
+                  "tone": "amber"
+                },
+                {
+                  "value": "10 s",
+                  "label": "IQLayer replan interval",
+                  "tone": "green"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Rebuilt from a real corpus document (LEO_ARCHITECTURE.html). One shape behind seven class names — stat, stats, stats-bar, stat-val, stat-lbl, stat-label, stat-num — across 45 of 73 documents."
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"stats\",\n  \"items\": [\n    { \"value\": \"10\",  \"label\": \"lanes\" },\n    { \"value\": \"99+\", \"label\": \"actor declarations in Core\" },\n    { \"value\": \"16\",  \"label\": \"CLI commands\", \"tone\": \"amber\" },\n    { \"value\": \"10 s\", \"label\": \"IQLayer replan interval\", \"tone\": \"green\" }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-html",
+      "group": "Live Surfaces",
+      "title": "html",
+      "status": "LIVE",
+      "tagline": "the `html` primitive — the bounded escape hatch for the long tail",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "html",
+              "content": "<div class=\"lane-map\"><svg viewBox=\"0 0 120 40\" width=\"120\" height=\"40\"><circle cx=\"20\" cy=\"20\" r=\"12\" fill=\"currentColor\" opacity=\"0.35\"></circle><line x1=\"34\" y1=\"20\" x2=\"86\" y2=\"20\" stroke=\"currentColor\"></line><circle cx=\"100\" cy=\"20\" r=\"12\" fill=\"currentColor\"></circle></svg><p class=\"u-amber u-tight\">A shape the library does not have yet.</p></div>"
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "The ONLY untrusted slot in a std-doc. ~75% of the corpus's 1,070 CSS classes appear in exactly one document — that tail is per-document invention, and no library will ever enumerate it. This is what the tail gets, so an author is never blocked on a missing shape."
+        },
+        {
+          "type": "prose",
+          "text": "Every block is parsed and RE-SERIALIZED from the parse tree, never regex-filtered. Violations are refused LOUDLY and nothing is ever silently stripped. script, on* handlers, style=, src, iframe and img are rejected; use the utility classes for colour so it themes under --style."
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"html\",\n  \"content\": \"<div class=\\\"lane-map\\\">…inline SVG, tables, lists…</div>\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-stats-bar",
+      "group": "Status & Labels",
+      "title": "stats-bar",
+      "status": "LIVE",
+      "tagline": "the `stats-bar` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "stats-bar",
+              "stats": [
+                {
+                  "value": "47",
+                  "label": "Findings"
+                },
+                {
+                  "value": "12",
+                  "label": "Critical",
+                  "kind": "bad"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"stats-bar\",\n  \"stats\": [\n    {\n      \"value\": \"47\",\n      \"label\": \"Findings\"\n    },\n    {\n      \"value\": \"12\",\n      \"label\": \"Critical\",\n      \"kind\": \"bad\"\n    }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-legend",
+      "group": "Status & Labels",
+      "title": "legend",
+      "status": "LIVE",
+      "tagline": "the `legend` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "legend",
+              "items": [
+                {
+                  "kind": "hot",
+                  "label": "01 Personality"
+                },
+                {
+                  "kind": "good",
+                  "label": "02 Harnesses"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"legend\",\n  \"items\": [\n    {\n      \"kind\": \"hot\",\n      \"label\": \"01 Personality\"\n    },\n    {\n      \"kind\": \"good\",\n      \"label\": \"02 Harnesses\"\n    }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-table-list",
+      "group": "Code & Docs",
+      "title": "table-list",
+      "status": "LIVE",
+      "tagline": "the `table-list` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "table-list",
+              "items": [
+                {
+                  "name": "chart_of_accounts",
+                  "note": "~60 GL codes: expense/revenue/asset categories"
+                },
+                {
+                  "name": "entities",
+                  "note": "personal, business, s_corp, c_corp"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"table-list\",\n  \"items\": [\n    {\n      \"name\": \"chart_of_accounts\",\n      \"note\": \"~60 GL codes: expense/revenue/asset categories\"\n    }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-schema-grid",
+      "group": "Code & Docs",
+      "title": "schema-grid",
+      "status": "LIVE",
+      "tagline": "the `schema-grid` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "schema-grid",
+              "boxes": [
+                {
+                  "name": "meta",
+                  "kind": "hot",
+                  "desc": "Reference data — entities, accounts, vendors, GL codes.",
+                  "tables": [
+                    {
+                      "name": "chart_of_accounts",
+                      "note": "~60 GL codes"
+                    },
+                    {
+                      "name": "entities",
+                      "note": "personal, business, s_corp, c_corp"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"schema-grid\",\n  \"boxes\": [\n    {\n      \"name\": \"meta\",\n      \"kind\": \"hot\",\n      \"desc\": \"Reference data.\",\n      \"tables\": [\n        {\n          \"name\": \"chart_of_accounts\",\n          \"note\": \"~60 GL codes\"\n        }\n      ]\n    }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-phase-strip",
+      "group": "Boards & Pipelines",
+      "title": "phase-strip",
+      "status": "LIVE",
+      "tagline": "the `phase-strip` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "phase-strip",
+              "phases": [
+                {
+                  "num": "Phase 0",
+                  "name": "Pre-flight emergencies",
+                  "desc": "Drain the backlog. Fix the deadlock pattern.",
+                  "effort": "3-5 shifts",
+                  "kind": "bad"
+                },
+                {
+                  "num": "Phase 1",
+                  "name": "Fixer contract",
+                  "desc": "Fix fixer composition bug. Ship pipeline.yaml.",
+                  "effort": "2-3 shifts",
+                  "kind": "good"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"phase-strip\",\n  \"phases\": [\n    {\n      \"num\": \"Phase 0\",\n      \"name\": \"Pre-flight emergencies\",\n      \"desc\": \"Drain the backlog.\",\n      \"effort\": \"3-5 shifts\",\n      \"kind\": \"bad\"\n    }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-verdict-box",
+      "group": "Comparison & Decision",
+      "title": "verdict-box",
+      "status": "LIVE",
+      "tagline": "the `verdict-box` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "verdict-box",
+              "label": "Plane verdict",
+              "verdict": "appropriate_but_chaotic",
+              "kind": "good",
+              "text": "The canon WORKS. See [notes](https://example.com/notes) for detail."
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"verdict-box\",\n  \"label\": \"Plane verdict\",\n  \"verdict\": \"appropriate_but_chaotic\",\n  \"kind\": \"good\",\n  \"text\": \"The canon WORKS.\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-disclosure",
+      "group": "Code & Docs",
+      "title": "disclosure",
+      "status": "LIVE",
+      "tagline": "the `disclosure` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "disclosure",
+              "summary": "Full stack trace (click to expand)",
+              "open": false,
+              "content": [
+                {
+                  "type": "prose",
+                  "text": "Deep detail that most readers should see collapsed by default."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"disclosure\",\n  \"summary\": \"Full stack trace\",\n  \"open\": false,\n  \"content\": [\n    {\n      \"type\": \"prose\",\n      \"text\": \"...\"\n    }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-tag",
+      "group": "Status & Labels",
+      "title": "tag",
+      "status": "LIVE",
+      "tagline": "the `tag` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "tag",
+              "kind": "hot",
+              "label": "hot"
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"tag\",\n  \"kind\": \"hot\",\n  \"label\": \"hot\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-landscape-ascii",
+      "group": "Diagrammatic",
+      "title": "landscape-ascii",
+      "status": "LIVE",
+      "tagline": "the `landscape-ascii` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "landscape-ascii",
+              "lines": [
+                [
+                  {
+                    "text": "┌──────────────────────────┐",
+                    "kind": "frozen"
+                  }
+                ],
+                [
+                  {
+                    "text": "│  "
+                  },
+                  {
+                    "text": "01 PERSONALITY",
+                    "kind": "frozen"
+                  },
+                  {
+                    "text": "          │"
+                  }
+                ],
+                [
+                  {
+                    "text": "│  "
+                  },
+                  {
+                    "text": "↳ ghost @ LOAD_BEARING",
+                    "kind": "bad"
+                  },
+                  {
+                    "text": "   │"
+                  }
+                ],
+                [
+                  {
+                    "text": "└──────────────────────────┘",
+                    "kind": "frozen"
+                  }
+                ]
+              ]
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"landscape-ascii\",\n  \"lines\": [\n    [\n      {\n        \"text\": \"\\u250c\\u2500\\u2500\\u2500\\u2510\",\n        \"kind\": \"frozen\"\n      }\n    ],\n    [\n      {\n        \"text\": \"\\u2502 \"\n      },\n      {\n        \"text\": \"01 PERSONALITY\",\n        \"kind\": \"frozen\"\n      },\n      {\n        \"text\": \" \\u2502\"\n      }\n    ],\n    [\n      {\n        \"text\": \"\\u2502 \"\n      },\n      {\n        \"text\": \"\\u21b3 ghost\",\n        \"kind\": \"bad\"\n      },\n      {\n        \"text\": \" \\u2502\"\n      }\n    ]\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-finding",
+      "group": "Comparison & Decision",
+      "title": "finding",
+      "status": "LIVE",
+      "tagline": "the `finding` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "finding",
+              "id": "F1",
+              "severity": "high",
+              "headline": "FIXER COMPOSITION BUG — load-bearing architectural flaw",
+              "where": "the block's `type` field selects the handler — `lib/base.py:149`",
+              "evidence": "MEASURED. Confirmed by reading `PreToolUseContext.tool_input` directly."
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"finding\",\n  \"id\": \"F1\",\n  \"severity\": \"high\",\n  \"headline\": \"FIXER COMPOSITION BUG \\u2014 load-bearing architectural flaw\",\n  \"where\": \"the block's `type` field selects the handler \\u2014 `lib/base.py:149`\",\n  \"evidence\": \"MEASURED. Confirmed by reading `PreToolUseContext.tool_input` directly.\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-enrich-steps",
+      "group": "Cards & Clusters",
+      "title": "enrich-steps",
+      "status": "LIVE",
+      "tagline": "the `enrich-steps` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "enrich-steps",
+              "steps": [
+                {
+                  "num": "STEP 1",
+                  "name": "Parse",
+                  "desc": "Tokenize the raw input into a structured event."
+                },
+                {
+                  "num": "STEP 2",
+                  "name": "Render",
+                  "desc": "Walk blocks against the registry."
+                },
+                {
+                  "num": "STEP 3",
+                  "name": "Serve",
+                  "desc": "Write the response."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"enrich-steps\",\n  \"steps\": [\n    {\n      \"num\": \"STEP 1\",\n      \"name\": \"Parse\",\n      \"desc\": \"Tokenize the raw input.\"\n    }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-pattern-header",
+      "group": "Text & Emphasis",
+      "title": "pattern-header",
+      "status": "LIVE",
+      "tagline": "the `pattern-header` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "pattern-header",
+              "era": "Rebuild Era · 2026",
+              "title": "The Seven Planes",
+              "desc": "How the kingdom's architecture divides into seven independently-evolving planes."
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"pattern-header\",\n  \"era\": \"Rebuild Era \\u00b7 2026\",\n  \"title\": \"The Seven Planes\",\n  \"desc\": \"How the architecture divides into seven planes.\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-timeline-infographic",
+      "group": "Boards & Pipelines",
+      "title": "timeline-infographic",
+      "status": "LIVE",
+      "tagline": "the `timeline-infographic` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "timeline-infographic",
+              "steps": [
+                {
+                  "num": 1,
+                  "title": "Client Sends Request",
+                  "desc": "The client library selects a transport.",
+                  "icons": [
+                    "🐍",
+                    "🐹"
+                  ],
+                  "timing": "~1ms (network)",
+                  "kind": "glow"
+                },
+                {
+                  "num": 2,
+                  "title": "Router Validates",
+                  "desc": "Auth + routing checks run.",
+                  "timing": "~2ms"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"timeline-infographic\",\n  \"steps\": [\n    {\n      \"num\": 1,\n      \"title\": \"Client Sends Request\",\n      \"desc\": \"Picks a transport.\",\n      \"icons\": [\n        \"\\ud83d\\udc0d\",\n        \"\\ud83d\\udc39\"\n      ],\n      \"timing\": \"~1ms\",\n      \"kind\": \"glow\"\n    }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-quote",
+      "group": "Text & Emphasis",
+      "title": "quote",
+      "status": "LIVE",
+      "tagline": "the `quote` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "quote",
+              "text": "The kingdom CAN do everything it needs — but every captain has to assemble the workflow by hand.",
+              "who": "the detective's headline"
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"quote\",\n  \"text\": \"The kingdom CAN do everything it needs.\",\n  \"who\": \"the detective's headline\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-kv",
+      "group": "Code & Docs",
+      "title": "kv",
+      "status": "LIVE",
+      "tagline": "the `kv` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "kv",
+              "rows": [
+                {
+                  "k": "Engine",
+                  "v": "Plain `str.replace` for `{{ placeholder }}`"
+                },
+                {
+                  "k": "Renderer",
+                  "v": "src/codefactory/templates/__init__.py"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"kv\",\n  \"rows\": [\n    {\n      \"k\": \"Engine\",\n      \"v\": \"Plain `str.replace`\"\n    }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-synthesis-note",
+      "group": "Comparison & Decision",
+      "title": "synthesis-note",
+      "status": "LIVE",
+      "tagline": "the `synthesis-note` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "synthesis-note",
+              "text": "Predecessor detective made 32 tool calls (17 Read, 0 Grep). Shortest lifetime (4m06s). Killed at write step."
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"synthesis-note\",\n  \"text\": \"Predecessor made 32 tool calls. Killed at write step.\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-stamp",
+      "group": "Comparison & Decision",
+      "title": "stamp",
+      "status": "LIVE",
+      "tagline": "the `stamp` primitive — live render, then its source",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "stamp",
+              "date": "2026-05-14",
+              "roles": [
+                {
+                  "name": "Captain Codefactory",
+                  "kind": "accent"
+                },
+                {
+                  "name": "Mr. Dragon",
+                  "kind": "hot"
+                },
+                {
+                  "name": "Strategist",
+                  "kind": "good"
+                }
+              ],
+              "caption": "kingdom architecture · synthesis pass"
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"stamp\",\n  \"date\": \"2026-05-14\",\n  \"roles\": [\n    {\n      \"name\": \"Captain Codefactory\",\n      \"kind\": \"accent\"\n    }\n  ],\n  \"caption\": \"kingdom architecture \\u00b7 synthesis pass\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-row",
+      "group": "Layout & Composition",
+      "title": "row",
+      "status": "LIVE",
+      "tagline": "the `row` container — N columns across, with weights (page layout language, docs/design/layout-language.md)",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "row",
+              "w": "2fr 1fr",
+              "cols": [
+                {
+                  "type": "prose",
+                  "text": "The read pipeline is the hot path."
+                },
+                {
+                  "type": "callout",
+                  "kind": "amber",
+                  "lead": "Budget",
+                  "body": "120ms p99."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"row\",\n  \"w\": \"2fr 1fr\",\n  \"cols\": [\n    {\"type\": \"prose\", \"text\": \"The read pipeline is the hot path.\"},\n    {\"type\": \"callout\", \"kind\": \"amber\", \"lead\": \"Budget\", \"body\": \"120ms p99.\"}\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-grid",
+      "group": "Layout & Composition",
+      "title": "grid",
+      "status": "LIVE",
+      "tagline": "the `grid` container — auto-flowing N-across or auto-fill, for a flat list of blocks (page layout language)",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "grid",
+              "across": 4,
+              "content": [
+                {
+                  "type": "panel",
+                  "variant": "hairline",
+                  "kind": "frozen",
+                  "lead": "Substrate",
+                  "body": "The plane everything else stands on."
+                },
+                {
+                  "type": "panel",
+                  "variant": "hairline",
+                  "kind": "bad",
+                  "lead": "Memory",
+                  "body": "Leaks under load."
+                },
+                {
+                  "type": "panel",
+                  "variant": "hairline",
+                  "kind": "good",
+                  "lead": "Recall",
+                  "body": "Fast, warm, shared."
+                },
+                {
+                  "type": "panel",
+                  "variant": "hairline",
+                  "kind": "hot",
+                  "lead": "Dispatch",
+                  "body": "Where the heat concentrates."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"grid\",\n  \"across\": 4,\n  \"content\": [\n    {\"type\": \"panel\", \"variant\": \"hairline\", \"kind\": \"frozen\", \"lead\": \"Substrate\", \"body\": \"…\"},\n    {\"type\": \"panel\", \"variant\": \"hairline\", \"kind\": \"bad\", \"lead\": \"Memory\", \"body\": \"…\"}\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "p-band",
+      "group": "Layout & Composition",
+      "title": "band",
+      "status": "LIVE",
+      "tagline": "the `band` container — a labeled vertical region, free block stream, and the TOC anchor (page layout language)",
+      "blocks": [
+        {
+          "type": "showcase",
+          "label": "LIVE RENDER",
+          "content": [
+            {
+              "type": "band",
+              "label": "THE PLANES",
+              "tone": "glow",
+              "content": [
+                {
+                  "type": "prose",
+                  "text": "Seven planes, one substrate."
+                },
+                {
+                  "type": "grid",
+                  "across": 2,
+                  "content": [
+                    {
+                      "type": "panel",
+                      "variant": "lift",
+                      "lead": "Left",
+                      "body": "First panel in the nested grid."
+                    },
+                    {
+                      "type": "panel",
+                      "variant": "lift",
+                      "lead": "Right",
+                      "body": "Second panel in the nested grid."
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "prose",
+          "text": "Source (copy into your own source.json):"
+        },
+        {
+          "type": "code",
+          "mode": "snippet",
+          "caption": null,
+          "spans": [
+            {
+              "cls": "plain",
+              "text": "{\n  \"type\": \"band\",\n  \"label\": \"THE PLANES\",\n  \"tone\": \"glow\",\n  \"content\": [\n    {\"type\": \"prose\", \"text\": \"Seven planes, one substrate.\"},\n    {\"type\": \"grid\", \"across\": 2, \"content\": [ …panels… ]}\n  ]\n}"
             }
           ]
         }

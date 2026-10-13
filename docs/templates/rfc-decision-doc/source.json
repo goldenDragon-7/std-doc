@@ -1,0 +1,111 @@
+{
+  "title": "RFC — Retire the polling queue for pushed events",
+  "generated_date": "2026-09-01",
+  "layout": "hero",
+  "groups": ["RFC"],
+  "palette": {
+    "green": { "label": "Chosen", "color": "#10b981" },
+    "red": { "label": "Rejected", "color": "#ef4444" },
+    "gold": { "label": "Open question", "color": "#fbbf24" },
+    "cyan": { "label": "Spine", "color": "#22d3ee" }
+  },
+  "root": {
+    "summary": "A worked RFC exemplar: state the question, show the decision up front, argue it with a comparison and a cost table, then close the open questions honestly. Copy this shape for any proposal that needs a recorded, defensible decision."
+  },
+  "nodes": [
+    {
+      "slug": "rfc",
+      "group": "RFC",
+      "title": "Retire the polling queue",
+      "status": "LIVE",
+      "tagline": "Decision doc — proposal mode. One question, one chosen answer, the reasoning that survives an audit.",
+      "blocks": [
+        {
+          "type": "kicker",
+          "text": "RFC-014 · Proposal mode"
+        },
+        {
+          "type": "hero",
+          "text": "Should the job runner poll the queue table, or should the queue push events over NOTIFY?",
+          "sub": "This doc argues for push, records the decision, and names what push does not solve."
+        },
+        {
+          "type": "decision",
+          "question": "How should the job runner learn that new work exists — poll on an interval, or be pushed a wakeup?",
+          "chosen": "Switch to Postgres LISTEN/NOTIFY: the queue table's insert trigger fires NOTIFY, the runner blocks on LISTEN and wakes immediately.",
+          "rationale": "Polling costs a fixed query every interval whether or not there is work, and its latency floor is the interval itself. NOTIFY costs nothing when idle and wakes the runner in the same transaction commit that created the work — no floor.",
+          "alternatives": [
+            { "label": "Tighter poll interval (1s)", "reason": "Trades latency for load without removing either; still has a floor, now a worse one under contention." },
+            { "label": "External message broker (Redis/RabbitMQ)", "reason": "Solves the same problem Postgres already solves in-process; adds an operational dependency and a second source of truth for the same rows." },
+            { "label": "Webhook callback from the inserting service", "reason": "Couples every producer to knowing about every consumer; NOTIFY keeps the coupling at the table." }
+          ]
+        },
+        {
+          "type": "callout",
+          "kind": "gold",
+          "lead": "Read the comparison for the shape, not the row count.",
+          "body": "Every row on the push side is a property NOTIFY gets for free from being in-transaction. Every row on the poll side is a property that has to be tuned by hand and re-tuned as load changes."
+        },
+        {
+          "type": "compare",
+          "left": {
+            "title": "Poll (current)",
+            "pill": "REJECTED",
+            "accent": "red",
+            "items": [
+              "Fixed query cost every interval, busy or idle",
+              "Latency floor = the interval, no better even when idle",
+              "Tighter interval trades latency for load, never removes either",
+              "Race window between check and claim needs a row lock"
+            ]
+          },
+          "right": {
+            "title": "Push (NOTIFY)",
+            "pill": "CHOSEN",
+            "accent": "green",
+            "items": [
+              "Zero cost while idle — LISTEN blocks, no query runs",
+              "Wakes in the same commit that created the work",
+              "Load-independent: one NOTIFY per insert, not per runner-tick",
+              "Same row lock still needed at claim time — NOTIFY doesn't remove contention, it removes the wait"
+            ]
+          }
+        },
+        {
+          "type": "table",
+          "columns": ["Property", "Poll (1s)", "Push (NOTIFY)"],
+          "groups": [
+            {
+              "name": "Cost",
+              "rows": [
+                ["Idle query rate", "1/sec/runner", "0"],
+                ["p50 pickup latency", "~500ms", "~5ms"],
+                ["p99 pickup latency", "~1000ms", "~15ms"]
+              ]
+            },
+            {
+              "name": "Risk",
+              "rows": [
+                ["New failure mode", "None — same as today", "Connection drop silently stops LISTEN; needs a reconnect+resync loop"],
+                ["Operational surface", "Unchanged", "+1 trigger, +1 long-lived LISTEN connection per runner"]
+              ]
+            }
+          ]
+        },
+        {
+          "type": "callout",
+          "kind": "red",
+          "variant": "gate",
+          "lead": "The gate this RFC does not close.",
+          "body": "NOTIFY payloads are capped at 8000 bytes and are not durable — a runner that is down when NOTIFY fires never sees it. The insert must still be the source of truth; NOTIFY is a wakeup hint, not a delivery guarantee. Any adopting runner MUST poll once on startup and once after every reconnect to resync, or it will silently miss work created while it was disconnected."
+        },
+        {
+          "type": "callout",
+          "kind": "gold",
+          "lead": "Open question — not blocking this RFC, but unresolved.",
+          "body": "Should the resync-on-reconnect poll use the same 1s interval as today, or a wider one now that it only needs to catch a missed-NOTIFY window instead of carry the whole latency budget? Left to the implementer; either is a strict improvement over the status quo."
+        }
+      ]
+    }
+  ]
+}

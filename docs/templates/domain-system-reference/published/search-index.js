@@ -1,0 +1,1 @@
+window.CF_SEARCH_INDEX=[{"slug":"ref","url":"ref.html","number":"1.1","title":"Cron Substrate","sections":null,"text":"cron substrate — system reference"}];

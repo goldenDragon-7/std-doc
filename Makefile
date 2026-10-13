@@ -29,7 +29,17 @@ PLATFORMS := darwin/arm64 darwin/amd64 linux/amd64 linux/arm64 windows/amd64
 .PHONY: build release verify sign clean version dist
 
 # Internal-only paths pruned from the public source bundle (make dist).
+#
+# Keeping this list correct by hand is NOT the safety mechanism. A denylist only
+# catches what someone already thought of, and on 2026-10-13 four directories
+# added after this line was written (strategy services contrib docs) were sitting
+# inside the public bundle while the documented leak-scan printed "clean". The
+# real gate is the ALLOWLIST in .claude/skills/stddoc-release/preflight.sh, which
+# blocks anything not deliberately admitted. This list is convenience; that gate
+# is the guarantee.
 DIST_EXCLUDE := briefs _audit_out prd HANDOFF.md CLAUDE.md COMING-ATTRACTIONS.md RELEASE.md Makefile.internal \
+                strategy services contrib \
+                docs/design docs/findings docs/primitive-candidates docs/templates/GAPS.md \
                 .claude go/LETTER-to-the-next-maker.md go/probably_trash \
                 style-interview/demo/_review-spec style-interview/demo/pager-preview \
                 style-interview/demo/published-pager conformance/cases/prd-python-prep
@@ -56,7 +66,7 @@ release: clean
 	      $(GO) build -ldflags "$(LDFLAGS)" -o ../$$stage/stddoc$$ext ./cmd/stddoc ); \
 	  cp -R $(LIB_DIR) $$stage/stddoc-lib; \
 	  rm -rf $$stage/stddoc-lib/flint/bake/node_modules $$stage/stddoc-lib/flint/bake/package-lock.json; \
-	  find $$stage -name '._*' -delete; \
+	  find $$stage \( -name '._*' -o -name '.DS_Store' \) -delete; \
 	  ( cd $(DIST) && COPYFILE_DISABLE=1 tar -czf $$name.tar.gz $$name ); \
 	  rm -rf $$stage; \
 	done
@@ -72,7 +82,7 @@ dist:
 	@mkdir -p $(DIST)/$(DIST_NAME)
 	@git archive HEAD | tar -x -C $(DIST)/$(DIST_NAME)
 	@cd $(DIST)/$(DIST_NAME) && rm -rf $(DIST_EXCLUDE)
-	@find $(DIST)/$(DIST_NAME) -name '._*' -delete
+	@find $(DIST)/$(DIST_NAME) \( -name '._*' -o -name '.DS_Store' \) -delete
 	@( cd $(DIST) && COPYFILE_DISABLE=1 tar -czf $(DIST_NAME)-dist.tar.gz $(DIST_NAME) )
 	@echo "----"
 	@echo "public bundle:  $(DIST)/$(DIST_NAME)/   (pruned: $(DIST_EXCLUDE))"

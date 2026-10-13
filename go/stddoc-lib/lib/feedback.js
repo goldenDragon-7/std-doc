@@ -329,6 +329,25 @@
 
   const $ = (id) => document.getElementById(id);
 
+  // Acknowledge a captured comment WITHOUT taking the page over: the launcher
+  // pulses and the badge pops (renderPending has already bumped the count), and
+  // the panel stays DOWN. This used to call openPanel(), which covered the very
+  // sentence the reader had just commented on — the acknowledgement obscured the
+  // subject. Acknowledge in the corner; let them keep reading.
+  function pulseLauncher() {
+    const els = [$("cf-toggle"), $("cf-badge")];
+    for (const el of els) {
+      if (!el) continue;
+      el.classList.remove("cf-captured");
+      void el.offsetWidth;          // restart the animation on rapid repeat comments
+      el.classList.add("cf-captured");
+    }
+    clearTimeout(pulseLauncher._timeout);
+    pulseLauncher._timeout = setTimeout(() => {
+      for (const el of els) if (el) el.classList.remove("cf-captured");
+    }, 900);
+  }
+
   function showToast(msg, ms = 2500) {
     const t = $("cf-toast");
     t.textContent = msg;
@@ -545,8 +564,7 @@
       window.getSelection().removeAllRanges();
       S.savedTextSelection = null;
     }
-    openPanel();
-    setActiveTab("pending");
+    pulseLauncher();
     showToast("comment added");
   }
 
@@ -1604,8 +1622,7 @@
     saveLS();
     renderPending();
     paintControlAnswered(block);   // flip THIS control to the inverse-video answered state now
-    openPanel();
-    setActiveTab("pending");
+    pulseLauncher();
     showToast("answer added");
   }
 

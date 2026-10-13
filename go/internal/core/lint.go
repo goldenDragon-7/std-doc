@@ -5,8 +5,10 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+	"unicode/utf8"
 
 	"stddoc/internal/library"
+	"stddoc/internal/palette"
 	"stddoc/internal/registry"
 	"stddoc/internal/wire"
 )
@@ -118,6 +120,18 @@ func lintDoc(doc *wire.OrderedMap, reg *registry.Registry) []registry.Finding {
 	if doc == nil {
 		return []registry.Finding{errf("<doc>", "source is not a JSON object")}
 	}
+	// The doc's real palette (not nil, not an empty stand-in): lintReachability
+	// actually RENDERS a block to see what it composes, and a container that
+	// pairs `tone`/`kind` (palette_var) with composed content — band is the
+	// first primitive to do both — would hit "palette_var requires a palette
+	// in ctx" partway through its own template and abort BEFORE reaching the
+	// `each`/`compose` that walks its children, which reachabilityScan then
+	// misreads as "authored but never rendered". An empty palette would still
+	// error loudly for any key not declared in it (by design — undeclared
+	// palette keys are a real authoring mistake), so only the doc's own
+	// palette avoids both the false positive and the missed real one.
+	palMap, _ := get(doc, "palette").(*wire.OrderedMap)
+	pal := palette.New(palMap)
 	// the accepted evidence vocabulary for this doc (canonical five ∪ any the
 	// doc declares in evidence_levels), computed once and used by the citation
 	// check below — CARRIED-4.
@@ -137,7 +151,7 @@ func lintDoc(doc *wire.OrderedMap, reg *registry.Registry) []registry.Finding {
 		}
 		// Reuse the per-primitive block validator over the page's top-level
 		// blocks[] (same dispatch a node's blocks get).
-		return append(out, lintBlocks(doc, "<page>", reg)...)
+		return append(out, lintBlocks(doc, "<page>", reg, pal)...)
 	}
 	nodesV, _ := doc.Get("nodes")
 	nodes, ok := nodesV.([]any)
@@ -256,18 +270,30 @@ func lintDoc(doc *wire.OrderedMap, reg *registry.Registry) []registry.Finding {
 			}
 			if asciiTxt, ok := get(d, "ascii").(string); ok {
 				for _, ln := range strings.Split(asciiTxt, "\n") {
-					if len(ln) > asciiMax {
-						clip := ln
+					// COLUMNS, not bytes. Every box-drawing glyph (─ │ ► ◄ ·)
+					// is 3 bytes in UTF-8, so len() over-measured a diagram by
+					// roughly a third and reported widths no reader ever saw.
+					// The clip must be rune-sliced too — byte-slicing split a
+					// glyph mid-sequence and printed mojibake into the warning.
+					cols := utf8.RuneCountInString(ln)
+					if cols > asciiMax {
+						clip := []rune(ln)
 						if len(clip) > 40 {
 							clip = clip[:40]
 						}
-						out = append(out, warnf(slug, "ascii diagram line > %d cols (%d): '%s'…", asciiMax, len(ln), clip))
+						out = append(out, warnf(slug, "ascii diagram line > %d cols (%d): '%s'…", asciiMax, cols, string(clip)))
 						break
 					}
 				}
-				if strings.ContainsAny(asciiTxt, "<>") {
-					out = append(out, warnf(slug, "raw '<'/'>' in ascii diagram text"))
-				}
+				// NOTE: there was a "raw '<'/'>' in ascii diagram text" warning
+				// here. It was removed 2026-08-22: ascii is escaped on every
+				// output path (verified published AND frozen — `<your-doc-dir>`
+				// emits as `&lt;your-doc-dir&gt;` in both), so the rule fired on
+				// correct content and named no action the author could take.
+				// Now that warnings actually print, a rule like that teaches
+				// people to ignore warnings — which is more expensive than the
+				// non-problem it flagged. The escaping is covered by a real test
+				// instead: TestAsciiAngleBracketsAreEscaped.
 			}
 		}
 		for _, secV := range list(node, "sections") {
@@ -298,7 +324,21 @@ func lintDoc(doc *wire.OrderedMap, reg *registry.Registry) []registry.Finding {
 			}
 		}
 		// per-primitive validate + unknown-type check over authored blocks[].
-		out = append(out, lintBlocks(node, slug, reg)...)
+		out = append(out, lintBlocks(node, slug, reg, pal)...)
+		// a primitive authored into sections[] instead of blocks[] renders as
+		// NOTHING and says nothing — the silent drop this check exists to end.
+		out = append(out, lintMisplacedPrimitives(node, slug, reg)...)
+		// `sections` is a SYNTHETIC node-level block: it is never present in
+		// blocks[], so lintBlocks above can never reach its validator. Without
+		// this call, registering that validator does nothing at all — the unit
+		// test would pass while publish stayed silent. Same silent-drop class,
+		// one level up.
+		for _, f := range reg.Validate("sections", node) {
+			if f.Slug == "" {
+				f.Slug = slug
+			}
+			out = append(out, f)
+		}
 		for _, cv := range list(node, "children") {
 			if c, ok := omap(cv); ok {
 				walk(c)
@@ -314,11 +354,77 @@ func lintDoc(doc *wire.OrderedMap, reg *registry.Registry) []registry.Finding {
 	return out
 }
 
+// lintMisplacedPrimitives catches a primitive authored into sections[] rather
+// than blocks[]. sections[] carries prose ({name, icon, summary}); primitives
+// live in blocks[]. A typed entry in sections[] is dropped at render time
+// WITHOUT a word — the author gets a clean exit code and a page missing its
+// diagrams. Covenant VI: a silent failure is the one we do not ship.
+func lintMisplacedPrimitives(node *wire.OrderedMap, slug string, reg *registry.Registry) []registry.Finding {
+	var out []registry.Finding
+	for _, sv := range list(node, "sections") {
+		s, ok := omap(sv)
+		if !ok {
+			continue
+		}
+		typ := str(s, "type")
+		if typ == "" {
+			continue
+		}
+		if reg.Has(typ) {
+			out = append(out, errf(slug, "primitive '%s' authored in sections[] — primitives belong in blocks[]; it would render as nothing", typ))
+			continue
+		}
+		out = append(out, errf(slug, "sections[] entry carries type '%s'; sections[] holds prose (name/icon/summary), primitives belong in blocks[]", typ))
+	}
+	out = append(out, lintNearMissContainers(node, slug)...)
+	for _, cv := range list(node, "children") {
+		c, ok := omap(cv)
+		if !ok {
+			continue
+		}
+		if typ := str(c, "type"); typ != "" && reg.Has(typ) {
+			out = append(out, errf(slug, "primitive '%s' authored in children[] — children[] holds child NODES, not primitives; it would render as nothing", typ))
+		}
+	}
+	return out
+}
+
+// nearMissContainers maps a singular (or otherwise mistyped) container key to
+// the real one. Authoring `block:` instead of `blocks:` drops EVERY primitive
+// on the node and, before this check, said nothing at all — publish exits 0 and
+// the page is simply empty. Same class as lintMisplacedPrimitives: content the
+// author wrote, silently discarded.
+var nearMissContainers = map[string]string{
+	"block":   "blocks",
+	"section": "sections",
+	"child":   "children",
+	"node":    "nodes",
+	"blocs":   "blocks",
+	"secions": "sections",
+}
+
+func lintNearMissContainers(node *wire.OrderedMap, slug string) []registry.Finding {
+	var out []registry.Finding
+	for _, k := range node.Keys() {
+		real, ok := nearMissContainers[k]
+		if !ok {
+			continue
+		}
+		if _, exists := node.Get(real); exists {
+			// both present: the real one is authoritative, the stray is dead weight.
+			out = append(out, warnf(slug, "key '%s' is ignored ('%s' is the real container and is also present)", k, real))
+			continue
+		}
+		out = append(out, errf(slug, "key '%s' is not a container std-doc reads — did you mean '%s'? everything under it renders as nothing", k, real))
+	}
+	return out
+}
+
 // lintBlocks dispatches the assembled per-primitive validation over a node's
 // authored blocks[]. An unknown type is a lint error (mirrors the render-time
 // error boundary); a known type with a registered validator surfaces its
 // findings, re-scoped to the node slug when the validator left the slug blank.
-func lintBlocks(node *wire.OrderedMap, slug string, reg *registry.Registry) []registry.Finding {
+func lintBlocks(node *wire.OrderedMap, slug string, reg *registry.Registry, pal *palette.Palette) []registry.Finding {
 	var out []registry.Finding
 	for _, bv := range list(node, "blocks") {
 		b, ok := omap(bv)
@@ -340,6 +446,58 @@ func lintBlocks(node *wire.OrderedMap, slug string, reg *registry.Registry) []re
 			}
 			out = append(out, f)
 		}
+		// A misspelled field inside a COMPOSED primitive used to be invisible —
+		// lintBlocks only ever checked the top-level authored blocks[], so the
+		// exact same 'bodyy' typo that warned at depth 0 said nothing one
+		// container deep (a callout nested inside a band/row/grid, or inside a
+		// style_ab voice's preview[]). Route through the shared walker (Job 1,
+		// blocks.go) to reach every nested block, at any depth.
+		out = append(out, lintNestedBlocks(b, slug, reg)...)
+		// The reachability diff (lint_reachability.go): a container's field can
+		// be MISNAMED in a way that isn't close enough to any real field to
+		// trip the near-miss check above (band.items[] isn't a near-miss of
+		// "content"), or the mismatch can be several containers deep. Runs the
+		// real render for b and reports anything authored under it that the
+		// render never actually touched.
+		out = append(out, lintReachability(b, typ, slug, reg, pal)...)
+	}
+	return out
+}
+
+// lintNestedBlocks recurses into an authored block's own fields (never the
+// block itself — the caller already validated that at its own level) and
+// validates every nested object that carries a "type" the registry KNOWS.
+//
+// Deliberately silent on an unknown nested type: composition mixes real
+// primitives (callout, figure, decisionmatrix, …) with a small inline-atom
+// vocabulary that also happens to use a "type" key (text/strong/soft/kbd, the
+// content spans inside e.g. a reveal's paras[].content[]) — those ARE
+// registered (buildRegistry installs them), so reg.Has covers them too, but a
+// hypothetical future data shape that reuses "type" for something else again
+// must not be flagged as "unknown block type" just because it is nested; that
+// class of false positive is exactly the "cries wolf" failure mode the gate
+// forbids. A misspelled TYPE name at the top level of an authored blocks[]
+// entry is still caught (lintBlocks, unchanged); this only adds depth to the
+// per-primitive FIELD/VALUE validation for types the registry already knows
+// about, unbounded depth, matching how the renderer itself recurses.
+func lintNestedBlocks(b *wire.OrderedMap, slug string, reg *registry.Registry) []registry.Finding {
+	var out []registry.Finding
+	for _, k := range b.Keys() {
+		if k == "type" {
+			continue
+		}
+		val, _ := b.Get(k)
+		walkNestedBlocks(val, func(node *wire.OrderedMap, typ string) {
+			if !reg.Has(typ) {
+				return
+			}
+			for _, f := range reg.Validate(typ, node) {
+				if f.Slug == "" {
+					f.Slug = slug
+				}
+				out = append(out, f)
+			}
+		})
 	}
 	return out
 }

@@ -31,7 +31,7 @@ fallback. **`id` is optional too** — the doc-tree renderer always assigns one
 (`<slug>-canvas-<ordinal>` when absent), so zero-config still works even with
 several canvas blocks on one page.
 
-**v2 — per-canvas boards** (`prd/canvas-primitive/v2-per-canvas-boards.md`): each
+**v2 — per-canvas boards** (`the canvas v2 per-board design`): each
 canvas block gets its OWN board — its own `scene.json` and its own feedback inbox
 — routed by `id`, not shared with every other canvas block in the doc (that was
 v1's constraint: one board, period). One codraw *server* still serves the whole
@@ -138,4 +138,4 @@ one Monitor loop can tell multiple boards apart without per-board plumbing.
 | serve auto-wiring + per-board routing (v2) | `go/internal/serve/codraw.go`, `go/internal/serve/server.go` |
 | freeze degrade | `go/internal/freeze/freeze.go` (`FreezeCanvas`) |
 | self-tests | `go/internal/core/canvas_primitive_test.go`, `go/internal/core/canvas_v2_boards_test.go`, `go/internal/serve/codraw_v2_boards_test.go`, `go/internal/freeze/freeze_test.go` |
-| design + findings | `prd/canvas-primitive/design.md`, `prd/canvas-primitive/v2-per-canvas-boards.md` |
+| design + findings | `the canvas design note`, `the canvas v2 per-board design` |

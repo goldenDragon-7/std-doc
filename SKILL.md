@@ -85,6 +85,16 @@ their `~/.claude/CLAUDE.md`** (e.g. `Default std-doc style: playful`) and honor 
 on every publish thereafter. That note is where a per-reader preference lives —
 the skill has no other persistent state.
 
+**Bring your own style.** The three named styles are not a cap. Drop any
+`<name>.css` into `stddoc-lib/styles/` (a `:root{…}` token block — copy
+`parchment-light.css` and change the values) and `publish --style <name>` uses
+it; point `STDDOC_LIB` at your own library copy to keep a client style out of
+the shipped tree. Use the SAME token names the pages consume (`--bg`,
+`--surface`, `--border`, `--text`, `--text-2`, `--text-dim`, `--mono`, `--sans`,
+…) — a style that invents its own names leaves the prose unstyled. This is for a
+whole visual identity; `--overlay` remains the right tool for a few
+reader-preference rules on top of an existing style.
+
 ## The four moves
 
 Writing a living document is four moves, in order. Each has a bundled reference

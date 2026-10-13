@@ -1,0 +1,105 @@
+{
+  "title": "Status — v0.12 release train",
+  "generated_date": "2026-09-01",
+  "layout": "hero",
+  "groups": ["Status"],
+  "palette": {
+    "green": { "label": "Live", "color": "#10b981" },
+    "gold": { "label": "At risk", "color": "#fbbf24" },
+    "red": { "label": "Blocked", "color": "#ef4444" },
+    "cyan": { "label": "Spine", "color": "#22d3ee" }
+  },
+  "root": {
+    "summary": "A worked status-report exemplar: where we are, what stage each workstream is in, the scoreboard by area, the one thing at risk, and what's next. Copy this shape for any recurring weekly/release-train update."
+  },
+  "nodes": [
+    {
+      "slug": "status",
+      "group": "Status",
+      "title": "v0.12 release train",
+      "status": "LIVE",
+      "tagline": "Weekly status — proposal mode off, reference mode on. State what's true, flag what's at risk, name what's next.",
+      "blocks": [
+        {
+          "type": "kicker",
+          "text": "Week of 2026-09-01 · Status report"
+        },
+        {
+          "type": "hero",
+          "text": "Three of four workstreams are green; the layout-language design is the one at-risk item.",
+          "sub": "No blockers on the release itself — v0.12 ships on schedule even if the design slips a week."
+        },
+        {
+          "type": "pipeline",
+          "stages": [
+            { "label": "Templates", "state": "done", "note": "3 exemplars shipped" },
+            { "label": "Primitives", "state": "here", "note": "2 landing this week" },
+            { "label": "Layout language", "state": "pending", "note": "design in progress" },
+            { "label": "v0.12 cut", "state": "pending", "note": "targets 2026-09-08" }
+          ]
+        },
+        {
+          "type": "statusboard",
+          "columns": ["Mon", "Tue", "Wed", "Thu", "Fri"],
+          "groups": [
+            {
+              "label": "Engine",
+              "rows": [
+                { "label": "serve/publish/freeze", "cells": [
+                  {"status":"LIVE"}, {"status":"LIVE"}, {"status":"LIVE"}, {"status":"LIVE"}, {"status":"LIVE"}
+                ]},
+                { "label": "layout language", "cells": [
+                  {"status":"WIP"}, {"status":"WIP"}, {"status":"PARTIAL"}, {"status":"PARTIAL"}, {"status":"WIP"}
+                ]}
+              ]
+            },
+            {
+              "label": "Library",
+              "rows": [
+                { "label": "primitive count", "cells": [
+                  {"status":"LIVE"}, {"status":"LIVE"}, {"status":"LIVE"}, {"status":"PARTIAL"}, {"status":"LIVE"}
+                ]},
+                { "label": "templates shelf", "cells": [
+                  {"status":"WIP"}, {"status":"WIP"}, {"status":"LIVE"}, {"status":"LIVE"}, {"status":"LIVE"}
+                ]}
+              ]
+            }
+          ]
+        },
+        {
+          "type": "callout",
+          "kind": "gold",
+          "lead": "At risk — the layout language design.",
+          "body": "The straightjacket the templates work is running into (every data-derived doc forces the same §-card stack) is real and documented in each template's loss-list. The design is in progress but not yet reviewed. It does not block v0.12 — the engine and library both ship independently of it — but it is the thing most likely to slip."
+        },
+        {
+          "type": "spectrum",
+          "stops": [
+            { "label": "Flat HTML", "note": "no structure, hand-authored — the state we left" },
+            { "label": "§-card stack", "note": "current data-derived path — one shape for every doc" },
+            { "label": "Layout language", "note": "the goal — a doc chooses its own shape" }
+          ]
+        },
+        {
+          "type": "table",
+          "columns": ["Area", "This week", "Next"],
+          "groups": [
+            {
+              "rows": [
+                ["Templates", "RFC/decision-doc + status-report shipped, freeze-clean", "Runbook + reference-doc families"],
+                ["Primitives", "2 landed (compare-verdict follow-up filed)", "Whatever the template shelf needs next"],
+                ["Layout language", "Design draft circulating", "Review + first prototype"]
+              ]
+            }
+          ]
+        },
+        {
+          "type": "callout",
+          "kind": "cyan",
+          "lead": "What's next.",
+          "body": "Keep shipping template exemplars against the corpus while the layout-language design lands — each exemplar's loss-list becomes that design's requirements input, so the work compounds instead of blocking."
+        }
+      ]
+    }
+  ]
+}

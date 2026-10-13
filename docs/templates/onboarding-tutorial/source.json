@@ -1,0 +1,102 @@
+{
+  "title": "Onboarding Tutorial — worked example",
+  "generated_date": "2026-09-01",
+  "nav": "pager",
+  "root": "welcome",
+  "palette": {
+    "glow": { "label": "Glow", "color": "#22d3ee" },
+    "amber": { "label": "Amber", "color": "#f59e0b" },
+    "writer": { "label": "Writer", "color": "#f472b6" }
+  },
+  "nodes": [
+    {
+      "slug": "welcome",
+      "group": "Meet it",
+      "title": "1 · Say something to this page",
+      "tagline": "it can hear you — and it answers",
+      "blocks": [
+        {
+          "type": "prose",
+          "lede": true,
+          "text": "Most tutorials are a one-way street: someone writes, you read, the end. Try this one differently — select a sentence, tell it what you think, and watch it answer where you pointed."
+        },
+        {
+          "type": "callout",
+          "kind": "writer",
+          "style": "gradient",
+          "loud": true,
+          "pin": "👇 try it on this sentence",
+          "lead_content": [
+            { "type": "text", "s": "Select this line, click the 💬, type a comment, and send — press " },
+            { "type": "kbd", "key": "Enter" },
+            { "type": "text", "s": " to submit." }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "vocabulary",
+      "group": "Meet it",
+      "title": "2 · Meet the vocabulary",
+      "tagline": "the pieces you'll reach for first",
+      "blocks": [
+        {
+          "type": "prose",
+          "text": "Every page you'll write is a stack of these. Here are the four you'll use in your first ten minutes."
+        },
+        {
+          "type": "cardgrid",
+          "cards": [
+            { "eyebrow": "atom", "ent": "glow", "title": "prose", "body": "the workhorse paragraph" },
+            { "eyebrow": "atom", "ent": "amber", "title": "callout", "body": "a colored note box" },
+            { "eyebrow": "structure", "ent": "glow", "title": "cardgrid", "body": "a row of bordered cards" },
+            { "eyebrow": "structure", "ent": "amber", "title": "flow", "body": "a numbered step sequence" }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "try-it",
+      "group": "Do it",
+      "title": "3 · Draw with me",
+      "tagline": "from source.json to a rendered page in one command",
+      "blocks": [
+        {
+          "type": "flow",
+          "head": "Your first publish",
+          "steps": [
+            { "n": "1", "head": "Write", "sub": "author a source.json with a few blocks" },
+            { "n": "2", "head": "Publish", "sub": "stddoc publish source.json out/" },
+            { "n": "3", "head": "Open", "sub": "check the rendered HTML — did it say what you meant?" }
+          ]
+        },
+        {
+          "type": "code",
+          "mode": "command",
+          "caption": "Try it now",
+          "spans": [
+            { "cls": "plain", "text": "stddoc publish source.json published --style techno-dark" }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "ship",
+      "group": "Ship it",
+      "title": "4 · Come build with us",
+      "tagline": "the invitation",
+      "blocks": [
+        {
+          "type": "callout",
+          "kind": "glow",
+          "lead": "You have hands now.",
+          "body": "Everything above is a std-doc, including this tutorial. Go write one — and if you build a template shape the library doesn't have yet, that's a contribution, not a side project."
+        },
+        {
+          "type": "prose",
+          "text": "Next stop: docs/templates/README.md — pick a family by the question your reader is actually asking."
+        }
+      ]
+    }
+  ]
+}

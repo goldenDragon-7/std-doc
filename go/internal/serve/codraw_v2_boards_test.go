@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-// codraw_v2_boards_test.go — S1/S2 of prd/canvas-primitive/v2-per-canvas-boards.md:
+// codraw_v2_boards_test.go — S1/S2 of the canvas v2 per-board design:
 // per-mount rewrite + path routing to independent per-board scene/inbox files.
 
 // CAPABILITY: rewriteCanvasBoards routes EACH mount to its OWN board url,

@@ -99,8 +99,12 @@ func cmdPublish(args []string) error {
 		if lerr != nil {
 			return lerr
 		}
-		if nErr := core.CountErrors(findings); nErr > 0 {
+		// Warnings are surfaced even on a successful publish. A warning nobody
+		// ever sees is not a warning — it is a silent degrade wearing a label.
+		if len(findings) > 0 {
 			reportFindings(findings)
+		}
+		if nErr := core.CountErrors(findings); nErr > 0 {
 			return fmt.Errorf("publish aborted: %s has %d lint error(s) (use --no-lint to override)", src, nErr)
 		}
 	}
@@ -124,7 +128,21 @@ func cmdPublish(args []string) error {
 	if err := os.MkdirAll(out, 0o755); err != nil {
 		return err
 	}
+	// Which style did this doc actually get published in? A doc-tree gets the
+	// resolved named style (core.Publish applies DefaultStyle for ""); a
+	// standalone layout:"page" doc carries its own `theme` instead, so it is
+	// stamped with the pageOwnStyle sentinel. Either way the page now DECLARES
+	// its voice, so serve's style-lock stops overwriting it with techno-dark.
+	stampStyle := pageOwnStyle
+	if docTree {
+		stampStyle = style
+		if stampStyle == "" {
+			stampStyle = library.DefaultStyle
+		}
+	}
+
 	for name, html := range pages {
+		html = applyStyleStamp(html, stampStyle)
 		if overlayCSS != "" {
 			html = applyOverlay(html, overlayCSS)
 		}

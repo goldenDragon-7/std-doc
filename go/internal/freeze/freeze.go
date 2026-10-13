@@ -48,7 +48,14 @@ var (
 	// a live `canvas` primitive mount (canvasRender output): the canvas-embed div
 	// through its iframe and the div's own close. The iframe is an external ref, so
 	// a live canvas can't survive freeze — it degrades to a static placeholder.
-	canvasBlock = regexp.MustCompile(`(?is)<div class='canvas-embed' data-canvas-src='[^']*'>(.*?)</iframe>\s*</div>`)
+	// NOTE: match the opener by ATTRIBUTE PRESENCE, never by attribute ORDER.
+	// canvas v2 (per-board) began emitting `data-canvas-board` BEFORE `class`,
+	// which made an order-pinned pattern silently no-op on every real page:
+	// the frozen doc kept a dead <iframe src='codraw:…'> and left the author's
+	// snapshot `hidden`, so the drawing vanished. The freeze gate did not catch
+	// it either — `codraw:` is not http(s), so it is not an "external ref".
+	// Regression-tested against the renderer's ACTUAL output, not a fixture.
+	canvasBlock = regexp.MustCompile(`(?is)<div[^>]*class='canvas-embed'[^>]*>(.*?)</iframe>\s*</div>`)
 	// the dc-label text inside a canvas block, to carry the caption into the placeholder.
 	canvasLabel = regexp.MustCompile(`(?is)<span class='dc-label'>(.*?)</span>`)
 	// the author-time snapshot (inline SVG) hidden in a canvas block, if present.

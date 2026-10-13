@@ -56,6 +56,27 @@ four moves; Claude drives the `stddoc` binary for you.
 tour"*) — it'll walk you through **Meet std-doc** (the onboarding) in `style-interview/`,
 the warmest way to meet what a living document is.
 
+### Or grab a pre-built binary
+
+Prefer not to build from source? Download a release tarball from
+[Releases](https://github.com/goldenDragon-7/std-doc/releases/latest) — a single
+`stddoc` binary plus its `stddoc-lib/`, for macOS (Apple Silicon / Intel), Linux,
+and Windows.
+
+**macOS first run — the binaries are not yet code-signed.** If you download via a
+browser, macOS quarantines the file and Gatekeeper will block it with a *"cannot
+be opened / malware"* warning on first launch. It's not malware — it's just
+unsigned. Clear the quarantine flag once and it runs normally:
+
+```bash
+# point it at the extracted folder — clears the binary AND stddoc-lib/
+xattr -dr com.apple.quarantine ./stddoc-darwin-arm64/
+```
+
+Or, in Finder: right-click `stddoc` → **Open** → **Open** (you only confirm once).
+Linux and Windows builds have no such prompt. *(Signed builds are coming; until
+then, this one-time step is expected.)*
+
 ---
 
 ## The 60-second first run

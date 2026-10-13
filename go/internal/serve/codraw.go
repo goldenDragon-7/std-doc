@@ -56,7 +56,7 @@ type codrawServer struct {
 // empty dark scene for the DEFAULT board if none exists yet — v1's single
 // shared board, still reachable at the server root (no /board/<id>/ prefix)
 // for a mount carrying an author-EXPLICIT `src`. v2 per-board boards
-// (prd/canvas-primitive/v2-per-canvas-boards.md) are seeded lazily, on first
+// (the canvas v2 per-board design) are seeded lazily, on first
 // request to /board/<id>/, by scenePath/inboxPath below.
 func newCodrawServer(runtimeRoot, feedbackDir string) *codrawServer {
 	cs := &codrawServer{
@@ -121,7 +121,7 @@ func (cs *codrawServer) readScene(sceneFile string) (map[string]any, error) {
 // boardPrefix splits a v2 "/board/<id>/<rest>" path into (id, "/<rest>"); ok
 // is false for any path that isn't board-routed, in which case the caller
 // falls through to the v1 default-board behavior (Seam 3: path routing,
-// prd/canvas-primitive/v2-per-canvas-boards.md).
+// the canvas v2 per-board design).
 func boardPrefix(path string) (id, rest string, ok bool) {
 	if !strings.HasPrefix(path, "/board/") {
 		return "", "", false
@@ -261,8 +261,8 @@ func rewriteCanvasSrc(body []byte, url string) []byte {
 	return []byte(s)
 }
 
-// rewriteCanvasBoards is the v2 per-mount rewrite (prd/canvas-primitive/
-// v2-per-canvas-boards.md, Seam 2): every canvas mount is routed to ITS OWN
+// rewriteCanvasBoards is the v2 per-mount rewrite (the canvas v2 per-board
+// design, Seam 2): every canvas mount is routed to ITS OWN
 // `<baseURL>board/<id>/`, keyed on the `data-canvas-board` attribute
 // canvas_primitive.go always emits — so N canvas blocks in one doc mount N
 // independent boards instead of v1's single shared one. baseURL must end in

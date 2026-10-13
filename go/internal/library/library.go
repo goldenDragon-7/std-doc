@@ -29,6 +29,8 @@ type Library struct {
 	PageAtomsJSON      []byte            // page_atoms.json — raw
 	PrimitiveCSSJSON   []byte            // primitive_css.json — raw
 	DiagramEnginesJSON []byte            // diagram_engines.json — raw; OPTIONAL (nil if absent, so older library trees still load)
+	HTMLWhitelistJSON  []byte            // html_whitelist.json — raw; OPTIONAL (nil if absent). The sanitizer policy for the `html` bounded-value primitive; absent means the html primitive refuses to render rather than emitting ungated author HTML.
+	UtilityCSSJSON     []byte            // utility_css.json — raw; OPTIONAL (nil if absent). The utility layer: tone/spacing modifiers bound to palette tokens, emitted only for classes a page actually uses.
 	BodyCSS            string            // body.css — raw
 	SearchJS           string            // search.js — raw
 	NavScrollJS        string            // nav_scroll.js — raw
@@ -82,6 +84,19 @@ func Load(root string) (*Library, error) {
 	// the byte-identical strangler proof for pre-existing pages).
 	if b, rerr := os.ReadFile(filepath.Join(root, "diagram_engines.json")); rerr == nil {
 		lib.DiagramEnginesJSON = b
+	}
+	// utility_css.json — OPTIONAL, same backward-compat contract as above. The
+	// utility layer (tone/spacing modifiers bound to palette tokens). Absent in
+	// older library trees; nil simply means no utility CSS is ever emitted,
+	// which is byte-identical to the pre-utility engine.
+	if b, rerr := os.ReadFile(filepath.Join(root, "utility_css.json")); rerr == nil {
+		lib.UtilityCSSJSON = b
+	}
+	// html_whitelist.json — OPTIONAL to LOAD, mandatory to USE. Absent simply
+	// means an older library tree; the html primitive then refuses loudly
+	// rather than emitting author HTML through no gate at all.
+	if b, rerr := os.ReadFile(filepath.Join(root, "html_whitelist.json")); rerr == nil {
+		lib.HTMLWhitelistJSON = b
 	}
 	if lib.BodyCSS, err = readString(root, "body.css"); err != nil {
 		return nil, err

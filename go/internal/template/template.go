@@ -53,6 +53,14 @@ type Ctx struct {
 	// paragraphs/<br> and "- "/"1. " runs into lists (the `rich` op). Falls back
 	// to Esc when nil, so a plain single-line field is byte-identical either way.
 	RichText func(string) string
+	// RichTextCode is RichText PLUS single-backtick inline code-span support
+	// (the `richcode` op) — kept as a SEPARATE function from RichText rather
+	// than an extension of it, deliberately: this repo's own self-doc corpus
+	// has pinned-golden prose already containing backticks, so wiring code-span
+	// parsing into the shared RichText path would flip existing rendered pages.
+	// A template requests it explicitly via `richcode` instead of `rich`.
+	// Falls back to Esc when nil.
+	RichTextCode func(string) string
 	// Doc is the whole source doc-tree (compose/evidence may consult it).
 	Doc any
 }
@@ -334,6 +342,24 @@ func renderNode(node any, env []Frame, ctx *Ctx) (string, error) {
 			return ctx.Esc(v), nil
 		}
 		return ctx.RichText(wire.PyStr(v)), nil
+	}
+
+	// richcode: like rich, PLUS single-backtick inline code spans `like this`
+	// become <code> chips (GAPS.md leaf gap #2). A separate op from `rich` —
+	// see the long comment on Ctx.RichTextCode for why it isn't just rich's
+	// default behavior (existing pinned-golden pages already contain literal
+	// backticks in "rich" fields; this keeps them untouched and byte-identical).
+	if path, ok := m["richcode"]; ok {
+		v := resolve(asStr(path), env)
+		if v == nil {
+			if def, ok := m["default"]; ok {
+				v = def
+			}
+		}
+		if ctx.RichTextCode == nil {
+			return ctx.Esc(v), nil
+		}
+		return ctx.RichTextCode(wire.PyStr(v)), nil
 	}
 
 	if path, ok := m["anchor"]; ok {

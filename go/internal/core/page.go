@@ -41,6 +41,12 @@ func head(title string, doc *wire.OrderedMap, current string, isIndex bool, styl
 			css += "\n" + heroCSS
 			shell = "shell hero-shell"
 			nav = ""
+		case "reference":
+			// Keeps the rail (it is a reference doc — the nav is load-bearing) and
+			// adds the third column. The aside itself is emitted after </main> by
+			// renderNode, since it is derived from the NODE, not the doc.
+			css += "\n" + referenceCSS
+			shell = "shell reference-shell"
 		}
 	}
 	return "<!doctype html><html><head><meta charset='utf-8'>" +
@@ -62,6 +68,7 @@ func makeCtx(doc *wire.OrderedMap, reg *registry.Registry, pal *palette.Palette)
 		Anchor:         anchor,
 		RenderEvidence: renderEvidence,
 		RichText:       richText,
+		RichTextCode:   richTextCode,
 		Doc:            doc,
 	}
 }
@@ -89,8 +96,12 @@ func renderNode(n, doc *wire.OrderedMap, reg *registry.Registry, styleRoot strin
 	}
 	h.WriteString("<h1 id='" + nid + "' data-cf-anchor='" + esc(nanchor) + "'>" +
 		h1num + esc(title) + "</h1>")
+	// tagline is PROSE — richText, not esc. Deliberate, and reversible in two
+	// lines: it completes the inline-code work rather than extending it, since
+	// tagline was excluded from prose features by accident. See
+	// summary_tagline_richtext_test.go for the full contract.
 	if truthy(get(n, "tagline")) {
-		h.WriteString("<p class='tagline'>" + esc(str(n, "tagline")) + "</p>")
+		h.WriteString("<p class='tagline'>" + richText(str(n, "tagline")) + "</p>")
 	}
 	palMap, _ := get(doc, "palette").(*wire.OrderedMap)
 	pal := palette.New(palMap)
@@ -100,15 +111,66 @@ func renderNode(n, doc *wire.OrderedMap, reg *registry.Registry, styleRoot strin
 	}
 	nblocks := adaptNode(n)
 	assignCanvasBoardIDs(nblocks, str(n, "slug"))
+	assignBandAnchorIDs(nblocks, str(n, "slug"))
 	if icss := collectBlockCSS(nblocks, reg); icss != "" {
 		h.WriteString("<style>" + icss + "</style>")
 	}
-	h.WriteString(renderBlocks(nblocks, ctx, reg))
+	// Utility layer (utility.go): render the body FIRST, then emit CSS for only
+	// the utility classes it actually contains. A page using none gets zero
+	// bytes and stays byte-identical to the pre-utility engine.
+	body := renderBlocks(nblocks, ctx, reg)
+	if ucss := collectUtilityCSS(body, loadUtilityCSS(lib.UtilityCSSJSON)); ucss != "" {
+		h.WriteString("<style>" + ucss + "</style>")
+	}
+	h.WriteString(body)
 	if pgr {
 		h.WriteString(renderPagerNav(doc, str(n, "slug")))
 	}
 	h.WriteString("<div class='footer'>Derived from source.json &middot; std-doc v2 &middot; JSON canonical, HTML rendered</div>")
-	h.WriteString("</main></div></body></html>")
+	h.WriteString("</main>")
+	if layoutMode(doc) == "reference" {
+		h.WriteString(renderOnThisPage(n, nblocks))
+	}
+	h.WriteString("</div></body></html>")
+	return h.String()
+}
+
+// renderOnThisPage builds the reference layout's third column. It is DERIVED —
+// the label list comes from collectTOCLabels, which walks the SAME adapted
+// block stream the page body renders (sections[].name, unchanged, plus any
+// band.label/band.title at any depth) — so nothing is authored twice and the
+// aside cannot drift from the page it indexes. Emitted only in reference mode;
+// every other layout never calls it, which is what keeps the strangler proof
+// intact. A doc with no band collects nothing from step 2, so its aside is
+// byte-identical to before this function grew a second source.
+func renderOnThisPage(n *wire.OrderedMap, nblocks []streamBlock) string {
+	labels := collectTOCLabels(n, nblocks)
+	status := str(n, "status")
+	updated := str(n, "updated")
+	// An aside with nothing in it is chrome, not information.
+	if len(labels) == 0 && status == "" && updated == "" {
+		return ""
+	}
+	var h strings.Builder
+	h.WriteString("<aside class='otp'>")
+	if len(labels) > 0 {
+		h.WriteString("<div class='otp-head'>On this page</div><ul class='otp-list'>")
+		for _, l := range labels {
+			h.WriteString("<li><a href='#" + esc(l.Anchor) + "'>" + esc(l.Text) + "</a></li>")
+		}
+		h.WriteString("</ul>")
+	}
+	if status != "" || updated != "" {
+		h.WriteString("<dl class='otp-meta'>")
+		if status != "" {
+			h.WriteString("<dt>Status</dt><dd>" + esc(status) + "</dd>")
+		}
+		if updated != "" {
+			h.WriteString("<dt>Updated</dt><dd>" + esc(updated) + "</dd>")
+		}
+		h.WriteString("</dl>")
+	}
+	h.WriteString("</aside>")
 	return h.String()
 }
 
@@ -122,8 +184,9 @@ func renderIndex(doc *wire.OrderedMap, reg *registry.Registry, styleRoot string,
 	h.WriteString(head(title, doc, "", true, styleRoot, lib))
 	h.WriteString("<h1>" + esc(title) + "</h1>")
 	if r != nil {
+		// root.summary is PROSE — same CHOICE, same reversibility as node tagline.
 		if truthy(get(r, "summary")) {
-			h.WriteString("<p class='tagline'>" + esc(str(r, "summary")) + "</p>")
+			h.WriteString("<p class='tagline'>" + richText(str(r, "summary")) + "</p>")
 		}
 		// Hero: the index DRAWS the doc's architecture (root.diagrams) right after
 		// the summary — so a data-derived doc opens with a picture, not a list
@@ -187,6 +250,7 @@ func RenderStandalone(doc *wire.OrderedMap, lib *library.Library) (string, strin
 		RenderEvidence: renderEvidence,
 		AnchorAttr:     anchorAttr,
 		RichText:       richText,
+		RichTextCode:   richTextCode,
 		Doc:            doc,
 	}
 	title := getOr(doc, "title", "doc")

@@ -1,0 +1,1 @@
+window.CF_SEARCH_INDEX=[{"slug":"status","url":"status.html","number":"1.1","title":"v0.12 release train","sections":null,"text":"v0.12 release train weekly status — proposal mode off, reference mode on. state what's true, flag what's at risk, name what's next."}];

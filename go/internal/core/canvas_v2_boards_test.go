@@ -8,7 +8,7 @@ import (
 	"stddoc/internal/wire"
 )
 
-// canvas_v2_boards_test.go — S1 of prd/canvas-primitive/v2-per-canvas-boards.md:
+// canvas_v2_boards_test.go — S1 of the canvas v2 per-board design:
 // board id assignment + the codraw: placeholder + data-canvas-board attribute.
 // Purely additive (no golden page uses `canvas`).
 
@@ -119,5 +119,62 @@ func TestCanvasRender_ExplicitSrcStillGetsBoardID(t *testing.T) {
 	}
 	if !strings.Contains(out, "src='http://localhost:9999/'") {
 		t.Errorf("explicit src must be honored as the mount's src\n got: %s", out)
+	}
+}
+
+// TestAssignCanvasBoardIDs_NestedGetsID is the fourth caller of the shared
+// walker (blocks.go's walkNestedBlocks doc comment): assignCanvasBoardIDs used
+// to loop only the TOP-LEVEL stream, so a canvas COMPOSED inside a container
+// (style_ab's voices[].preview[] here — real production composition, same as
+// the lint recursion tests) never got a board id at all. Latent today (no
+// shipped doc nests a canvas), live the moment one does.
+func TestAssignCanvasBoardIDs_NestedGetsID(t *testing.T) {
+	doc := parseDoc(t, `{"title":"x","nodes":[{"slug":"arch","title":"A","blocks":[
+		{"type":"canvas"},
+		`+styleABWrap(`{"type":"canvas"}`)+`
+	]}]}`)
+	buildTree(doc)
+	n := bySlug(doc, "arch")
+	nblocks := adaptNode(n)
+	assignCanvasBoardIDs(nblocks, str(n, "slug"))
+
+	// Reuse the shared walker itself (blocks.go) rather than a hand-rolled
+	// traversal — it is already proven safe over real authored data. Mirror
+	// collectBlockCSS's own guard: only walk AUTHORED block data
+	// (Data["type"] == sb.Type). A synthetic node-level entry (badges,
+	// children, sections, …) carries the WHOLE NODE as Data, which buildTree
+	// has wired with a real *wire.OrderedMap back-pointer at "_parent" —
+	// walking that generically is a self-reference hazard this test has no
+	// business poking at; production code (assignCanvasBoardIDs itself) has
+	// the identical guard for the identical reason.
+	var ids []string
+	for _, sb := range nblocks {
+		if sb.Data == nil {
+			continue
+		}
+		t2, ok := sb.Data.Get("type")
+		if !ok {
+			continue
+		}
+		if ts, _ := t2.(string); ts != sb.Type {
+			continue
+		}
+		walkNestedBlocks(sb.Data, func(node *wire.OrderedMap, typ string) {
+			if typ != "canvas" {
+				return
+			}
+			id, ok := node.Get("id")
+			if !ok {
+				t.Fatalf("nested canvas block has no id at all: %#v", node)
+			}
+			ids = append(ids, id.(string))
+		})
+	}
+
+	if len(ids) != 2 {
+		t.Fatalf("expected 2 canvas blocks (1 top-level, 1 nested in style_ab), got %d: %v", len(ids), ids)
+	}
+	if ids[0] == ids[1] {
+		t.Errorf("top-level and nested zero-config canvases must get DISTINCT ids, got %q twice", ids[0])
 	}
 }

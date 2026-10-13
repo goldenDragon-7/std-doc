@@ -1,0 +1,100 @@
+{
+  "title": "Macro Overview — worked example",
+  "generated_date": "2026-09-01",
+  "layout": "top-nav",
+  "root": "overview",
+  "palette": {
+    "hot": { "label": "Hot", "color": "#f7c66a" },
+    "warm": { "label": "Warm", "color": "#6bcf8a" },
+    "cold": { "label": "Cold", "color": "#4fc3f7" },
+    "frozen": { "label": "Frozen", "color": "#9c8cf0" },
+    "evol": { "label": "Evolving", "color": "#f07a7a" },
+    "accent": { "label": "Accent", "color": "#4fc3f7" }
+  },
+  "nodes": [
+    {
+      "slug": "overview",
+      "title": "Kingdom Autonomics — Landscape",
+      "blocks": [
+        {
+          "type": "hero",
+          "text": "Kingdom Autonomics — landscape",
+          "sub": "The three capabilities that make a session a citizen, not a script: cron, monitor, channel."
+        },
+        {
+          "type": "stamp",
+          "date": "2026-09-01",
+          "roles": [ { "name": "std-doc-template-scout", "kind": "accent" } ],
+          "caption": "autonomics landscape · orientation pass"
+        },
+        {
+          "type": "prose",
+          "lede": true,
+          "text": "This is an orientation, not an audit — it classifies each autonomic by its state of activity rather than diagnosing any one of them. Read the temperature legend before the grid."
+        },
+        {
+          "type": "legend",
+          "items": [
+            { "kind": "hot", "label": "in-request / actively firing" },
+            { "kind": "warm", "label": "background / steady-state" },
+            { "kind": "cold", "label": "stable / low-volatility API surface" },
+            { "kind": "frozen", "label": "identity-bearing / rarely changes" },
+            { "kind": "evol", "label": "in-flux / may break" }
+          ]
+        },
+        {
+          "type": "pattern-header",
+          "era": "Autonomics era · v1",
+          "title": "The Three Autonomics",
+          "desc": "Classified by state of activity, not by correctness — read the legend above before this section."
+        },
+        {
+          "type": "panel",
+          "variant": "hairline",
+          "kind": "hot",
+          "lead": "cron",
+          "body": "Fires on schedule; the 7-day expiry and jitter are the parts most likely to surprise a caller."
+        },
+        {
+          "type": "panel",
+          "variant": "hairline",
+          "kind": "warm",
+          "lead": "monitor",
+          "body": "Streams events from a running process — steady background watch, not request-driven."
+        },
+        {
+          "type": "panel",
+          "variant": "hairline",
+          "kind": "cold",
+          "lead": "channel (hk ping/receive)",
+          "body": "The stable messaging substrate every citizen already depends on."
+        },
+        {
+          "type": "phase-strip",
+          "phases": [
+            { "num": "Phase 1", "name": "Arm", "desc": "CronCreate / subscribe / wait_for_message", "kind": "hot" },
+            { "num": "Phase 2", "name": "Idle", "desc": "REPL waits; autonomics keep working in the background", "kind": "warm" },
+            { "num": "Phase 3", "name": "Wake", "desc": "A fire, an event, or a message re-enters the session", "kind": "cold" }
+          ]
+        },
+        {
+          "type": "compare",
+          "left": {
+            "title": "Frozen (rarely changes)",
+            "pill": "stable",
+            "items": [ "The 5-field cron syntax", "The off-:00/:30 jitter convention" ]
+          },
+          "right": {
+            "title": "Evolving (may break)",
+            "pill": "watch",
+            "items": [ "Session-only persistence (no durable jobs yet)", "Cross-uid delivery guarantees for channel" ]
+          }
+        },
+        {
+          "type": "prose",
+          "text": "Why this classification: a reader orienting to the landscape needs to know what to trust today (frozen/cold) versus what to double-check before depending on it (evol/hot). This is deliberately NOT a findings report — no verdicts, just state."
+        }
+      ]
+    }
+  ]
+}

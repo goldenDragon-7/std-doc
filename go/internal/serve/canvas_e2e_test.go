@@ -30,7 +30,7 @@ func repoRoot(t *testing.T) string {
 
 // TestCanvasE2E_TwoBlocksTwoIndependentBoards is the S4 self-test the PRD asks
 // for: "a self-test asserting two canvas blocks in one doc produce two
-// independent scene files" (prd/canvas-primitive/v2-per-canvas-boards.md,
+// independent scene files" (the canvas v2 per-board design,
 // Suggested slicing, S4). Exercises the REAL pipeline — core.Publish renders
 // the doc-tree (assigning board ids), then the codrawServer serves each
 // board's own scene — not just the unit-level pieces (already covered by

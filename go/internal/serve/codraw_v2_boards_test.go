@@ -123,3 +123,52 @@ func TestCodrawServer_PerBoardIsolation(t *testing.T) {
 		t.Error("board b inbox must not exist — only board a received feedback")
 	}
 }
+
+// CAPABILITY: a board page requested WITHOUT a trailing slash must redirect to
+// the trailing-slash form, because every fetch in the board page is RELATIVE.
+//
+// The bug this guards (MEASURED 2026-10-13, real Chrome): at /board/<id> the
+// document base is /board/, so the page's own `fetch("./scene")` resolves to
+// /board/scene. boardPrefix then reads that as a board NAMED "scene" with
+// rest="/" and serves it the HTML page — so r.json() throws, the scene never
+// applies, and the canvas is SILENTLY BLANK. The POST counterpart 404s and the
+// board shows "offline — retrying" forever. Nothing errors server-side; the
+// only symptom is an empty canvas, which reads as a render bug.
+func TestCodrawServer_BoardPathRedirectsToTrailingSlash(t *testing.T) {
+	runtime := t.TempDir()
+	if err := os.WriteFile(runtime+"/index.html", []byte("<html>board</html>"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	cs := newCodrawServer(runtime, t.TempDir())
+
+	rr := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/board/arch", nil)
+	cs.ServeHTTP(rr, req)
+
+	if rr.Code != http.StatusMovedPermanently && rr.Code != http.StatusPermanentRedirect {
+		t.Fatalf("GET /board/arch = %d, want a permanent redirect to /board/arch/ "+
+			"(without it, the page's relative fetch(\"./scene\") escapes to /board/scene "+
+			"and the canvas silently renders blank)", rr.Code)
+	}
+	if loc := rr.Header().Get("Location"); loc != "/board/arch/" {
+		t.Errorf("Location = %q, want %q", loc, "/board/arch/")
+	}
+
+	// The trailing-slash form must still serve the page, not redirect again.
+	rr2 := httptest.NewRecorder()
+	cs.ServeHTTP(rr2, httptest.NewRequest(http.MethodGet, "/board/arch/", nil))
+	if rr2.Code != http.StatusOK {
+		t.Errorf("GET /board/arch/ = %d, want 200", rr2.Code)
+	}
+
+	// And the scene endpoint under a board must stay JSON, never the page.
+	rr3 := httptest.NewRecorder()
+	cs.ServeHTTP(rr3, httptest.NewRequest(http.MethodGet, "/board/arch/scene", nil))
+	if ct := rr3.Header().Get("Content-Type"); !strings.Contains(ct, "json") {
+		t.Errorf("GET /board/arch/scene Content-Type = %q, want JSON", ct)
+	}
+	var m map[string]any
+	if err := json.Unmarshal(rr3.Body.Bytes(), &m); err != nil {
+		t.Errorf("GET /board/arch/scene did not return JSON: %v", err)
+	}
+}

@@ -5,13 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Co-Draw Studio</title>
 <script>
-  // Fonts + lazy chunks resolve locally (vendored under vendor/excalidraw-assets/)
-  // so a live canvas reaches ZERO third parties and has ZERO 404s in the default
-  // (English) locale. Non-English UIs fall back to English offline (their locale
-  // chunks aren't vendored — a rare case, graceful degrade, no CDN call).
-  window.EXCALIDRAW_ASSET_PATH = "/vendor/";
+  // Fonts resolve locally (vendored under vendor/excalidraw-0.18.1/fonts/) so a
+  // live canvas reaches ZERO third parties. Non-English UIs fall back to
+  // English offline (their locale chunks aren't vendored — a rare case,
+  // graceful degrade, no CDN call).
+  window.EXCALIDRAW_ASSET_PATH = "/vendor/excalidraw-0.18.1/";
 </script>
-<!-- Excalidraw 0.17.x UMD injects its own styles at runtime; no CSS link needed. -->
+<!-- 0.18's ESM build does NOT self-inject styles the way the 0.17.6 UMD did
+     (that was a bundler-era behavior change, not a codraw choice) — the
+     stylesheet must be linked explicitly. Vendored alongside the bundle. -->
+<link rel="stylesheet" href="/vendor/excalidraw-0.18.1/index.css" />
 <style>
   html, body, #root { height: 100%; margin: 0; }
   #bar {
@@ -58,42 +61,15 @@
   <span class="hint" id="fb-hint"></span>
 </div>
 
+<!-- ESM-only since Excalidraw 0.18 dropped the UMD build. codraw-glue.js
+     (esbuild-bundled to vendor/codraw-bundle.js, zero CDN, zero npm at
+     runtime) re-exposes window.React / window.ReactDOM / window.ExcalidrawLib
+     so everything below this point is untouched from the 0.17.6 UMD era. -->
+<script type="module" src="/vendor/codraw-bundle.js"></script>
 <script>
-// Load libraries local-first (vendored, offline-proof); fall back to CDN per file.
-(function () {
-  var CDN = {
-    react: "https://unpkg.com/react@18/umd/react.production.min.js",
-    reactDom: "https://unpkg.com/react-dom@18/umd/react-dom.production.min.js",
-    excalidraw: "https://unpkg.com/@excalidraw/excalidraw@0.17.6/dist/excalidraw.production.min.js"
-  };
-  var LOCAL = {
-    react: "/vendor/react.production.min.js",
-    reactDom: "/vendor/react-dom.production.min.js",
-    excalidraw: "/vendor/excalidraw.production.min.js"
-  };
-  function load(localUrl, cdnUrl) {
-    return new Promise(function (res, rej) {
-      var s = document.createElement("script");
-      s.src = localUrl;
-      s.onload = function () { res(localUrl); };
-      s.onerror = function () {
-        var c = document.createElement("script");
-        c.src = cdnUrl;
-        c.onload = function () { res(cdnUrl); };
-        c.onerror = function () { rej(cdnUrl); };
-        document.head.appendChild(c);
-      };
-      document.head.appendChild(s);
-    });
-  }
-  load(LOCAL.react, CDN.react)
-    .then(function () { return load(LOCAL.reactDom, CDN.reactDom); })
-    .then(function () { return load(LOCAL.excalidraw, CDN.excalidraw); })
-    .then(function () { window.__startCoDraw(); })
-    .catch(function () {
-      var el = document.getElementById("status");
-      if (el) el.textContent = "failed to load libraries";
-    });
+(function waitForLibs() {
+  if (window.__coDrawLibsReady) { window.__startCoDraw(); return; }
+  requestAnimationFrame(waitForLibs);
 })();
 </script>
 <script>
@@ -234,8 +210,27 @@ window.__startCoDraw = function () {
     theme: "dark",   // drawing surfaces default to dark mode
     excalidrawAPI: function (a) {
       api = a;
-      fetch("./scene").then(function (r) { return r.json(); })
-        .then(function (scene) { applyScene(scene); poll(); })
+      window.__excalidrawAPI = a; // debug/test hook — read-only convenience, never written to
+      // Preload Excalidraw's @font-face rules BEFORE the first scene applies.
+      // Excalidraw lazy-fetches its fonts and does not auto-repaint the canvas
+      // when a font later loads, so a cold canvas rendered all text in serif
+      // fallback until the reader clicked a shape (the click forced a redraw).
+      // Preload + one refresh() after apply = correct font on first paint —
+      // for BOTH free-standing and container-bound text (0.18.1, MEASURED).
+      // 0.18 renamed the hand-drawn family Virgil -> Excalifont; load both
+      // names so this preload survives future renames too.
+      var preload = document.fonts ? Promise.all([
+        document.fonts.load('20px Excalifont'),
+        document.fonts.load('20px Virgil'),
+        document.fonts.load('20px Cascadia'),
+        document.fonts.load('600 20px Assistant'),
+      ]).catch(function () {}) : Promise.resolve();
+      Promise.all([preload, fetch("./scene").then(function (r) { return r.json(); })])
+        .then(function (results) {
+          applyScene(results[1]);
+          if (a && typeof a.refresh === "function") a.refresh();
+          poll();
+        })
         .catch(function () { status("could not load scene"); poll(); });
     },
     onChange: onChange

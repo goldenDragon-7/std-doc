@@ -152,9 +152,14 @@ func TestCapability_DocsDoNotLie(t *testing.T) {
 
 // CAPABILITY: the codraw canvas runtime is fully self-contained offline — a live
 // canvas must reach ZERO third parties. Guards the 404-class regression found on
-// 2026-08-14: EXCALIDRAW_ASSET_PATH points local, but the fonts and the lazy
-// vendor-<hash>.js chunk it code-splits weren't vendored, so they silently 404'd.
-// This MEASURES that the asset path is local AND every asset it needs is present.
+// 2026-08-14 (EXCALIDRAW_ASSET_PATH pointed local, but fonts/chunks weren't
+// vendored, so they silently 404'd) — and, since the 0.18 ESM upgrade, ALSO
+// guards the newer trap: @excalidraw/excalidraw's own asset loader always
+// appends a real esm.sh CDN URL as a final fallback candidate (verified by
+// reading the bundled source), so a wrong/missing local path silently
+// degrades to a network fetch instead of failing loud. MEASURED offline
+// (2026-09-06): with EXCALIDRAW_ASSET_PATH set to the vendored dir below,
+// devtools network capture showed 100% localhost font requests, zero CDN.
 func TestCapability_CodrawVendoredOffline(t *testing.T) {
 	codraw := filepath.Join(repoRoot(t), "go", "stddoc-lib", "lib", "codraw")
 
@@ -163,45 +168,36 @@ func TestCapability_CodrawVendoredOffline(t *testing.T) {
 	if err != nil {
 		t.Fatalf("read codraw/index.html: %v", err)
 	}
-	if !strings.Contains(string(idx), `EXCALIDRAW_ASSET_PATH = "/vendor/"`) {
-		t.Error("codraw must set EXCALIDRAW_ASSET_PATH to a local /vendor/ path (not a CDN)")
+	if !strings.Contains(string(idx), `EXCALIDRAW_ASSET_PATH = "/vendor/excalidraw-0.18.1/"`) {
+		t.Error("codraw must set EXCALIDRAW_ASSET_PATH to a local /vendor/excalidraw-0.18.1/ path (not a CDN)")
 	}
 
-	// The three UMD bundles the loader prefers local-first.
-	for _, f := range []string{
-		"vendor/react.production.min.js",
-		"vendor/react-dom.production.min.js",
-		"vendor/excalidraw.production.min.js",
-	} {
-		if _, err := os.Stat(filepath.Join(codraw, f)); err != nil {
-			t.Errorf("missing vendored bundle %s — live canvas would fall back to the CDN: %v", f, err)
-		}
+	// The one vendored ESM bundle (esbuild-in-Go, `stddoc bundle-codraw`) the
+	// loader depends on — replaces the three 0.17.6 UMD files (react.js,
+	// react-dom.js, excalidraw.js) that 0.18 no longer ships (UMD dropped).
+	if _, err := os.Stat(filepath.Join(codraw, "vendor", "codraw-bundle.js")); err != nil {
+		t.Errorf("missing vendored vendor/codraw-bundle.js — live canvas would have nothing to load: %v", err)
 	}
 
-	// The runtime assets Excalidraw loads from EXCALIDRAW_ASSET_PATH: the 6 fonts
-	// and at least one code-split vendor-*.js chunk (else a silent 404 offline).
-	assets := filepath.Join(codraw, "vendor", "excalidraw-assets")
+	// The runtime assets Excalidraw loads from EXCALIDRAW_ASSET_PATH: the
+	// fonts codraw's own preload block (index.html) requests by name, plus
+	// the stylesheet the 0.18 ESM build no longer self-injects (that was a
+	// UMD-era behavior; the ESM package expects the consumer to link it).
+	assets := filepath.Join(codraw, "vendor", "excalidraw-0.18.1")
+	if _, err := os.Stat(filepath.Join(assets, "index.css")); err != nil {
+		t.Errorf("missing vendored index.css — 0.18's ESM build does not self-inject styles: %v", err)
+	}
 	for _, font := range []string{
-		"Virgil.woff2", "Cascadia.woff2",
-		"Assistant-Regular.woff2", "Assistant-Medium.woff2",
-		"Assistant-SemiBold.woff2", "Assistant-Bold.woff2",
+		filepath.Join("fonts", "Virgil", "Virgil-Regular.woff2"),
+		filepath.Join("fonts", "Cascadia", "CascadiaCode-Regular.woff2"),
+		filepath.Join("fonts", "Assistant", "Assistant-Regular.woff2"),
+		filepath.Join("fonts", "Assistant", "Assistant-Medium.woff2"),
+		filepath.Join("fonts", "Assistant", "Assistant-SemiBold.woff2"),
+		filepath.Join("fonts", "Assistant", "Assistant-Bold.woff2"),
 	} {
 		if _, err := os.Stat(filepath.Join(assets, font)); err != nil {
-			t.Errorf("missing vendored font %s — hand-drawn text would 404 offline: %v", font, err)
+			t.Errorf("missing vendored font %s — hand-drawn text would silently fall back to the esm.sh CDN: %v", font, err)
 		}
-	}
-	entries, err := os.ReadDir(assets)
-	if err != nil {
-		t.Fatalf("read excalidraw-assets: %v", err)
-	}
-	hasChunk := false
-	for _, e := range entries {
-		if strings.HasPrefix(e.Name(), "vendor-") && strings.HasSuffix(e.Name(), ".js") {
-			hasChunk = true
-		}
-	}
-	if !hasChunk {
-		t.Error("no vendored vendor-*.js chunk — Excalidraw lazy-loads it from the asset path and it would 404 offline")
 	}
 }
 
@@ -236,8 +232,8 @@ func TestCapability_CodrawSceneFeedbackAreRelative(t *testing.T) {
 	}
 	// The shared vendored runtime stays absolute — it's the SAME copy for
 	// every board, not board-scoped.
-	if !strings.Contains(body, `EXCALIDRAW_ASSET_PATH = "/vendor/"`) {
-		t.Error("EXCALIDRAW_ASSET_PATH must stay the absolute shared /vendor/ path")
+	if !strings.Contains(body, `EXCALIDRAW_ASSET_PATH = "/vendor/excalidraw-0.18.1/"`) {
+		t.Error("EXCALIDRAW_ASSET_PATH must stay the absolute shared /vendor/excalidraw-0.18.1/ path")
 	}
 }
 

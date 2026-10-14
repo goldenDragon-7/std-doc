@@ -3,6 +3,7 @@ module stddoc
 go 1.26.1
 
 require (
+	github.com/evanw/esbuild v0.28.2
 	golang.org/x/net v0.35.0
 	oss.terrastruct.com/d2 v0.7.1
 )
@@ -23,6 +24,7 @@ require (
 	github.com/yuin/goldmark v1.7.4 // indirect
 	golang.org/x/exp v0.0.0-20240909161429-701f63a606c0 // indirect
 	golang.org/x/image v0.20.0 // indirect
+	golang.org/x/sys v0.30.0 // indirect
 	golang.org/x/text v0.22.0 // indirect
 	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da // indirect
 	oss.terrastruct.com/util-go v0.0.0-20250213174338-243d8661088a // indirect

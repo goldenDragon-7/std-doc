@@ -144,6 +144,18 @@ func (cs *codrawServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// touch, same shape as the default board at construction time.
 	id, rest := "", r.URL.Path
 	if bid, brest, ok := boardPrefix(r.URL.Path); ok {
+		// A board page MUST be served from the trailing-slash form. Every fetch
+		// in the board page is relative ("./scene"), so at /board/<id> the
+		// document base is /board/ and ./scene escapes to /board/scene — which
+		// boardPrefix then reads as a board NAMED "scene" and answers with the
+		// HTML page. r.json() throws, the scene never applies, and the canvas
+		// goes SILENTLY BLANK (the POST counterpart 404s, leaving the board
+		// stuck on "offline — retrying"). Redirect instead of trusting callers
+		// to remember the slash.
+		if brest == "/" && !strings.HasSuffix(r.URL.Path, "/") {
+			http.Redirect(w, r, r.URL.Path+"/", http.StatusMovedPermanently)
+			return
+		}
 		id, rest = bid, brest
 		cs.seedScene(cs.scenePath(id))
 	}

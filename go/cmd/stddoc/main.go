@@ -35,7 +35,7 @@ func main() {
 
 func run(args []string) error {
 	if len(args) == 0 {
-		return fmt.Errorf("usage: stddoc <publish|lint|freeze|serve|inject|ls|status|roll|graduate|primitives> ...")
+		return fmt.Errorf("usage: stddoc <publish|lint|freeze|serve|inject|ls|status|roll|graduate|primitives|bundle-codraw> ...")
 	}
 	cmd, rest := args[0], args[1:]
 	switch cmd {
@@ -62,6 +62,8 @@ func run(args []string) error {
 		return cmdGraduate(rest)
 	case "primitives":
 		return cmdPrimitives(rest)
+	case "bundle-codraw":
+		return cmdBundleCodraw(rest)
 	default:
 		return fmt.Errorf("unknown command %q", cmd)
 	}

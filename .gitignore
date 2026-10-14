@@ -24,3 +24,8 @@ probably_trash/
 
 # local dev build of the stddoc binary (34MB artifact, rebuild with: cd go && go build -o stddoc-dev ./cmd/stddoc)
 go/stddoc-dev
+
+# codraw's build-time-only npm dependency graph (never committed, never
+# needed at runtime) — see go/stddoc-lib/lib/codraw/BUNDLE.md
+go/stddoc-lib/lib/codraw/node_modules
+go/stddoc-lib/lib/codraw/.scratch

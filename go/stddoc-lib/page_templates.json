@@ -1,0 +1,47 @@
+{
+  "decision-board": {
+    "binds": {
+      "required": ["sections"],
+      "doc": "A one-page decision board: a KPI row, then numbered sections, each with colored good/bad/hold/q cards and an optional inline question the reader clicks. Data shape: {lede?, kpis:[{v,cls,l}], sections:[{n?, heading, tag?:{text,cls}, intro?, cards:[{class:good|bad|hold|q, lead, body}], question?:{id, prompt, options:[{value,label}]}}]}."
+    },
+    "assemble": [
+      {"when": {"truthy": "lede"}, "do": [
+        {"block": "callout", "set": {"style": "gradient", "kind": "accent", "body": {"@": "lede"}}}
+      ]},
+      {"when": {"truthy": "kpis"}, "do": [
+        {"block": "stats", "set": {
+          "items": {"list": "kpis", "set": {
+            "value": {"@": "v"},
+            "label": {"@": "l"},
+            "tone": {"map": "cls", "table": {"p": "purple", "go": "gold", "g": "green", "a": "amber", "c": "quiet"}, "default": "dim"}
+          }}
+        }}
+      ]},
+      {"foreach": "sections", "do": [
+        {"block": "pattern-header", "set": {
+          "era": {"@": "n"},
+          "title": {"@": "heading"},
+          "desc": {"@": "intro"}
+        }},
+        {"foreach": "cards", "do": [
+          {"block": "callout", "set": {
+            "kind": {"map": "class", "table": {"good": "green", "bad": "red", "hold": "gold", "q": "purple"}, "default": "accent"},
+            "lead": {"@": "lead"},
+            "body": {"join": "paras", "sep": "\n\n"}
+          }}
+        ]},
+        {"when": {"truthy": "question"}, "do": [
+          {"block": "ask", "set": {
+            "id": {"@": "question.id"},
+            "prompt": {"@": "question.prompt"},
+            "control": "radio",
+            "choices": {"list": "question.options", "set": {
+              "value": {"@": "value"},
+              "label": {"@": "label"}
+            }}
+          }}
+        ]}
+      ]}
+    ]
+  }
+}

@@ -76,6 +76,85 @@ If `source.json` is absent, std-doc behaves exactly as v1 (author HTML by hand).
 }
 ```
 
+## LAYER 2 — page templates (`"template"`): assemble primitives from friendly data
+
+Everything above is **layer 1**: you hand-author a node's `blocks[]`, one primitive
+at a time. That is total control, and for a bespoke page it is the right tool.
+
+But most documents are a *kind*: a decision-board, a status-report, a release-notes
+page. Their shape repeats — a KPI row, then numbered sections, each with coloured
+cards and maybe a question — and hand-assembling that `blocks[]` stream for every
+new instance is exactly the per-document build script this standard exists to kill.
+
+**Layer 2 is the lego-assembly layer.** A node names a `template`; the engine looks
+it up in `page_templates.json`, runs a data-driven assembler over the node's own
+friendly fields, and emits the primitive `blocks[]` *for* you. You supply **data**,
+not an assembly:
+
+```jsonc
+{
+  "palette": { "green": {"color":"#10b981"}, "gold": {"color":"#fbbf24"},
+               "purple": {"color":"#a78bfa"}, "accent": {"color":"#22d3ee"} },
+  "nodes": [{
+    "slug": "board",
+    "template": "decision-board",          // ← names a layer-2 template
+    "lede": "Everything that needs you, on one page.",
+    "kpis": [ {"v":"2","cls":"p","l":"your call"} ],
+    "sections": [{
+      "n": "01 · your call", "heading": "The release gates",
+      "intro": "…", 
+      "cards": [ {"class":"good","lead":"…","paras":["…"]} ],
+      "question": { "id":"d01", "prompt":"Does it stand?",
+                    "options":[ {"value":"yes","label":"It stands."} ] }
+    }]
+  }]
+}
+```
+
+There is **no `build_board.py`.** `stddoc publish` renders it. Adding a *new* kind
+of document is adding a `page_templates.json` entry — pure data — never Go code.
+
+**Discoverability is enforced, not hoped for.** A node that names a template which
+does not exist, or omits a field the template marks required, fails at publish with
+a message that names the gap and lists the templates you *could* have used — the
+pre-run error whose absence is what makes an unfindable capability feel like a
+missing one. Run `stddoc primitives` for layer 1; the available templates are the
+keys of `page_templates.json`.
+
+### Writing a template (the assembly grammar)
+
+A `page_templates.json` entry is `{ "binds": {...}, "assemble": [ emit-nodes… ] }`.
+`binds.required` drives the teaching error; `assemble` is the spec. It reuses the
+same interpreter the primitives use, so the mental model is one, not two:
+
+| emit node | does |
+|---|---|
+| `{"block": T, "set": {field: <val>}}` | emit one primitive block of type `T` |
+| `{"foreach": "path", "do": [ … ]}` | iterate a data list (`@item`/`@index`/`@first`/`@last`) |
+| `{"when": <cond>, "do": [ … ], "else": […]}` | conditional (same `truthy`/`eq`/… grammar as primitives) |
+
+A field `<val>` is a bare string (literal), or one of:
+`{"@":"dotted.path"}` (resolve; optional `default`) · `{"lit": v}` (non-string
+literal) · `{"join":"path","sep":"…"}` (join a list) · `{"map":"path","table":{…}}`
+(lookup, e.g. a `class`→palette-kind map) · `{"list":"path","set":{…}}` (build a
+sub-list of objects, for `stats.items` / `ask.choices`).
+
+The assembler emits real primitive blocks, so the rest of the pipeline — lint,
+anchors, per-primitive CSS, freeze — runs unchanged. A document that names **no**
+template renders through the identical pre-layer-2 path, which is why every
+existing page stays byte-identical (the golden-master strangler proof).
+
+### One honest caveat — inline emphasis in prose fields
+
+A template binds friendly prose into a primitive's prose field (e.g. a card's
+`body`), which renders through the **safe `rich` subset**: paragraphs, lists, and
+markdown `[text](https://…)` links. It does **not** render raw inline HTML —
+`<strong>`, `<em>`, `<code>` are escaped by design (no raw-HTML op; Covenant IV).
+So migrating a bespoke page that carried inline HTML emphasis is **not lossless**:
+links survive if rewritten as markdown; inline **bold**/`code` becomes plain text
+until a primitive opts into a richer inline op. Name the loss; do not let it pass
+as a silent yes.
+
 ### The three node containers — and the trap
 
 A node has exactly three containers, and **putting content in the wrong one used

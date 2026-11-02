@@ -38,7 +38,7 @@ PLATFORMS := darwin/arm64 darwin/amd64 linux/amd64 linux/arm64 windows/amd64
 # blocks anything not deliberately admitted. This list is convenience; that gate
 # is the guarantee.
 DIST_EXCLUDE := briefs _audit_out prd HANDOFF.md CLAUDE.md COMING-ATTRACTIONS.md RELEASE.md Makefile.internal \
-                strategy services contrib \
+                strategy services contrib bridge \
                 docs/design docs/findings docs/primitive-candidates docs/templates/GAPS.md \
                 .claude go/LETTER-to-the-next-maker.md go/probably_trash \
                 style-interview/demo/_review-spec style-interview/demo/pager-preview \

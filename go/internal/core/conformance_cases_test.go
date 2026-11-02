@@ -25,12 +25,38 @@ import (
 )
 
 func TestConformanceCases_ByteIdentical(t *testing.T) {
-	cases := []string{
-		"callout-variants", "cardgrid-variants", "figure", "flat",
-		"flow-code", "fourlevel", "golden", "howto", "m2-extends",
-		"prd-python-prep", "self-doc", "tree", "twolevel",
-	}
 	root := repoRoot(t)
+	// DISCOVERED, not hard-coded. The old literal list named prd-python-prep,
+	// which DIST_EXCLUDE prunes from the public source bundle — so this test
+	// FAILED on a missing file for every stranger who downloaded a release
+	// (MEASURED against published v0.13.0). It also silently skipped `pager`
+	// and `style-ab`, which have lived in the tree untested because nobody
+	// updated the literal.
+	//
+	// The floor below is the other half: a suite that quietly discovers fewer
+	// cases prints no failures and reads exactly like a passing one.
+	casesDir := filepath.Join(root, "conformance", "cases")
+	entries, err := os.ReadDir(casesDir)
+	if err != nil {
+		t.Fatalf("read conformance cases dir: %v", err)
+	}
+	var cases []string
+	for _, e := range entries {
+		if !e.IsDir() {
+			continue
+		}
+		if _, err := os.Stat(filepath.Join(casesDir, e.Name(), "input.json")); err != nil {
+			continue
+		}
+		cases = append(cases, e.Name())
+	}
+	const minCases = 12
+	if len(cases) < minCases {
+		t.Fatalf("discovered only %d conformance case(s) in %s — expected >= %d. "+
+			"A suite that stopped finding cases is not a passing suite.",
+			len(cases), casesDir, minCases)
+	}
+	t.Logf("conformance cases discovered: %d", len(cases))
 	lib, err := library.Load(filepath.Join(root, "go", "stddoc-lib"))
 	if err != nil {
 		t.Fatalf("load library: %v", err)

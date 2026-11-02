@@ -263,6 +263,20 @@ func lintDoc(doc *wire.OrderedMap, reg *registry.Registry) []registry.Finding {
 		if slug == "" {
 			slug = "<node>"
 		}
+		// LAYER 2: a node that names a page `template` does NOT carry the standard
+		// sections[]/blocks[] schema — the template owns its fields (kpis, cards,
+		// question, …), and their correctness is checked by validateTemplates at
+		// publish time. Running the standard-schema lint here would false-flag every
+		// template field as "renders as NOTHING", which is the opposite of a
+		// teaching error. Skip the body; still recurse into child nodes.
+		if str(node, "template") != "" {
+			for _, cv := range list(node, "children") {
+				if c, ok := omap(cv); ok {
+					walk(c)
+				}
+			}
+			return
+		}
 		for _, dv := range list(node, "diagrams") {
 			d, ok := omap(dv)
 			if !ok {

@@ -1,0 +1,71 @@
+{
+  "title": "Decision Board (layer-2 example)",
+  "generated_date": "2026-11-02",
+  "palette": {
+    "green":  {"color": "#10b981"},
+    "red":    {"color": "#ef4444"},
+    "gold":   {"color": "#fbbf24"},
+    "purple": {"color": "#a78bfa"},
+    "accent": {"color": "#22d3ee"}
+  },
+  "nodes": [
+    {
+      "slug": "board",
+      "title": "This morning — one page",
+      "template": "decision-board",
+      "lede": "A decision board built with NO per-document code: this node names the \"decision-board\" template and supplies only data. The engine assembles the primitives.",
+      "kpis": [
+        {"v": "2",   "cls": "p",  "l": "need your call"},
+        {"v": "1",   "cls": "go", "l": "parked"},
+        {"v": "✓",   "cls": "g",  "l": "tests green"}
+      ],
+      "sections": [
+        {
+          "n": "01 · your call",
+          "heading": "Ship the template layer?",
+          "intro": "Layer 2 renders a whole KIND of document from data. The question is whether to make it the default path for boards.",
+          "cards": [
+            {
+              "class": "good",
+              "lead": "Every board becomes data, not a script.",
+              "paras": [
+                "One template entry, authored once, serves every future board. Adding a new kind of document is adding a template — never writing a build_board.py.",
+                "Links survive as markdown: see [the schema](https://example.com/doctree-schema)."
+              ]
+            },
+            {
+              "class": "hold",
+              "lead": "Inline emphasis is the one caveat.",
+              "paras": [
+                "Prose fields render through the safe rich subset (paragraphs, lists, links). Raw inline bold/code is escaped by design, so a migration that carried inline HTML loses that emphasis until a primitive opts into a richer inline op."
+              ]
+            }
+          ],
+          "question": {
+            "id": "ship-layer-2",
+            "prompt": "DECISION — make the template path the default for boards?",
+            "options": [
+              {"value": "yes",     "label": "Yes — adopt it. Boards are data from here on."},
+              {"value": "trial",   "label": "Trial it on the next board, keep the bespoke path as fallback."},
+              {"value": "discuss", "label": "Let's talk about the inline-emphasis caveat first."}
+            ]
+          }
+        },
+        {
+          "n": "02 · handled",
+          "heading": "In flight — no decision needed",
+          "intro": "Shown so you can see it moving.",
+          "cards": [
+            {
+              "class": "good",
+              "lead": "The expander ships zero new interpreter ops.",
+              "paras": [
+                "It reuses the primitive interpreter's own path resolver and loop/condition semantics, so the assembly language and the render language are one."
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

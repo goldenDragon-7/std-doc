@@ -10,10 +10,38 @@ package core
 // freeze gate finds zero external references.
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 
 	"stddoc/internal/gate"
 )
+
+// freezableCase returns a diagram-bearing conformance case that actually EXISTS
+// in this tree.
+//
+// Why this is not a constant: prd-python-prep is pruned from the public source
+// bundle by DIST_EXCLUDE, so hard-coding it meant `go test ./...` FAILED for
+// every stranger who downloaded a release — three tests, on a missing file,
+// with nothing wrong in the code. MEASURED 2026-10-13 against the published
+// v0.13.0 bundle. The internal tree can never reproduce it, which is exactly
+// why it survived: test inside the extracted tarball, not the repo.
+//
+// self-doc is deliberately NOT a candidate — it documents the gate itself, so
+// it contains a `url(https:` in PROSE and a live mermaid demo div, both of
+// which the gate correctly refuses.
+func freezableCase(t *testing.T) string {
+	t.Helper()
+	for _, name := range []string{"prd-python-prep", "flow-code"} {
+		p := filepath.Join(repoRoot(t), "conformance", "cases", name, "input.json")
+		if _, err := os.Stat(p); err == nil {
+			return name
+		}
+	}
+	t.Fatal("no diagram-bearing conformance case found (looked for prd-python-prep, flow-code) — " +
+		"this test cannot prove Covenant IV without one; do not let it pass quietly")
+	return ""
+}
 
 // CAPABILITY (Covenant IV, executable): a real rendered doc — including an
 // in-process d2 diagram and the embedded body CSS / search JS — passes the
@@ -30,7 +58,7 @@ import (
 // self-doc demos. Don't add self-doc back until that's resolved.
 func TestFreeze_RealRenderedDocIsSelfContained(t *testing.T) {
 	lib := loadLib(t)
-	for _, name := range []string{"prd-python-prep"} {
+	for _, name := range []string{freezableCase(t)} {
 		t.Run(name, func(t *testing.T) {
 			pages, err := Publish(loadCaseDoc(t, name), "", lib)
 			if err != nil {
@@ -50,11 +78,12 @@ func TestFreeze_RealRenderedDocIsSelfContained(t *testing.T) {
 // style and enforce.
 func TestFreeze_AllStylesSelfContained(t *testing.T) {
 	lib := loadLib(t)
+	caseName := freezableCase(t)
 	for _, s := range namedStyles {
 		t.Run(s, func(t *testing.T) {
-			pages, err := Publish(loadCaseDoc(t, "prd-python-prep"), s, lib)
+			pages, err := Publish(loadCaseDoc(t, caseName), s, lib)
 			if err != nil {
-				t.Fatalf("Publish prd-python-prep style %s: %v", s, err)
+				t.Fatalf("Publish %s style %s: %v", caseName, s, err)
 			}
 			if err := gate.Enforce(pages); err != nil {
 				t.Errorf("style %s must render a self-contained doc; gate leaks: %v", s, err)

@@ -26,10 +26,14 @@ import (
 // primitive just because nobody wrote a blurb for it yet.
 func cmdPrimitives(args []string) error {
 	plugins := ""
+	countJSON := false
 	for i := 0; i < len(args); i++ {
-		if args[i] == "--plugins" && i+1 < len(args) {
+		switch {
+		case args[i] == "--plugins" && i+1 < len(args):
 			plugins = args[i+1]
 			i++
+		case args[i] == "--count":
+			countJSON = true
 		}
 	}
 	root, err := resolveLibRoot(plugins)
@@ -57,6 +61,38 @@ func cmdPrimitives(args []string) error {
 		names = append(names, t)
 	}
 	sort.Strings(names)
+
+	// --count: machine-readable SOURCE OF TRUTH for the drift gate. Every number
+	// is a NAMED field keyed to the instrument that produced it — never a bare
+	// integer — so a gate (or a human) can never again subtract two counts that
+	// measured different objects. `declarative` (templates.json) and the
+	// structural/chrome sets are distinct denominators; `total_primitives` is
+	// their sum, and `page_templates` (layer 2) is counted separately because it
+	// is a different KIND of thing entirely (an assembly, not a primitive).
+	if countJSON {
+		pageTemplates := 0
+		if len(lib.PageTemplatesJSON) > 0 {
+			var pt map[string]any
+			if err := json.Unmarshal(lib.PageTemplatesJSON, &pt); err != nil {
+				return fmt.Errorf("primitives: parse page_templates.json: %w", err)
+			}
+			pageTemplates = len(pt)
+		}
+		var rawKeys map[string]any
+		_ = json.Unmarshal(lib.TemplatesJSON, &rawKeys)
+		counts := map[string]any{
+			"templates_json_raw_keys":             len(rawKeys), // every key, incl. the children auto-block + showcase chrome
+			"declarative_authorable_primitives":   len(names),   // raw_keys minus children (auto) and showcase (chrome)
+			"structural_primitives_hand_coded_go": len(structuralPrimitives),
+			"chrome_primitives":                   1, // showcase
+			"total_listed_by_primitives_command":  len(names) + len(structuralPrimitives) + 1,
+			"page_templates_layer2":               pageTemplates,
+			"note":                                "Every count names the exact object it measured. total_listed = declarative_authorable + structural + chrome. templates_json_raw_keys is LARGER than declarative_authorable (it includes the children auto-block and the showcase chrome). page_templates is a separate KIND (an assembly, not a primitive) — never add it to a primitive total. A drift gate MUST compare the same named field across artifacts, never two different ones.",
+		}
+		b, _ := json.MarshalIndent(counts, "", "  ")
+		fmt.Println(string(b))
+		return nil
+	}
 
 	fmt.Println("Declarative primitives (data-driven — templates.json + primitive_css.json):")
 	for _, t := range names {

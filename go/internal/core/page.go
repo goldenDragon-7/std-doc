@@ -110,6 +110,17 @@ func renderNode(n, doc *wire.OrderedMap, reg *registry.Registry, styleRoot strin
 		h.WriteString("<style>" + pcss + "</style>")
 	}
 	nblocks := adaptNode(n)
+	// LAYER 2: a node naming a page `template` has its friendly data assembled
+	// into primitive blocks here, replacing the default node stream. Expansion
+	// errors become a VISIBLE block (never a silent empty page). A node with no
+	// `template` key is untouched — the strangler-safe path.
+	if tb, isTmpl, terr := expandTemplatedNode(n, lib); isTmpl {
+		if terr != nil {
+			nblocks = templateErrorBlock(str(n, "slug"), terr)
+		} else {
+			nblocks = tb
+		}
+	}
 	assignCanvasBoardIDs(nblocks, str(n, "slug"))
 	assignBandAnchorIDs(nblocks, str(n, "slug"))
 	if icss := collectBlockCSS(nblocks, reg); icss != "" {
@@ -300,6 +311,13 @@ func Publish(doc *wire.OrderedMap, style string, lib *library.Library) (map[stri
 		return nil, err
 	}
 	buildTree(doc)
+	// LAYER 2 pre-run gate: a node that names a missing template, or omits a
+	// field the template requires, fails HERE with a message naming the gap —
+	// before a single page is rendered. The discoverability defect this layer
+	// exists to kill is precisely a capability that fails silently instead.
+	if err := validateTemplates(doc, lib); err != nil {
+		return nil, err
+	}
 	// In pager mode synthetic group nodes aren't tour stops (no content, no
 	// left-nav to anchor), so they get no page — the tour is exactly the cover +
 	// real content pages. (publish.build)

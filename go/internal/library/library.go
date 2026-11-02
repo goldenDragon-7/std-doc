@@ -31,6 +31,7 @@ type Library struct {
 	DiagramEnginesJSON []byte            // diagram_engines.json — raw; OPTIONAL (nil if absent, so older library trees still load)
 	HTMLWhitelistJSON  []byte            // html_whitelist.json — raw; OPTIONAL (nil if absent). The sanitizer policy for the `html` bounded-value primitive; absent means the html primitive refuses to render rather than emitting ungated author HTML.
 	UtilityCSSJSON     []byte            // utility_css.json — raw; OPTIONAL (nil if absent). The utility layer: tone/spacing modifiers bound to palette tokens, emitted only for classes a page actually uses.
+	PageTemplatesJSON  []byte            // page_templates.json — raw; OPTIONAL (nil if absent). LAYER 2: named page templates that assemble primitives from a friendly JSON data shape. A node naming an unknown template is a loud error; a doc that names none is byte-identical to the pre-template engine.
 	BodyCSS            string            // body.css — raw
 	SearchJS           string            // search.js — raw
 	NavScrollJS        string            // nav_scroll.js — raw
@@ -91,6 +92,13 @@ func Load(root string) (*Library, error) {
 	// which is byte-identical to the pre-utility engine.
 	if b, rerr := os.ReadFile(filepath.Join(root, "utility_css.json")); rerr == nil {
 		lib.UtilityCSSJSON = b
+	}
+	// page_templates.json — OPTIONAL, same backward-compat contract. Layer 2's
+	// named assembly templates. Absent in older library trees; nil simply means
+	// no `template` key can resolve, and a doc that names none renders through the
+	// identical pre-template path (the strangler proof).
+	if b, rerr := os.ReadFile(filepath.Join(root, "page_templates.json")); rerr == nil {
+		lib.PageTemplatesJSON = b
 	}
 	// html_whitelist.json — OPTIONAL to LOAD, mandatory to USE. Absent simply
 	// means an older library tree; the html primitive then refuses loudly
